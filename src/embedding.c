@@ -9,11 +9,12 @@ SEXP initJulia(SEXP julia_home)
     if (jl_is_initialized())
 	 return R_NilValue;
 
-    const char* s = CHAR(STRING_ELT(julia_home, 0));
+    char* s = CHAR(STRING_ELT(julia_home, 0));
     if (strlen(s)==0)
      jl_init(NULL);
     else
-     jl_init(s);
+      jl_init(s);
+    
     JL_SET_STACK_BASE;
     if (jl_exception_occurred()) {
        error("Julia not initialized");
@@ -23,7 +24,7 @@ SEXP initJulia(SEXP julia_home)
 
 SEXP jl_eval(SEXP cmd)
 {
- const char* s = CHAR(STRING_ELT(cmd, 0));
+ char* s = CHAR(STRING_ELT(cmd, 0));
  jl_value_t *ret = jl_eval_string(s);
  double retDouble = jl_unbox_float64(ret);
  

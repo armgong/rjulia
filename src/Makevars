@@ -1,4 +1,11 @@
-Julia_Home=d:/codes/julia32/usr
 PKG_CPPFLAGS+= -I"$(Julia_Home)/include"
+#dev julia
+PKG_CPPFLAGS+= -I"$(Julia_Home)/../src" 
+PKG_CPPFLAGS+= -I"$(Julia_Home)/../src/support"
+# release julia
+PKG_CPPFLAGS+= -I"$(Julia_Home)/include/julia"
+
 PKG_LIBS=-L"$(Julia_Home)/bin" -ljulia
+PKG_LIBS+=-L"$(Julia_Home)/lib" -ljulia
+PKG_LIBS+=-L"$(Julia_Home)/lib/julia" -ljulia
 
