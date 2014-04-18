@@ -1,0 +1,9 @@
+Package: rjulia
+Type: Package
+Title: R Call Julia
+Version: 1.0
+Date: 2014-04-17
+Author: Yu Gong
+Maintainer: <armgong@yahoo.com>
+Description: R Call Julia interface use julia execute some task in R.
+License: GPLV2
