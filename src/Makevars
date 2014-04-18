@@ -1,0 +1,4 @@
+Julia_Home=d:/codes/julia32/usr
+PKG_CPPFLAGS+= -I"$(Julia_Home)/include"
+PKG_LIBS=-L"$(Julia_Home)/bin" -ljulia
+
