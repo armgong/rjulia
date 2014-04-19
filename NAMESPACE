@@ -1,2 +1,2 @@
-useDynLib(rjulia) 
+#useDynLib(rjulia) 
 exportPattern("^[[:alpha:]]+")
