@@ -1,11 +1,11 @@
-PKG_CPPFLAGS+= -I"$(Julia_Home)/include"
+PKG_CPPFLAGS+= -I"$(JULIA_HOME)/include"
 #dev julia
-PKG_CPPFLAGS+= -I"$(Julia_Home)/../src" 
-PKG_CPPFLAGS+= -I"$(Julia_Home)/../src/support"
+PKG_CPPFLAGS+= -I"$(JULIA_HOME)/../src" 
+PKG_CPPFLAGS+= -I"$(JULIA_HOME)/../src/support"
 # release julia
-PKG_CPPFLAGS+= -I"$(Julia_Home)/include/julia"
+PKG_CPPFLAGS+= -I"$(JULIA_HOME)/include/julia"
 
-PKG_LIBS=-L"$(Julia_Home)/bin" -ljulia
-PKG_LIBS+=-L"$(Julia_Home)/lib" -ljulia
-PKG_LIBS+=-L"$(Julia_Home)/lib/julia" -ljulia
+PKG_LIBS=-L"$(JULIA_HOME)/bin" -ljulia
+PKG_LIBS+=-L"$(JULIA_HOME)/lib" -ljulia
+PKG_LIBS+=-L"$(JULIA_HOME)/lib/julia" -ljulia
 
