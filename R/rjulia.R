@@ -6,4 +6,8 @@ julia_init <- function(juliahome)
 julia_eval<-function(expression)
 {
  .Call("jl_eval",expression,PACKAGE="rjulia")
+}
+r_julia<-function(x,y)
+{
+ .Call("R_Julia",x,y,PACKAGE="rjulia")
 } 
