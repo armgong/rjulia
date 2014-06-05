@@ -1,6 +1,11 @@
 library(rjulia)
 julia_init("d:/codes/julia32/usr/bin")
+x<-1.01:5.01
+r_julia(x,"tt")
+y<-julia_eval("tt")
+y
+
 x<-1:5
 r_julia(x,"tt")
-
-julia_eval("tt[1]")
+y<-julia_eval("tt")
+y

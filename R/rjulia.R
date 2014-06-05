@@ -7,7 +7,13 @@ julia_eval<-function(expression)
 {
  .Call("jl_eval",expression,PACKAGE="rjulia")
 }
+julia_void_eval<-function(expression)
+{
+ .Call("jl_void_eval",expression,PACKAGE="rjulia")
+}
+
 r_julia<-function(x,y)
 {
  .Call("R_Julia",x,y,PACKAGE="rjulia")
-} 
+}
+
