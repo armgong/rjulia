@@ -6,5 +6,5 @@
 #include <julia.h>
 #define pkgdebug
 
-void Julia_R_Basic_Element(jl_value_t* Var,SEXP ans);
-void Julia_R_1D(jl_value_t* Var,SEXP ans);
+SEXP Julia_R_Basic_Element(jl_value_t* Var);
+SEXP Julia_R_1D(jl_value_t* Var);

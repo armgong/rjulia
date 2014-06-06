@@ -7,18 +7,19 @@
 #include "julia_R.h"
 #define pkgdebug
 
-void Julia_R_Basic_Element(jl_value_t* Var,SEXP ans) 
+SEXP Julia_R_Basic_Element(jl_value_t* Var) 
 {
+  SEXP ans=R_NilValue;
   if (jl_is_int32(Var))
   {
     PROTECT(ans = allocVector(INTSXP, 1));
-    REAL(ans)[0]=jl_unbox_int32(Var); 
+    INTEGER(ans)[0]=jl_unbox_int32(Var); 
     UNPROTECT(1);
   }
   if (jl_is_int64(Var))
   {
     PROTECT(ans = allocVector(REALSXP, 1));
-    REAL(ans)[0]=jl_unbox_int64(Var); 
+    REAL(ans)[0]=(double)jl_unbox_int64(Var); 
     UNPROTECT(1);
   }
   if (jl_is_float64(Var))
@@ -26,6 +27,7 @@ void Julia_R_Basic_Element(jl_value_t* Var,SEXP ans)
     PROTECT(ans = allocVector(REALSXP, 1));
     REAL(ans)[0]=jl_unbox_int64(Var); 
     UNPROTECT(1);
+
   }
   if (jl_is_bool(Var))
   {
@@ -39,10 +41,12 @@ void Julia_R_Basic_Element(jl_value_t* Var,SEXP ans)
     SET_STRING_ELT(ans,0,mkChar(jl_string_data(Var)));
     UNPROTECT(1);
   } 
+  return ans;
 }
 
-void Julia_R_1D(jl_value_t* Var,SEXP ans)
+SEXP Julia_R_1D(jl_value_t* Var)
 {
+ SEXP ans=R_NilValue; 
  jl_value_t* val=jl_arrayref(Var,0);
  if (jl_is_bool(val))
  {
@@ -92,4 +96,5 @@ if (((jl_array_t*)Var)->ptrarray)
     SET_STRING_ELT(ans,i,mkChar(p[i])); 
   UNPROTECT(1);
 }
+return ans;
 }

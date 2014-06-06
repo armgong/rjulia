@@ -7,4 +7,4 @@
 #define pkgdebug
 
 void R_Julia_Vector(SEXP Var,jl_value_t* ret,char* VarName);
-void R_Julia_Array(SEXP Var,jl_value_t* ret,char* VarName);
+void R_Julia_Matrix(SEXP Var,jl_value_t* ret,char* VarName);

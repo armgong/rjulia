@@ -5,6 +5,7 @@
 #include <Rmath.h>
 #include <julia.h>
 #include "Julia_R.h"
+#include "R_Julia.h"
 #define pkgdebug
 
 SEXP initJulia(SEXP julia_home,SEXP DisableGC)
@@ -39,15 +40,16 @@ SEXP Julia_R(jl_value_t* Var)
   {
    if (jl_array_ndims(Var)==1)
    {
-     Julia_R_1D(Var,ans);
+     ans=Julia_R_1D(Var);
+     return ans;
    }
    else  
    {
-     /* code */
+     return ans;
    }   
  }
 //Value to Vector
- Julia_R_Basic_Element(Var,ans);
+ ans=Julia_R_Basic_Element(Var);
  JL_GC_POP();
  return ans;
 }
@@ -57,18 +59,25 @@ SEXP R_Julia(SEXP Var,SEXP VarNam)
   int n;
   jl_value_t* ret;
   char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  if (isVector(Var))
-   R_Julia_Vector(Var,ret,VarName);
+
+  if (isMatrix(Var))
+  {
+    R_Julia_Matrix(Var,ret,VarName);
+  } 
+  else if (isVector(Var))
+  {
+    R_Julia_Vector(Var,ret,VarName);
+  } 
  return R_NilValue;
 }
-
+//eval but not return val
 SEXP jl_void_eval(SEXP cmd)
 {
   char *s = CHAR(STRING_ELT(cmd, 0));
   jl_value_t* ret = jl_eval_string(s);
   return R_NilValue;
 }
-
+//eval julia script and retrun
 SEXP jl_eval(SEXP cmd)
 {
   char *s = CHAR(STRING_ELT(cmd, 0));
