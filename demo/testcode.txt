@@ -1,40 +1,53 @@
 library(rjulia)
 julia_init("d:/codes/julia32/usr/bin")
-x<-1.01:5.01
-r_julia(x,"tt")
-y<-julia_eval("tt")
-y
-
-x<-1:5
-r_julia(x,"tt")
-y<-julia_eval("tt")
-y
-
-
-x<-c(TRUE,FALSE,TRUE)
-r_julia(x,"ttt")
-yy<-julia_eval("ttt")
-yy
-
-x<-1
-r_julia(x,"ss")
-yy<-julia_eval("ss")
-yy
-
-
-x<-1.1
-r_julia(x,"ss")
-yy<-julia_eval("ss")
-yy
-
-x<-TRUE
-r_julia(x,"ss")
-yy<-julia_eval("ss")
-yy
-
-x<-c("tttt","xxxx")
-r_julia(x,"sss")
-yy<-julia_eval("sss")
-yy
-
-
+f=function(n){
+ for (i in 1:n)
+ {   
+  x<-1.01:5.01
+  r_julia(x,"tt")
+  y<-julia_eval("tt")
+  y
+  
+  x<-1:5
+  r_julia(x,"tt")
+  y<-julia_eval("tt")
+  y
+  
+  
+  x<-c(TRUE,FALSE,TRUE)
+  r_julia(x,"ttt")
+  yy<-julia_eval("ttt")
+  yy
+  
+  x<-1
+  r_julia(x,"ss")
+  yy<-julia_eval("ss")
+  yy
+  
+  
+  x<-1.1
+  r_julia(x,"ss")
+  yy<-julia_eval("ss")
+  yy
+  
+  x<-TRUE
+  r_julia(x,"ss")
+  yy<-julia_eval("ss")
+  print(yy)
+  print(i)
+  
+  #x<-c("tttt","xxxx")
+  #r_julia(x,"sss")
+  #yy<-julia_eval("sss")
+  #print(yy)
+  
+  
+  #julia_void_eval('xx=["ttt","xxxx"]')
+  #y<-julia_eval("xx[1]")
+  #print(y)
+  
+ }  
+}
+f(1)
+f(10)
+xdd<-f(10000)

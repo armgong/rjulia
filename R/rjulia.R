@@ -1,6 +1,6 @@
-julia_init <- function(juliahome)
+julia_init <- function(juliahome,disablegc=TRUE)
 {
- .Call("initJulia",juliahome,PACKAGE="rjulia")
+ .Call("initJulia",juliahome,disablegc,PACKAGE="rjulia")
 }
 
 julia_eval<-function(expression)
