@@ -43,8 +43,9 @@ SEXP Julia_R(jl_value_t* Var)
      ans=Julia_R_1D(Var);
      return ans;
    }
-   else  
+   else if (jl_array_ndims(Var)==2) 
    {
+     ans=Julia_R_2D(Var); 
      return ans;
    }   
  }
