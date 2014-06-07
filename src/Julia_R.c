@@ -35,7 +35,14 @@ SEXP Julia_R_Basic_Element(jl_value_t* Var)
     LOGICAL(ans)[0]=jl_unbox_bool(Var); 
     UNPROTECT(1);
   }
-  if (jl_is_byte_string(Var))
+
+  if (jl_is_utf8_string(Var))
+  {
+    PROTECT(ans = allocVector(STRSXP, 1));
+    SET_STRING_ELT(ans,0,mkCharCE(jl_string_data(Var),CE_UTF8));
+    UNPROTECT(1);
+  } 
+  if (jl_is_ascii_string(Var))
   {
     PROTECT(ans = allocVector(STRSXP, 1));
     SET_STRING_ELT(ans,0,mkChar(jl_string_data(Var)));
@@ -46,8 +53,14 @@ SEXP Julia_R_Basic_Element(jl_value_t* Var)
 
 SEXP Julia_R_1D(jl_value_t* Var)
 {
- SEXP ans=R_NilValue; 
- jl_value_t* val=jl_arrayref(Var,0);
+ SEXP ans=R_NilValue;
+
+ jl_value_t* val; 
+ if (((jl_array_t*)Var)->ptrarray)
+    val = jl_cellref(Var, 0);
+ else
+    val = jl_arrayref((jl_array_t*)Var,0);
+
  int len=jl_array_dim(Var,0);
  if (jl_is_bool(val))
  {
@@ -84,21 +97,39 @@ if (jl_is_float64(val))
   UNPROTECT(1);
 }   
 //convert string array to STRSXP ,but not sure it is corret?
-if (((jl_array_t*)Var)->ptrarray)
+if (jl_is_utf8_string(val))
 {
-  char** p=(char**) jl_array_data(Var);
   PROTECT(ans = allocVector(STRSXP, len));
   for (size_t i=0;i<len;i++)
-    SET_STRING_ELT(ans,i,mkChar(p[i])); 
+    SET_STRING_ELT(ans,i,mkCharCE(jl_string_data(jl_cellref(Var,i)),CE_UTF8));
   UNPROTECT(1);
 }
+if (jl_is_utf8_string(val))
+{
+  PROTECT(ans = allocVector(STRSXP, len));
+  for (size_t i=0;i<len;i++)
+    SET_STRING_ELT(ans,i,mkCharCE(jl_string_data(jl_cellref(Var,i)),CE_UTF8));
+  UNPROTECT(1);
+}
+if (jl_is_ascii_string(val))
+{
+  PROTECT(ans = allocVector(STRSXP, len));
+  for (size_t i=0;i<len;i++)
+    SET_STRING_ELT(ans,i,mkChar(jl_string_data(jl_cellref(Var,i))));
+  UNPROTECT(1);
+}
+
 return ans;
 }
 
 SEXP Julia_R_2D(jl_value_t* Var)
 {
  SEXP ans=R_NilValue; 
- jl_value_t* val=jl_arrayref(Var,0);
+ jl_value_t* val; 
+ if (((jl_array_t*)Var)->ptrarray)
+    val = jl_cellref(Var, 0);
+ else
+    val = jl_arrayref((jl_array_t*)Var,0);
  int len=jl_array_len(Var);
  int dim0=jl_array_dim(Var,0);
  int dim1=jl_array_dim(Var,1);
@@ -137,12 +168,18 @@ if (jl_is_float64(val))
   UNPROTECT(1);
 }   
 //convert string array to STRSXP ,but not sure it is corret?
-if (((jl_array_t*)Var)->ptrarray)
+if (jl_is_utf8_string(val))
 {
-  char** p=(char**) jl_array_data(Var);
+  PROTECT(ans = allocVector(STRSXP, len));
+  for (size_t i=0;i<len;i++)
+    SET_STRING_ELT(ans,i,mkCharCE(jl_string_data(jl_cellref(Var,i)),CE_UTF8));
+  UNPROTECT(1);
+}
+if (jl_is_ascii_string(val))
+{
   PROTECT(ans = allocMatrix(STRSXP, dim0,dim1));
   for (size_t i=0;i<len;i++)
-    SET_STRING_ELT(ans,i,mkChar(p[i])); 
+   SET_STRING_ELT(ans,i,mkChar(jl_string_data(jl_cellref(Var,i))));
   UNPROTECT(1);
 }
 return ans;

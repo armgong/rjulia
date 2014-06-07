@@ -1,6 +1,6 @@
-1 verify R STRSXP to julia array is correct
-2 R array to Julia array
-3 R matrix to Julia matrix
+1 verify R STRSXP to julia array is correct(need ask julia developer?)
+2 R array to Julia array (done 1d and 2d)
+3 R matrix to Julia matrix(done matrix is 2d array)
 4 R dataframe to Julia dataframe(need to julia dataframe package)
 5 write more samples and docs
 
