@@ -7,6 +7,4 @@
 #define pkgdebug
 
 SEXP Julia_R_Basic_Element(jl_value_t* Var);
-SEXP Julia_R_1D(jl_value_t* Var);
-SEXP Julia_R_2D(jl_value_t* Var);
 SEXP Julia_R_MD(jl_value_t* Var);

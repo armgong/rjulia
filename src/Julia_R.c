@@ -51,16 +51,6 @@ SEXP Julia_R_Basic_Element(jl_value_t* Var)
   return ans;
 }
 
-SEXP Julia_R_1D(jl_value_t* Var)
-{
-  return Julia_R_MD(Var);
-}
-
-SEXP Julia_R_2D(jl_value_t* Var)
-{
- return Julia_R_MD(Var);
-}
-
 SEXP Julia_R_MD(jl_value_t* Var)
 {
  SEXP ans=R_NilValue; 
