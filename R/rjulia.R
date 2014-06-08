@@ -5,7 +5,13 @@ julia_init <- function(juliahome,disablegc=TRUE)
 
 julia_eval<-function(expression)
 {
- .Call("jl_eval",expression,PACKAGE="rjulia")
+ y<-.Call("jl_eval",expression,PACKAGE="rjulia")
+ if ((length(dim(y))==1)||(length(y)==1))
+  return (as.vector(y))
+ else if(length(dim(y))==2)
+  return (as.matrix(y))
+ else 
+  return (y)
 }
 julia_void_eval<-function(expression)
 {
