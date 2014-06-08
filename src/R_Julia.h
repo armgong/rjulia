@@ -8,3 +8,4 @@
 
 void R_Julia_Vector(SEXP Var,jl_value_t* ret,char* VarName);
 void R_Julia_Matrix(SEXP Var,jl_value_t* ret,char* VarName);
+void R_Julia_MDArray(SEXP Var,jl_value_t* ret,char* VarName);

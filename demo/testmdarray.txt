@@ -1,0 +1,19 @@
+library(rjulia)
+#init embedding julia,paraments are julia_home and disable_gc
+julia_init("d:/codes/julia32/usr/bin",F)
+f=function(n){
+ for (i in 1:n)
+ {   
+  #pass R double vector to Julia
+  x<-array(1.01:18.01,c(3,3,2))
+  r_julia(x,"tt")
+  y<-julia_eval("tt")
+  print(i)
+  print(y)  
+ }
+}
+f(1)
+f(10)
+xdd<-f(10000)
+
+
