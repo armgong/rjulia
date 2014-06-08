@@ -53,9 +53,9 @@ void R_Julia_Vector(SEXP Var,jl_value_t* ret,char* VarName)
         jl_value_t* array_type =jl_apply_array_type(jl_ascii_string_type,1); 
         jl_array_t* ret= jl_alloc_array_1d(array_type,n);
         JL_GC_PUSH1(&ret);
-        char** retData = (char**)jl_array_data(ret);
+        jl_value_t** retData=jl_array_data(ret); 
         for(size_t i=0; i<jl_array_len(ret); i++)
-         retData[i] =CHAR(STRING_ELT(Var, i));
+         retData[i] =jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
        jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
        JL_GC_POP();
        break;
@@ -114,9 +114,9 @@ void R_Julia_Matrix(SEXP Var,jl_value_t* ret,char* VarName)
         jl_value_t* array_type =jl_apply_array_type(jl_ascii_string_type,1); 
         jl_array_t* ret= jl_alloc_array_2d(array_type,rows,cols);
         JL_GC_PUSH1(&ret);
-        char** retData = (char**)jl_array_data(ret);
+        jl_value_t** retData=jl_array_data(ret); 
         for(size_t i=0; i<jl_array_len(ret); i++)
-         retData[i] =CHAR(STRING_ELT(Var, i));
+         retData[i] =jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
        jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
        JL_GC_POP();
        break;
@@ -187,9 +187,9 @@ void R_Julia_MDArray(SEXP Var,jl_value_t* ret,char* VarName)
         jl_value_t* array_type =jl_apply_array_type(jl_ascii_string_type,1); 
         jl_array_t* ret= jl_new_array(array_type,dims);
         JL_GC_PUSH1(&ret);
-        char** retData = (char**)jl_array_data(ret);
+       jl_value_t** retData=jl_array_data(ret); 
         for(size_t i=0; i<jl_array_len(ret); i++)
-         retData[i] =CHAR(STRING_ELT(Var, i));
+         retData[i] =jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
        jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
        JL_GC_POP();
        break;

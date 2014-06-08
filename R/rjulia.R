@@ -9,11 +9,11 @@ julia_eval<-function(expression)
 }
 julia_void_eval<-function(expression)
 {
- .Call("jl_void_eval",expression,PACKAGE="rjulia")
+ invisible(.Call("jl_void_eval",expression,PACKAGE="rjulia"))
 }
 
 r_julia<-function(x,y)
 {
- .Call("R_Julia",x,y,PACKAGE="rjulia")
+invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
 }
 

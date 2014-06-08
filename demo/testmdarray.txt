@@ -8,8 +8,9 @@ f=function(n){
   x<-array(1.01:18.01,c(3,3,2))
   r_julia(x,"tt")
   y<-julia_eval("tt")
-  print(i)
-  print(y)  
+  cat("MD array:","\n")
+  print(y)
+  cat("run times is:",i,"\n")
  }
 }
 f(1)
