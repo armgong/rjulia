@@ -110,7 +110,7 @@ else if (jl_is_float64(val))
 //convert string array to STRSXP ,but not sure it is corret?
 else if (jl_is_utf8_string(val))
 {
-  PROTECT(ans = allocArray(STRSXP, len));
+  PROTECT(ans = allocArray(STRSXP, dims));
   for (size_t i=0;i<len;i++)
     SET_STRING_ELT(ans,i,mkCharCE(jl_string_data(jl_cellref(Var,i)),CE_UTF8));
   UNPROTECT(1);
