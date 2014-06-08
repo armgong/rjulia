@@ -55,12 +55,7 @@ void R_Julia_Vector(SEXP Var,jl_value_t* ret,char* VarName)
         JL_GC_PUSH1(&ret);
         char** retData = (char**)jl_array_data(ret);
         for(size_t i=0; i<jl_array_len(ret); i++)
-        {
          retData[i] =CHAR(STRING_ELT(Var, i));
-           #ifdef pkgdebug
-          // Rprintf("str is %d %s\n",i,retData[i]);
-           #endif
-       } 
        jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
        JL_GC_POP();
        break;
@@ -97,10 +92,7 @@ void R_Julia_Matrix(SEXP Var,jl_value_t* ret,char* VarName)
         JL_GC_PUSH1(&ret);
         int* retData = (int*)jl_array_data(ret);
         for(size_t i=0; i<jl_array_len(ret); i++)
-        {
           retData[i] =INTEGER(Var)[i];
-          //Rprintf("i th value is %d\n",retData[i]);
-        }
         jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
         JL_GC_POP(); 
         break;
@@ -124,12 +116,7 @@ void R_Julia_Matrix(SEXP Var,jl_value_t* ret,char* VarName)
         JL_GC_PUSH1(&ret);
         char** retData = (char**)jl_array_data(ret);
         for(size_t i=0; i<jl_array_len(ret); i++)
-        {
          retData[i] =CHAR(STRING_ELT(Var, i));
-           #ifdef pkgdebug
-          // Rprintf("str is %d %s\n",i,retData[i]);
-           #endif
-       } 
        jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
        JL_GC_POP();
        break;
@@ -148,9 +135,7 @@ jl_tuple_t* Rdims_jTuple(SEXP Var)
     JL_GC_PUSH1(&d);
     size_t i;
     for(i=0; i < ndims; i++)
-    {
       jl_tupleset(d, i, jl_box_long(INTEGER(dims)[i]));
-    }
     JL_GC_POP();
     return d;
 }
@@ -180,10 +165,7 @@ void R_Julia_MDArray(SEXP Var,jl_value_t* ret,char* VarName)
         JL_GC_PUSH1(&ret);
         int* retData = (int*)jl_array_data(ret);
         for(size_t i=0; i<jl_array_len(ret); i++)
-        {
           retData[i] =INTEGER(Var)[i];
-          //Rprintf("i th value is %d\n",retData[i]);
-        }
         jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
         JL_GC_POP(); 
         break;
@@ -207,12 +189,7 @@ void R_Julia_MDArray(SEXP Var,jl_value_t* ret,char* VarName)
         JL_GC_PUSH1(&ret);
         char** retData = (char**)jl_array_data(ret);
         for(size_t i=0; i<jl_array_len(ret); i++)
-        {
          retData[i] =CHAR(STRING_ELT(Var, i));
-           #ifdef pkgdebug
-          // Rprintf("str is %d %s\n",i,retData[i]);
-           #endif
-       } 
        jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
        JL_GC_POP();
        break;

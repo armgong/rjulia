@@ -16,33 +16,33 @@ SEXP Julia_R_Basic_Element(jl_value_t* Var)
     INTEGER(ans)[0]=jl_unbox_int32(Var); 
     UNPROTECT(1);
   }
-  if (jl_is_int64(Var))
+  else if (jl_is_int64(Var))
   {
     PROTECT(ans = allocVector(REALSXP, 1));
     REAL(ans)[0]=(double)jl_unbox_int64(Var); 
     UNPROTECT(1);
   }
-  if (jl_is_float64(Var))
+  else if (jl_is_float64(Var))
   {
     PROTECT(ans = allocVector(REALSXP, 1));
     REAL(ans)[0]=jl_unbox_int64(Var); 
     UNPROTECT(1);
 
   }
-  if (jl_is_bool(Var))
+  else if (jl_is_bool(Var))
   {
     PROTECT(ans = allocVector(LGLSXP, 1));
     LOGICAL(ans)[0]=jl_unbox_bool(Var); 
     UNPROTECT(1);
   }
 
-  if (jl_is_utf8_string(Var))
+  else if (jl_is_utf8_string(Var))
   {
     PROTECT(ans = allocVector(STRSXP, 1));
     SET_STRING_ELT(ans,0,mkCharCE(jl_string_data(Var),CE_UTF8));
     UNPROTECT(1);
   } 
-  if (jl_is_ascii_string(Var))
+  else if (jl_is_ascii_string(Var))
   {
     PROTECT(ans = allocVector(STRSXP, 1));
     SET_STRING_ELT(ans,0,mkChar(jl_string_data(Var)));
@@ -80,8 +80,8 @@ SEXP Julia_R_MD(jl_value_t* Var)
   for (size_t i=0;i<len;i++) 
     LOGICAL(ans)[i]=p[i]; 
   UNPROTECT(1);
-}
-if (jl_is_int32(val))
+ }
+ else if (jl_is_int32(val))
 {
   int* p=(int*) jl_array_data(Var);
   PROTECT(ans = allocArray(INTSXP, dims));
@@ -90,7 +90,7 @@ if (jl_is_int32(val))
   UNPROTECT(1);
 }
 //int64
-if (jl_is_int64(val))
+else if (jl_is_int64(val))
 {
   long long* p=(long long*) jl_array_data(Var);
   PROTECT(ans = allocArray(REALSXP, dims));
@@ -99,7 +99,7 @@ if (jl_is_int64(val))
   UNPROTECT(1);
 }
 //double
-if (jl_is_float64(val))
+else if (jl_is_float64(val))
 {
   double* p=(double*) jl_array_data(Var);
   PROTECT(ans = allocArray(REALSXP, dims));
@@ -108,14 +108,14 @@ if (jl_is_float64(val))
   UNPROTECT(1);
 }   
 //convert string array to STRSXP ,but not sure it is corret?
-if (jl_is_utf8_string(val))
+else if (jl_is_utf8_string(val))
 {
   PROTECT(ans = allocArray(STRSXP, len));
   for (size_t i=0;i<len;i++)
     SET_STRING_ELT(ans,i,mkCharCE(jl_string_data(jl_cellref(Var,i)),CE_UTF8));
   UNPROTECT(1);
 }
-if (jl_is_ascii_string(val))
+else if (jl_is_ascii_string(val))
 {
   PROTECT(ans = allocArray(STRSXP, dims));
   for (size_t i=0;i<len;i++)

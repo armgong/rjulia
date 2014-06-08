@@ -42,15 +42,15 @@ f=function(n){
   print(i)
  
   # pass string vector to julia,need to verify 
-  #x<-c("tttt","xxxx")
-  #r_julia(x,"sss")
-  #yy<-julia_eval("sss")
-  #print(yy)
+  x<-c("tttt","xxxx")
+  r_julia(x,"sss")
+  yy<-julia_eval("sss")
+  print(yy)
   
   # pass string vector to julia,need to verify
-  #julia_void_eval('xx=["ttt","xxxx"]')
-  #y<-julia_eval("xx[1]")
-  #print(y)
+  julia_void_eval('xx=["ttt","xxxx"]')
+  y<-julia_eval("xx[1]")
+  print(y)
   
  }  
 }
