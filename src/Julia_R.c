@@ -62,6 +62,9 @@ SEXP Julia_R_1D(jl_value_t* Var)
     val = jl_arrayref((jl_array_t*)Var,0);
 
  int len=jl_array_dim(Var,0);
+ if (len==0) 
+   return ans;
+ 
  if (jl_is_bool(val))
  {
   char* p=(char*) jl_array_data(Var);
@@ -132,6 +135,9 @@ SEXP Julia_R_2D(jl_value_t* Var)
     val = jl_arrayref((jl_array_t*)Var,0);
  
  int len=jl_array_len(Var);
+
+ if (len==0) 
+   return ans;
  
  int dim0=jl_array_dim(Var,0);
  int dim1=jl_array_dim(Var,1);
@@ -198,6 +204,9 @@ SEXP Julia_R_MD(jl_value_t* Var)
     val = jl_arrayref((jl_array_t*)Var,0);
  //get Julia dims and set R array Dims
  int len=jl_array_len(Var);
+ if (len==0) 
+   return ans;
+
  int ndims=jl_array_ndims(Var);
  SEXP dims;
  PROTECT(dims = allocVector(INTSXP, ndims));
