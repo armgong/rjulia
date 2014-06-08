@@ -7,7 +7,7 @@
 #include "julia_R.h"
 #define pkgdebug
 
-SEXP Julia_R_Basic_Element(jl_value_t* Var) 
+SEXP Julia_R_Scalar(jl_value_t* Var) 
 {
   SEXP ans=R_NilValue;
   if (jl_is_int32(Var))

@@ -42,7 +42,7 @@ SEXP Julia_R(jl_value_t* Var)
    return ans;
  }
 //Value to Vector
- ans=Julia_R_Basic_Element(Var);
+ ans=Julia_R_Scalar(Var);
  JL_GC_POP();
  return ans;
 }
@@ -52,19 +52,8 @@ SEXP R_Julia(SEXP Var,SEXP VarNam)
   int n;
   jl_value_t* ret;
   char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  if (isArray(Var) && (LENGTH(getAttrib(Var, R_DimSymbol))>2))
-  {
-   R_Julia_MDArray(Var,ret,VarName);
- }
- else if (isMatrix(Var))
- {
-  R_Julia_Matrix(Var,ret,VarName);
-} 
-else if (isVector(Var))
-{
-  R_Julia_Vector(Var,ret,VarName);
-} 
-return R_NilValue;
+  R_Julia_MD(Var,ret,VarName);
+  return R_NilValue;
 }
 //eval but not return val
 SEXP jl_void_eval(SEXP cmd)
