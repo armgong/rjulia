@@ -1,7 +1,8 @@
 RJulia
 ======
 
-R package Call Julia,use Julia embeded api write a packege for R.
+RJula is a  R to Julia interface. it provides an interface between R and Julia. It allows to create Array, run script  in julia  from R.
+
 
 currently it can be use on unix and windows console,on windows gui it crashed.
 
