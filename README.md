@@ -15,6 +15,8 @@ Install
 
   if still have problem,please see the file Makevar in src dir.
 
+3 add juliainstalldir\bin into your system PATH variable
+
 Demo
 
 please see two txt files in demo dir 

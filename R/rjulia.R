@@ -64,7 +64,9 @@ julia_void_eval<-function(expression)
 r_julia<-function(x,y)
 {
 if (is.vector(x)||is.matrix(x)||is.array(x))
- invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
+{
+  invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
+}
 else
  warning("only accept vector or matrix or array of string int float")
 }
