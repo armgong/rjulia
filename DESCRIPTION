@@ -1,9 +1,9 @@
 Package: rjulia
 Type: Package
 Title: R Call Julia
-Version: 0.2
-Date: 2014-06-07
+Version: 0.3
+Date: 2014-06-09
 Author: Yu Gong
 Maintainer: <armgong@yahoo.com>
-Description: Use Julia C API  execute some task in R.
+Description: RJula provides an interface between R and Julia. It allows to create Array, run script in julia from R.
 License: GPLV2
