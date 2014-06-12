@@ -4,7 +4,7 @@
 #include <Rinternals.h>
 #include <Rmath.h>
 #include <julia.h>
-#include "julia_R.h"
+#include "Julia_R.h"
 #define pkgdebug
 
 SEXP Julia_R_Scalar(jl_value_t* Var) 
