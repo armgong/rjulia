@@ -1,3 +1,6 @@
+/*
+Copyright (C) 2014 by Yu Gong
+*/
 #include <stdio.h>
 #include <math.h>
 #include <R.h>
