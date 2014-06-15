@@ -10,6 +10,15 @@ Copyright (C) 2014 by Yu Gong
 #include "Julia_R.h"
 #include "R_Julia.h"
 #define pkgdebug
+static int jlrunning=0;
+SEXP Julia_is_running()
+{
+  SEXP ans;
+  PROTECT(ans = allocVector(LGLSXP, 1));
+  LOGICAL(ans)[0]=jlrunning;
+  UNPROTECT(1);
+  return ans; 
+}
 
 SEXP initJulia(SEXP julia_home,SEXP DisableGC)
 {
@@ -21,8 +30,8 @@ SEXP initJulia(SEXP julia_home,SEXP DisableGC)
     jl_init(NULL);
   else
     jl_init(s);
-
   JL_SET_STACK_BASE;
+  jlrunning=1;
   if (jl_exception_occurred())
   {
     error("Julia not initialized");

@@ -46,8 +46,18 @@ julia_init <- function(juliahome,disablegc=TRUE)
   stop("Could't Find Julia,Besure juliahome your passed is right")
 }
 
+Julia_is_running<-function()
+{
+  y<-.Call("Julia_is_running",PACKAGE="rjulia")
+  return (y)
+}
+
 julia_eval<-function(expression)
 {
+ if (!Julia_is_running())
+  {
+    stop("Julia not running,use julia_init to start it")
+  } 
  y<-.Call("jl_eval",expression,PACKAGE="rjulia")
  if ((length(dim(y))==1)||(length(y)==1))
   return (as.vector(y))
@@ -58,11 +68,19 @@ julia_eval<-function(expression)
 }
 julia_void_eval<-function(expression)
 {
+  if (!Julia_is_running())
+  {
+    stop("Julia not running,use julia_init to start it")
+  } 
  invisible(.Call("jl_void_eval",expression,PACKAGE="rjulia"))
 }
 
 r_julia<-function(x,y)
 {
+ if (!Julia_is_running())
+  {
+    stop("Julia not running,use julia_init to start it")
+  }   
 if (is.vector(x)||is.matrix(x)||is.array(x))
 {
   invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
