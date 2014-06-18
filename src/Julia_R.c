@@ -9,36 +9,61 @@ Copyright (C) 2014 by Yu Gong
 #include <julia.h>
 #include "Julia_R.h"
 #define pkgdebug
-
+#ifndef jl_is_int8
+#define jl_is_int8(v)        jl_typeis(v,jl_int8_type)
+#define jl_is_int16(v)       jl_typeis(v,jl_int16_type)
+#define jl_is_uint8(v)       jl_typeis(v,jl_uint8_type)
+#define jl_is_uint16(v)      jl_typeis(v,jl_uint16_type)
+#endif
 SEXP Julia_R_Scalar(jl_value_t* Var) 
 {
   SEXP ans=R_NilValue;
+  //most common type is here
   if (jl_is_int32(Var))
   {
-    PROTECT(ans = allocVector(INTSXP, 1));
-    INTEGER(ans)[0]=jl_unbox_int32(Var); 
-    UNPROTECT(1);
+    ans=ScalarInteger(jl_unbox_int32(Var)); 
   }
   else if (jl_is_int64(Var))
   {
-    PROTECT(ans = allocVector(REALSXP, 1));
-    REAL(ans)[0]=(double)jl_unbox_int64(Var); 
-    UNPROTECT(1);
+    ans=ScalarReal((double)jl_unbox_int64(Var)); 
+  }
+  //more integer type
+  if (jl_is_uint32(Var))
+  {
+    ans=ScalarReal((double)jl_unbox_uint32(Var)); 
+  }
+  else if (jl_is_uint64(Var))
+  {
+     ans=ScalarReal((double)jl_unbox_uint64(Var));
   }
   else if (jl_is_float64(Var))
   {
-    PROTECT(ans = allocVector(REALSXP, 1));
-    REAL(ans)[0]=jl_unbox_int64(Var); 
-    UNPROTECT(1);
-
+    ans=ScalarReal(jl_unbox_float64(Var)); 
+  }
+  else if (jl_is_float32(Var))
+  {
+    ans=ScalarReal(jl_unbox_float32(Var)); 
   }
   else if (jl_is_bool(Var))
   {
-    PROTECT(ans = allocVector(LGLSXP, 1));
-    LOGICAL(ans)[0]=jl_unbox_bool(Var); 
-    UNPROTECT(1);
+    ans=ScalarLogical(jl_unbox_bool(Var)); 
   }
-
+  else if (jl_is_int8(Var))
+  {
+    ans=ScalarInteger(jl_unbox_int8(Var)); 
+  }
+  else if (jl_is_uint8(Var))
+  {
+    ans=ScalarInteger(jl_unbox_uint8(Var)); 
+  }
+  else if (jl_is_int16(Var))
+  {
+    ans=ScalarInteger(jl_unbox_int16(Var)); 
+  }
+  else if (jl_is_uint16(Var))
+  {
+    ans=ScalarInteger(jl_unbox_uint16(Var)); 
+  }
   else if (jl_is_utf8_string(Var))
   {
     PROTECT(ans = allocVector(STRSXP, 1));
@@ -47,9 +72,7 @@ SEXP Julia_R_Scalar(jl_value_t* Var)
   } 
   else if (jl_is_ascii_string(Var))
   {
-    PROTECT(ans = allocVector(STRSXP, 1));
-    SET_STRING_ELT(ans,0,mkChar(jl_string_data(Var)));
-    UNPROTECT(1);
+    ans=ScalarString(mkChar(jl_string_data(Var)));
   } 
   return ans;
 }
@@ -86,7 +109,7 @@ SEXP Julia_R_MD(jl_value_t* Var)
  }
  else if (jl_is_int32(val))
 {
-  int* p=(int*) jl_array_data(Var);
+  int32_t* p=(int32_t*) jl_array_data(Var);
   PROTECT(ans = allocArray(INTSXP, dims));
   for (size_t i=0;i<len;i++)
     INTEGER(ans)[i]=p[i]; 
@@ -95,7 +118,56 @@ SEXP Julia_R_MD(jl_value_t* Var)
 //int64
 else if (jl_is_int64(val))
 {
-  long long* p=(long long*) jl_array_data(Var);
+  int64_t* p=(int64_t*) jl_array_data(Var);
+  PROTECT(ans = allocArray(REALSXP, dims));
+  for (size_t i=0;i<len;i++)
+    REAL(ans)[i]=p[i]; 
+  UNPROTECT(1);
+}
+//more integer type
+else if (jl_is_int8(val))
+{
+  int8_t* p=(int8_t*) jl_array_data(Var);
+  PROTECT(ans = allocArray(INTSXP, dims));
+  for (size_t i=0;i<len;i++)
+    INTEGER(ans)[i]=p[i]; 
+  UNPROTECT(1);
+}
+else if (jl_is_int16(val))
+{
+  int16_t* p=(int16_t*) jl_array_data(Var);
+  PROTECT(ans = allocArray(INTSXP, dims));
+  for (size_t i=0;i<len;i++)
+    INTEGER(ans)[i]=p[i]; 
+  UNPROTECT(1);
+}
+else if (jl_is_uint8(val))
+{
+  uint8_t* p=(uint8_t*) jl_array_data(Var);
+  PROTECT(ans = allocArray(INTSXP, dims));
+  for (size_t i=0;i<len;i++)
+    INTEGER(ans)[i]=p[i]; 
+  UNPROTECT(1);
+}
+else if (jl_is_uint16(val))
+{
+  uint16_t* p=(uint16_t*) jl_array_data(Var);
+  PROTECT(ans = allocArray(INTSXP, dims));
+  for (size_t i=0;i<len;i++)
+    INTEGER(ans)[i]=p[i]; 
+  UNPROTECT(1);
+}
+else if (jl_is_uint32(val))
+{
+  uint32_t* p=(uint32_t*) jl_array_data(Var);
+  PROTECT(ans = allocArray(REALSXP, dims));
+  for (size_t i=0;i<len;i++)
+    REAL(ans)[i]=p[i]; 
+  UNPROTECT(1);
+}
+else if (jl_is_uint64(val))
+{
+  uint64_t* p=(uint64_t*) jl_array_data(Var);
   PROTECT(ans = allocArray(REALSXP, dims));
   for (size_t i=0;i<len;i++)
     REAL(ans)[i]=p[i]; 
@@ -109,7 +181,15 @@ else if (jl_is_float64(val))
   for (size_t i=0;i<len;i++)
     REAL(ans)[i]=p[i]; 
   UNPROTECT(1);
-}   
+}
+else if (jl_is_float32(val))
+{
+  float* p=(float*) jl_array_data(Var);
+  PROTECT(ans = allocArray(REALSXP, dims));
+  for (size_t i=0;i<len;i++)
+    REAL(ans)[i]=p[i]; 
+  UNPROTECT(1);
+}      
 //convert string array to STRSXP ,but not sure it is corret?
 else if (jl_is_utf8_string(val))
 {

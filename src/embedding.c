@@ -24,7 +24,6 @@ SEXP initJulia(SEXP julia_home,SEXP DisableGC)
 {
   if (jl_is_initialized())
     return R_NilValue;
-
   char *s = CHAR(STRING_ELT(julia_home, 0));
   if (strlen(s) == 0)
     jl_init(NULL);

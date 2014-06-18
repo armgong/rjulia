@@ -41,7 +41,7 @@ julia_init <- function(juliahome,disablegc=TRUE)
 {
  findjl<-JuliaIsExist(juliahome)	
  if (findjl[[1]])	
-  .Call("initJulia",findjl[[2]],disablegc,PACKAGE="rjulia")
+  invisible(.Call("initJulia",findjl[[2]],disablegc,PACKAGE="rjulia"))
  else
   stop("Could't Find Julia,Besure juliahome your passed is right")
 }
