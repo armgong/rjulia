@@ -9,8 +9,34 @@ Copyright (C) 2014 by Yu Gong
 #include <julia.h>
 #include "Julia_R.h"
 #include "R_Julia.h"
+
 #define pkgdebug
 static int jlrunning=0;
+
+static int DataArrayFrameInited=0;
+SEXP Julia_LoadDataArrayFrame()
+{
+  jl_eval_string("using DataArrays,DataFrames");
+  DataArrayFrameInited=1;
+  if (jl_exception_occurred()){
+    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    Rprintf("\n");
+   DataArrayFrameInited=0; 
+   jl_exception_clear();
+  } 
+  return R_NilValue; 
+}
+
+SEXP Julia_DataArrayFrameInited()
+{
+  SEXP ans;
+  PROTECT(ans = allocVector(LGLSXP, 1));
+  LOGICAL(ans)[0]=DataArrayFrameInited;
+  UNPROTECT(1);
+  return ans; 
+}
+
+
 SEXP Julia_is_running()
 {
   SEXP ans;
@@ -24,11 +50,11 @@ SEXP initJulia(SEXP julia_home,SEXP DisableGC)
 {
   if (jl_is_initialized())
     return R_NilValue;
-  char *s = CHAR(STRING_ELT(julia_home, 0));
-  if (strlen(s) == 0)
+  const char *s = CHAR(STRING_ELT(julia_home, 0));
+  if (strlen((char*)s) == 0)
     jl_init(NULL);
   else
-    jl_init(s);
+    jl_init((char*)s);
   JL_SET_STACK_BASE;
   jlrunning=1;
   if (jl_exception_occurred())
@@ -47,36 +73,77 @@ SEXP Julia_R(jl_value_t* Var)
   JL_GC_PUSH1(&Var);
   ans=R_NilValue;
   //Array To Vector
+  if (jl_is_null(Var)||jl_is_nothing(Var))
+    return ans;
   if (jl_is_array(Var))
   {
    ans=Julia_R_MD(Var); 
-   return ans;
- }
-//Value to Vector
- ans=Julia_R_Scalar(Var);
+  }
+  else if (strcmp(jl_typeof_str(Var),"DataArray")==0||
+           strcmp(jl_typeof_str(Var),"DataVector")==0||
+           strcmp(jl_typeof_str(Var),"DataMatrix")==0||
+           strcmp(jl_typeof_str(Var),"DataFrame")==0||
+           strcmp(jl_typeof_str(Var),"NAtype")==0)
+   {
+    //try to load DataArrays DataFrames package
+    if (!DataArrayFrameInited) Julia_LoadDataArrayFrame();
+    if (!DataArrayFrameInited)
+    {
+     error("DataArrays and DataFrames can't be load,please check this\n");
+     return R_NilValue;
+    }
+    //Rprintf("type of %s len %d",jl_typeof_str(Var),strlen(jl_typeof_str(Var)));
+    if(strcmp(jl_typeof_str(Var),"NAtype")==0)
+     ans=Julia_R_Scalar_NA(Var); 
+    else 
+     ans=Julia_R_MD_NA(Var);
+   } 
+  else 
+  { 
+     ans=Julia_R_Scalar(Var); 
+  }
  JL_GC_POP();
  return ans;
 }
-//Convert R Type To Julia
+
+//Convert R Type To Julia,which not contain NA
 SEXP R_Julia(SEXP Var,SEXP VarNam)
 {
-  int n;
-  jl_value_t* ret;
-  char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD(Var,ret,VarName);
+  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
+  R_Julia_MD(Var,VarName);
+  return R_NilValue;
+}
+//Convert R Type To Julia,which contain NA
+SEXP R_Julia_NA(SEXP Var,SEXP VarNam)
+{
+  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
+  R_Julia_MD_NA(Var,VarName);
   return R_NilValue;
 }
 //eval but not return val
 SEXP jl_void_eval(SEXP cmd)
 {
-  char *s = CHAR(STRING_ELT(cmd, 0));
-  jl_value_t* ret = jl_eval_string(s);
+  const char *s = CHAR(STRING_ELT(cmd, 0));
+  jl_eval_string((char*)s);
+  if (jl_exception_occurred())
+   { 
+   jl_show(jl_stderr_obj(), jl_exception_occurred());
+   Rprintf("\n");
+   jl_exception_clear();
+   }
   return R_NilValue;
 }
+
 //eval julia script and retrun
 SEXP jl_eval(SEXP cmd)
 {
-  char *s = CHAR(STRING_ELT(cmd, 0));
-  jl_value_t* ret= jl_eval_string(s);
+  const char *s = CHAR(STRING_ELT(cmd, 0));
+  jl_value_t* ret= jl_eval_string((char*)s);
+  if (jl_exception_occurred()){
+    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    Rprintf("\n");
+    jl_exception_clear();
+   return R_NilValue;
+  }
   return Julia_R(ret);
 }

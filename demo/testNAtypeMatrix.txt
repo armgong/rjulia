@@ -1,0 +1,20 @@
+library(rjulia)
+#init embedding julia,paraments are julia_home and disable_gc
+julia_init("d:/codes/julia32/usr/bin",F)
+julia_LoadDataArrayFrame()
+
+x<-matrix(1:9,c(3,3))
+x[1]=NA
+x[5]<-NA
+x[8]<-NA
+x
+r_julia(x,"xy")
+y<-julia_eval("xy")
+y
+y<-julia_eval("length(xy)")
+y
+y<-julia_eval("length(xy.na)")
+y
+y<-julia_eval("length(xy.data)")
+y
+

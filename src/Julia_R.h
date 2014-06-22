@@ -11,3 +11,6 @@ Copyright (C) 2014 by Yu Gong
 
 SEXP Julia_R_Scalar(jl_value_t* Var);
 SEXP Julia_R_MD(jl_value_t* Var);
+
+SEXP Julia_R_Scalar_NA(jl_value_t* Var);
+SEXP Julia_R_MD_NA(jl_value_t* Var);

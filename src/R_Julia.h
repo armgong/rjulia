@@ -9,4 +9,5 @@ Copyright (C) 2014 by Yu Gong
 #include <julia.h>
 #define pkgdebug
 
-void R_Julia_MD(SEXP Var,jl_value_t* ret,char* VarName);
+void R_Julia_MD(SEXP Var,const char* VarName);
+void R_Julia_MD_NA(SEXP Var,const char* VarName);

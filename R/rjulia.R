@@ -8,42 +8,46 @@ JuliaIsExist<-function(juliahome)
  {
    jhome<-""
    if (nchar(Sys.getenv("JULIA_HOME"))>0)
-     jhome<-Sys.getenv("JULIA_HOME")
+   jhome<-Sys.getenv("JULIA_HOME")
    if  (nchar(Sys.getenv("Julia_Home"))>0)
-     jhome<-Sys.getenv("Julia_Home")
+   jhome<-Sys.getenv("Julia_Home")
    if  (nchar(Sys.getenv("JULIAHOME"))>0)
-     jhome<-Sys.getenv("JULIAHOME")
+   jhome<-Sys.getenv("JULIAHOME")
    if  (nchar(Sys.getenv("JuliaHome"))>0)
-     jhome<-Sys.getenv("JuliaHome")
+   jhome<-Sys.getenv("JuliaHome")
    if  (nchar(Sys.getenv("JULIA"))>0)
-     jhome<-Sys.getenv("JULIA")
+   jhome<-Sys.getenv("JULIA")
    if  (nchar(Sys.getenv("Julia"))>0)
-     jhome<-Sys.getenv("Julia")
+   jhome<-Sys.getenv("Julia")
  }
-  
+
  if (nchar(jhome)>0)
  { 
    if ((jhome[length(jhome)]!="/")||(jhome[length(jhome)]!="\\"))
-     sysfile<-paste(jhome,"/../lib/julia/sys.ji",sep="")
+   sysfile<-paste(jhome,"/../lib/julia/sys.ji",sep="")
    else
-     sysfile<-paste(jhome,"../lib/julia/sys.ji",sep="")
+   sysfile<-paste(jhome,"../lib/julia/sys.ji",sep="")
    ret<-file.exists(sysfile)
  }  
  else
-  {
-  	ret<-FALSE
-  }
-  return (list(ret,jhome))
+ {
+   ret<-FALSE
+ }
+ return (list(ret,jhome))
 }
- 
+
 
 julia_init <- function(juliahome,disablegc=TRUE)
 {
  findjl<-JuliaIsExist(juliahome)	
  if (findjl[[1]])	
+ {
   invisible(.Call("initJulia",findjl[[2]],disablegc,PACKAGE="rjulia"))
+  #pacth on windows for pkg.dir() not correct because R 
+  julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
+ }
  else
-  stop("Could't Find Julia,Besure juliahome your passed is right")
+ stop("Could't Find Julia,Besure juliahome your passed is right")
 }
 
 Julia_is_running<-function()
@@ -55,37 +59,64 @@ Julia_is_running<-function()
 julia_eval<-function(expression)
 {
  if (!Julia_is_running())
-  {
-    stop("Julia not running,use julia_init to start it")
-  } 
+ {
+  stop("Julia not running,use julia_init to start it")
+ } 
  y<-.Call("jl_eval",expression,PACKAGE="rjulia")
  if ((length(dim(y))==1)||(length(y)==1))
-  return (as.vector(y))
- else if(length(dim(y))==2)
-  return (as.matrix(y))
+ return (as.vector(y))
+ #else if(length(dim(y))==2)
+ #return (as.matrix(y))
  else 
-  return (y)
+ return (y)
 }
+
 julia_void_eval<-function(expression)
 {
   if (!Julia_is_running())
   {
     stop("Julia not running,use julia_init to start it")
   } 
- invisible(.Call("jl_void_eval",expression,PACKAGE="rjulia"))
+  invisible(.Call("jl_void_eval",expression,PACKAGE="rjulia"))
 }
 
 r_julia<-function(x,y)
 {
  if (!Julia_is_running())
-  {
-    stop("Julia not running,use julia_init to start it")
-  }   
-if (is.vector(x)||is.matrix(x)||is.array(x))
-{
-  invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
-}
-else
- warning("only accept vector or matrix or array of string int float")
+ {
+  stop("Julia not running,use julia_init to start it")
+ }   
+ if (is.vector(x)||is.matrix(x)||is.array(x))
+ {
+  if (!anyNA(x))
+   {
+   invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
+   }
+  else
+   {
+    #r_julia_na(x,y)
+   invisible(.Call("R_Julia_NA",x,y,PACKAGE="rjulia"))
+   }
+ }
+ else
+  warning("only accept vector or matrix or array of string int float")
 }
 
+julia_DataArrayFrameInited<-function()
+{
+  y<-.Call("Julia_DataArrayFrameInited",PACKAGE="rjulia")
+  return (y)
+}
+
+julia_LoadDataArrayFrame<-function()
+{
+ if (!Julia_is_running())
+ {
+  stop("Julia not running,use julia_init to start it")
+ } 
+ invisible(.Call("Julia_LoadDataArrayFrame",PACKAGE="rjulia"))
+ if (julia_DataArrayFrameInited()==F)
+ {
+  warning("DataArray and DataFrame not load,please install or check dir")
+ }
+}
