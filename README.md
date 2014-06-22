@@ -8,7 +8,7 @@ currently it can be use on unix and windows console,on windows gui it crashed.
 
 Install
 
-1 need install julia v0.3 or git master branch,becase julia v0.2 no embedding API
+1 need install julia v0.3 or git master branch,becase julia v0.2 no embedding API.
 
 2 Rjulia will need Set the environment variables JULIA_SRC, 
 
@@ -18,9 +18,11 @@ Install
 
 3 add juliainstalldir\bin into your system PATH variable
 
+4 if you want typemapping R and julia variable that contain NA value,please install julia package DataArrays and DataFrames
+
 Demo
 
-please see two txt files in demo dir 
+please see txt files in demo dir 
 
 Doc
 
