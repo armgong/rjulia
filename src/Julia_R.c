@@ -20,51 +20,63 @@ Copyright (C) 2014 by Yu Gong
 SEXP Julia_R_Scalar(jl_value_t* Var) 
 {
   SEXP ans=R_NilValue;
+
   //most common type is here
   if (jl_is_int32(Var))
   {
-     ans=ScalarInteger(jl_unbox_int32(Var)); 
+    PROTECT(ans=ScalarInteger(jl_unbox_int32(Var)));
+    UNPROTECT(1);
   }
   else if (jl_is_int64(Var))
   {
-    ans=ScalarReal((double)jl_unbox_int64(Var)); 
+    PROTECT(ans=ScalarReal((double)jl_unbox_int64(Var)));
+    UNPROTECT(1);
   }
   //more integer type
   if (jl_is_uint32(Var))
   {
-    ans=ScalarReal((double)jl_unbox_uint32(Var)); 
+    PROTECT(ans=ScalarReal((double)jl_unbox_uint32(Var)));
+    UNPROTECT(1); 
   }
   else if (jl_is_uint64(Var))
   {
-     ans=ScalarReal((double)jl_unbox_uint64(Var));
+     PROTECT(ans=ScalarReal((double)jl_unbox_uint64(Var)));
+     UNPROTECT(1);
   }
   else if (jl_is_float64(Var))
   {
-    ans=ScalarReal(jl_unbox_float64(Var)); 
+    PROTECT(ans=ScalarReal(jl_unbox_float64(Var)));
+    UNPROTECT(1); 
   }
   else if (jl_is_float32(Var))
   {
-    ans=ScalarReal(jl_unbox_float32(Var)); 
+    PROTECT(ans=ScalarReal(jl_unbox_float32(Var)));
+    UNPROTECT(1);
   }
   else if (jl_is_bool(Var))
   {
-    ans=ScalarLogical(jl_unbox_bool(Var)); 
+    PROTECT(ans=ScalarLogical(jl_unbox_bool(Var))); 
+    UNPROTECT(1);
   }
   else if (jl_is_int8(Var))
   {
-    ans=ScalarInteger(jl_unbox_int8(Var)); 
+    PROTECT(ans=ScalarInteger(jl_unbox_int8(Var)));
+    UNPROTECT(1);
   }
   else if (jl_is_uint8(Var))
   {
-    ans=ScalarInteger(jl_unbox_uint8(Var)); 
+    PROTECT(ans=ScalarInteger(jl_unbox_uint8(Var)));
+    UNPROTECT(1);
   }
   else if (jl_is_int16(Var))
   {
-    ans=ScalarInteger(jl_unbox_int16(Var)); 
+    PROTECT(ans=ScalarInteger(jl_unbox_int16(Var)));
+    UNPROTECT(1);
   }
   else if (jl_is_uint16(Var))
   {
-    ans=ScalarInteger(jl_unbox_uint16(Var)); 
+    PROTECT(ans=ScalarInteger(jl_unbox_uint16(Var)));
+    UNPROTECT(1); 
   }
   else if (jl_is_utf8_string(Var))
   {
@@ -74,7 +86,8 @@ SEXP Julia_R_Scalar(jl_value_t* Var)
   } 
   else if (jl_is_ascii_string(Var))
   {
-    ans=ScalarString(mkChar(jl_string_data(Var)));
+    PROTECT(ans=ScalarString(mkChar(jl_string_data(Var))));
+    UNPROTECT(1);
   } 
   return ans;
 }
@@ -212,7 +225,10 @@ return ans;
 
 SEXP Julia_R_Scalar_NA(jl_value_t* Var)
 {
-  return ScalarInteger(NA_INTEGER);
+  SEXP ans;
+  PROTECT(ans=ScalarInteger(NA_INTEGER));
+  UNPROTECT(1);
+  return ans;
 }
 
 SEXP Julia_R_MD_NA(jl_value_t* Var)

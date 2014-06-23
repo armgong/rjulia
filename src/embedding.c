@@ -7,6 +7,7 @@ Copyright (C) 2014 by Yu Gong
 #include <Rinternals.h>
 #include <Rmath.h>
 #include <julia.h>
+#include <Rdefines.h>
 #include "Julia_R.h"
 #include "R_Julia.h"
 
@@ -97,6 +98,15 @@ SEXP Julia_R(jl_value_t* Var)
      ans=Julia_R_Scalar_NA(Var); 
     else 
      ans=Julia_R_MD_NA(Var);
+   } 
+  else if (jl_is_tuple(Var))
+   {
+     PROTECT(ans=allocVector(VECSXP,jl_tuple_len(Var)));
+     for(int i=0;i<jl_tuple_len(Var);i++)
+     {
+      SET_ELEMENT(ans,i,Julia_R(jl_tupleref(Var,i)));
+     }
+     UNPROTECT(1);
    } 
   else 
   { 
