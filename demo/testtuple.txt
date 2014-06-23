@@ -1,0 +1,15 @@
+library(rjulia)
+#init embedding julia,paraments are julia_home and disable_gc
+julia_init("d:/codes/julia32/usr/bin",F)
+x<-1:3
+x1<-c("hello","world")
+y<-matrix(1:12,c(3,4))
+z<-list(x,x1,y)
+r_julia(z,"tupletest")
+y<-julia_eval("tupletest")
+y
+
+zz<-list(x,x1,y,z)
+r_julia(zz,"tupletest")
+y<-julia_eval("tupletest")
+y
