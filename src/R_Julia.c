@@ -43,8 +43,9 @@ jl_tuple_t* RDims_JuliaTuple(SEXP Var)
  return d;
 }
 
-void R_Julia_MD(SEXP Var,const char* VarName)
+jl_value_t* R_Julia_MD(SEXP Var,const char* VarName)
 {
+  
   if ((LENGTH(Var))!= 0) {
     jl_tuple_t* dims=RDims_JuliaTuple(Var);
     switch (TYPEOF( Var)) {
@@ -56,6 +57,7 @@ void R_Julia_MD(SEXP Var,const char* VarName)
         for(size_t i=0; i<jl_array_len(ret); i++)
           retData[i] =LOGICAL(Var)[i];
         jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
+        return (jl_value_t*) ret;            
         JL_GC_POP(); 
         break;
       };
@@ -67,6 +69,7 @@ void R_Julia_MD(SEXP Var,const char* VarName)
         for(size_t i=0; i<jl_array_len(ret); i++)
           retData[i] =INTEGER(Var)[i];
         jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
+        return (jl_value_t*) ret;            
         JL_GC_POP(); 
         break;
       }
@@ -79,6 +82,7 @@ void R_Julia_MD(SEXP Var,const char* VarName)
           retData[i] =REAL(Var)[i];
         jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
         JL_GC_POP();
+        return (jl_value_t*) ret;        
         break;
       }
       case STRSXP:
@@ -90,12 +94,32 @@ void R_Julia_MD(SEXP Var,const char* VarName)
          retData[i] =jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
        jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
        JL_GC_POP();
+       return (jl_value_t*) ret;
        break;
      }
+     case VECSXP:
+     {
+      char eltcmd[1024];
+      jl_tuple_t* ret=jl_alloc_tuple(length(Var));
+       JL_GC_PUSH1(&ret);
+      for (int i=0;i<length(Var);i++)
+      {
+        sprintf(eltcmd,"%selement%d",VarName,i);
+        jl_tupleset(ret,i,R_Julia_MD(VECTOR_ELT(Var,i),eltcmd));
+      }        
+      jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret); 
+      JL_GC_POP();
+      return (jl_value_t*) ret;
+     }
      default:
+      {
+      return (jl_value_t*) jl_nothing;
+      }
      break; 
    }
+ return (jl_value_t*) jl_nothing;  
  }  
+ return (jl_value_t*) jl_nothing; 
 }
 
 
