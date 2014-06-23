@@ -4,6 +4,6 @@
 4 R dataframe to Julia dataframe(DataArray already done,Dataframe comming soon,need two julia packages DataArrays and DataFrames)
 5 write more samples and docs
 6 R long vector to Julia array(long term becasue this need modify code heavily)
-7 julia tuple to R list and R list to Julia tuple(may be,not sure)
+7 julia tuple to R list and R list to Julia tuple(init implement,need more test)
  
 
