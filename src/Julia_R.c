@@ -6,6 +6,7 @@ Copyright (C) 2014 by Yu Gong
 #include <math.h>
 #include <R.h>
 #include <Rinternals.h>
+#include <Rdefines.h>
 #include <Rmath.h>
 #include <julia.h>
 #include "Julia_R.h"
@@ -240,19 +241,16 @@ SEXP Julia_R_MD_NA(jl_value_t* Var)
  jl_value_t* retData=jl_eval_string(strData); 
  jl_value_t* retNA=jl_eval_string(strNA); 
  jl_value_t* val;
- //Rprintf("Data Len %d, NA Len %d\n",jl_array_len(retData),jl_array_len(retNA));
  
  if (((jl_array_t*)retData)->ptrarray)
     val = jl_cellref(retData, 0);
  else
     val = jl_arrayref((jl_array_t*)retData,0);
- //get Julia dims and set R array Dims
  int len=jl_array_len(retData);
  if (len==0) 
    return ans;
 
  int ndims=jl_array_ndims(retData);
- //Rprintf("data dims is %d,na dims is %d\n",ndims,jl_array_ndims(retNA));
  SEXP dims;
  PROTECT(dims = allocVector(INTSXP, ndims));
   for (size_t i=0;i<ndims;i++) 
@@ -425,4 +423,58 @@ else if (jl_is_ascii_string(val))
   UNPROTECT(1);
 }
 return ans;
+}
+
+SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
+{
+ SEXP ans,names,rownames;
+ char evalcmd[4096];
+ int i;
+ const char* dfname="DataFrameName0tmp";
+ jl_set_global(jl_main_module, jl_symbol(dfname), (jl_value_t*)Var);
+ //Get Frame cols 
+ sprintf(evalcmd,"size(%s,2)",dfname);
+ jl_value_t* cols=jl_eval_string(evalcmd);
+ int collen=jl_unbox_long(cols);
+ jl_value_t* eachcolvector;
+ //Create VECSXP
+
+ //Create SEXP for Each Column and assign
+ PROTECT(ans=allocVector(VECSXP,collen));
+ for (i=0;i<collen;i++)
+ {
+  sprintf(evalcmd,"%s[%d]",dfname,i+1);
+  eachcolvector=jl_eval_string(evalcmd);
+  SET_VECTOR_ELT(ans,i,Julia_R_MD_NA(eachcolvector));
+ }
+ //set names attribute
+ sprintf(evalcmd,"names(%s)",dfname);
+ jl_value_t* ret=jl_eval_string(evalcmd);
+ jl_value_t* onesymbol;
+ if (jl_is_array(ret))
+ {
+  PROTECT(names=allocVector(STRSXP,collen));
+  for (i=0;i<jl_array_len(ret);i++)
+  { 
+   onesymbol=jl_arrayref((jl_array_t*)ret,i);
+   if (jl_is_symbol(onesymbol))
+    SET_STRING_ELT(names,i,mkChar(((jl_sym_t*)onesymbol)->name));
+  }
+  setAttrib(ans,R_NamesSymbol,names);
+  UNPROTECT(1);
+ } 
+ //set row names
+ sprintf(evalcmd,"size(%s,1)",dfname);
+ jl_value_t* rows=jl_eval_string(evalcmd);
+ int rowlen=jl_unbox_long(rows);
+ PROTECT(rownames=allocVector(INTSXP,rowlen));
+ for (i=0;i<rowlen;i++)
+  INTEGER(rownames)[i]=i+1;
+ setAttrib(ans,R_RowNamesSymbol,rownames);
+ UNPROTECT(1);
+ //set class as data frame
+ setAttrib(ans,R_ClassSymbol,mkString("data.frame"));
+ SET_OBJECT(ans, 1) ; 
+ UNPROTECT(1);
+ return ans;
 }

@@ -93,9 +93,14 @@ SEXP Julia_R(jl_value_t* Var)
      error("DataArrays and DataFrames can't be load,please check this\n");
      return R_NilValue;
     }
-    //Rprintf("type of %s len %d",jl_typeof_str(Var),strlen(jl_typeof_str(Var)));
-    if(strcmp(jl_typeof_str(Var),"NAtype")==0)
-     ans=Julia_R_Scalar_NA(Var); 
+    if(strcmp(jl_typeof_str(Var),"NAtype")==0||
+       strcmp(jl_typeof_str(Var),"DataFrame")==0)
+     { 
+      if(strcmp(jl_typeof_str(Var),"NAtype")==0)
+        ans=Julia_R_Scalar_NA(Var); 
+      else
+        ans=Julia_R_MD_NA_DataFrame(Var);
+     } 
     else 
      ans=Julia_R_MD_NA(Var);
    } 
@@ -110,7 +115,7 @@ SEXP Julia_R(jl_value_t* Var)
    } 
   else 
   { 
-     ans=Julia_R_Scalar(Var); 
+    ans=Julia_R_Scalar(Var); 
   }
  JL_GC_POP();
  return ans;
@@ -128,6 +133,13 @@ SEXP R_Julia_NA(SEXP Var,SEXP VarNam)
 {
   const char *VarName = CHAR(STRING_ELT(VarNam, 0));
   R_Julia_MD_NA(Var,VarName);
+  return R_NilValue;
+}
+//Convert R data frame To Julia
+SEXP R_Julia_NA_DataFrame(SEXP Var,SEXP VarNam)
+{
+  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
+  R_Julia_MD_NA_DataFrame(Var,VarName);
   return R_NilValue;
 }
 //eval but not return val

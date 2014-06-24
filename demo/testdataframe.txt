@@ -1,0 +1,17 @@
+library(rjulia)
+#init embedding julia,paraments are julia_home and disable_gc
+julia_init("d:/codes/julia32/usr/bin",F)
+julia_LoadDataArrayFrame()
+y<-julia_eval('df = DataFrame(A = 1:4, B = ["M", "F", "F", "M"])')
+typeof(y)
+is.data.frame(y)
+y
+
+r_julia(iris,"xx")
+y<-julia_eval("xx")
+y
+#y<-julia_eval('pdv = @pdata(["Group A", "Group A", "Group A","Group B", "Group B", "Group B"])')
+#y<-julia_eval('levels(pdv)')
+
+#y<-julia_eval('df = DataFrame(A = [1, 1, 1, 2, 2, 2],B = ["X", "X", "X", "Y", "Y", "Y"])')
+#y<-julia_eval('pool!(df, [:A, :B])')

@@ -125,21 +125,23 @@ jl_value_t* R_Julia_MD(SEXP Var,const char* VarName)
 
 //first pass creat array then convert it to DataArray
 //second pass assign NA to element
-void TransArrayToDataArray(jl_array_t* mArray,jl_array_t* mboolArray,const char* VarName)
+jl_value_t* TransArrayToDataArray(jl_array_t* mArray,jl_array_t* mboolArray,const char* VarName)
 {
   char evalcmd[4096]; 
   jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t*)mArray);
   jl_set_global(jl_main_module, jl_symbol("TransVarNamebool"), (jl_value_t*)mboolArray);
   sprintf(evalcmd,"%s=DataArray(TransVarName,TransVarNamebool)",VarName);
-  jl_eval_string(evalcmd);
+  jl_value_t* ret=jl_eval_string(evalcmd);
   if (jl_exception_occurred())
   {
     jl_show(jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
+   return (jl_value_t*) jl_nothing;
   }
+  return ret;
 }
-void R_Julia_MD_NA(SEXP Var,const char* VarName)
+jl_value_t* R_Julia_MD_NA(SEXP Var,const char* VarName)
 {
   if ((LENGTH(Var))!= 0) {
     jl_tuple_t* dims=RDims_JuliaTuple(Var);
@@ -167,7 +169,7 @@ void R_Julia_MD_NA(SEXP Var,const char* VarName)
           }
         }   
         JL_GC_POP();
-        TransArrayToDataArray(ret,ret1,VarName);
+        return TransArrayToDataArray(ret,ret1,VarName);
         break;
       };
       case INTSXP:
@@ -192,7 +194,7 @@ void R_Julia_MD_NA(SEXP Var,const char* VarName)
           }
         }  
         JL_GC_POP();   
-        TransArrayToDataArray(ret,ret1,VarName);
+        return TransArrayToDataArray(ret,ret1,VarName);
         break;
       }
       case REALSXP:
@@ -216,7 +218,7 @@ void R_Julia_MD_NA(SEXP Var,const char* VarName)
         }
       }   
       JL_GC_POP();
-      TransArrayToDataArray(ret,ret1,VarName);
+      return TransArrayToDataArray(ret,ret1,VarName);
       break;
     }
     case STRSXP:
@@ -241,11 +243,44 @@ void R_Julia_MD_NA(SEXP Var,const char* VarName)
       } 
     }   
     JL_GC_POP(); 
-    TransArrayToDataArray(ret,ret1,VarName);
+    return TransArrayToDataArray(ret,ret1,VarName);
     break;
   }
   default:
+  return (jl_value_t*) jl_nothing;
   break; 
   }//case end
- }//length !=0
+  return (jl_value_t*) jl_nothing;
+ }//if length !=0
+ return (jl_value_t*) jl_nothing;
 } 
+
+jl_value_t* R_Julia_MD_NA_DataFrame(SEXP Var,const char* VarName)
+{
+ SEXP names=getAttrib(Var,R_NamesSymbol); 
+ size_t len=LENGTH(Var);
+ if (TYPEOF(Var)!=VECSXP||len==0||names==R_NilValue)
+  return (jl_value_t*) jl_nothing;
+ char evalcmd[8192]; 
+ char eltcmd[8192];
+ for (size_t i=0;i<len;i++)
+ {
+  sprintf(eltcmd,"%sdfelt%d",VarName,i+1);
+  R_Julia_MD_NA(VECTOR_ELT(Var,i),eltcmd);
+  if (i==0) 
+   sprintf(evalcmd,"%s=DataFrame(%s",VarName,eltcmd);
+  else
+   sprintf(evalcmd,"%s,%s",evalcmd,eltcmd); 
+ }
+ sprintf(evalcmd,"%s)",evalcmd);
+ //Rprintf("%s\n",evalcmd);
+ jl_value_t* ret=jl_eval_string(evalcmd);
+ if (jl_exception_occurred()){
+    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    Rprintf("\n");
+    jl_exception_clear();
+   return (jl_value_t*) jl_nothing;;
+  } 
+ return ret;
+ //jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t*)mArray);
+}

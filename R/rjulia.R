@@ -67,8 +67,13 @@ julia_eval<-function(expression)
  return (as.vector(y))
  #else if(length(dim(y))==2)
  #return (as.matrix(y))
- else 
- return (y)
+ #else if (inherits(y,"data.frame"))
+ # {
+ #   print("this is a data frame") 
+ #   return (as.data.frame(y))
+ #  } 
+ else  
+  return (y)
 }
 
 julia_void_eval<-function(expression)
@@ -86,17 +91,24 @@ r_julia<-function(x,y)
  {
   stop("Julia not running,use julia_init to start it")
  }   
- if (is.vector(x)||is.matrix(x)||is.array(x))
+ if (is.vector(x)||is.matrix(x)||is.array(x)||is.data.frame(x))
  {
-  if (!anyNA(x))
+  if (is.data.frame(x))
    {
-   invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
+    invisible(.Call("R_Julia_NA_DataFrame",x,y,PACKAGE="rjulia"))
    }
-  else
+  else 
+  {
+   if (!anyNA(x))
+    {
+     invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
+    }
+   else
    {
     #r_julia_na(x,y)
    invisible(.Call("R_Julia_NA",x,y,PACKAGE="rjulia"))
    }
+  }
  }
  else
   warning("only accept vector or matrix or array of string int float")
