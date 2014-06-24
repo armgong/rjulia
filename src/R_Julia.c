@@ -261,8 +261,8 @@ jl_value_t* R_Julia_MD_NA_DataFrame(SEXP Var,const char* VarName)
  size_t len=LENGTH(Var);
  if (TYPEOF(Var)!=VECSXP||len==0||names==R_NilValue)
   return (jl_value_t*) jl_nothing;
- char evalcmd[8192]; 
- char eltcmd[8192];
+ char evalcmd[4096]; 
+ char eltcmd[1024];
  const char* onename;
  for (size_t i=0;i<len;i++)
  {
@@ -270,19 +270,18 @@ jl_value_t* R_Julia_MD_NA_DataFrame(SEXP Var,const char* VarName)
   R_Julia_MD_NA(VECTOR_ELT(Var,i),eltcmd);
   onename=CHAR(STRING_ELT(names, i));
   if (i==0) 
-   sprintf(evalcmd,"%s=DataFrame(%s =%s",VarName,onename,eltcmd);
+   sprintf(evalcmd,"%s=DataFrame(%s =%s)",VarName,onename,eltcmd);
   else
-   sprintf(evalcmd,"%s,%s =%s",evalcmd,onename,eltcmd); 
- }
- sprintf(evalcmd,"%s)",evalcmd);
-//Rprintf("%s\n",evalcmd);
- jl_value_t* ret=jl_eval_string(evalcmd);
- if (jl_exception_occurred()){
+   sprintf(evalcmd,"%s[symbol(\"%s\")]=%s",VarName,onename,eltcmd);
+  //Rprintf("%s\n",evalcmd);
+  jl_eval_string(evalcmd);
+  if (jl_exception_occurred())
+  {
     jl_show(jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
-   return (jl_value_t*) jl_nothing;;
-  } 
- return ret;
- //jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t*)mArray);
+   return (jl_value_t*) jl_nothing;
+  }  
+ }
+ return (jl_value_t*) jl_nothing;;
 }

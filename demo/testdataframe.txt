@@ -20,4 +20,4 @@ y
 #y<-julia_eval('pool!(df, [:A, :B])')
 
 
-xx=DataFrame(Ssl =xxdfelt1,sw =xxdfelt2,pl =xxdfelt3,wl =xxdfelt4,NA =xxdfelt5)
+#xx=DataFrame(Ssl =xxdfelt1,sw =xxdfelt2,pl =xxdfelt3,wl =xxdfelt4,NA =xxdfelt5)
