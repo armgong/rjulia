@@ -263,17 +263,19 @@ jl_value_t* R_Julia_MD_NA_DataFrame(SEXP Var,const char* VarName)
   return (jl_value_t*) jl_nothing;
  char evalcmd[8192]; 
  char eltcmd[8192];
+ const char* onename;
  for (size_t i=0;i<len;i++)
  {
   sprintf(eltcmd,"%sdfelt%d",VarName,i+1);
   R_Julia_MD_NA(VECTOR_ELT(Var,i),eltcmd);
+  onename=CHAR(STRING_ELT(names, i));
   if (i==0) 
-   sprintf(evalcmd,"%s=DataFrame(%s",VarName,eltcmd);
+   sprintf(evalcmd,"%s=DataFrame(%s =%s",VarName,onename,eltcmd);
   else
-   sprintf(evalcmd,"%s,%s",evalcmd,eltcmd); 
+   sprintf(evalcmd,"%s,%s =%s",evalcmd,onename,eltcmd); 
  }
  sprintf(evalcmd,"%s)",evalcmd);
- //Rprintf("%s\n",evalcmd);
+//Rprintf("%s\n",evalcmd);
  jl_value_t* ret=jl_eval_string(evalcmd);
  if (jl_exception_occurred()){
     jl_show(jl_stderr_obj(), jl_exception_occurred());
