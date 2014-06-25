@@ -92,9 +92,9 @@ jl_value_t* R_Julia_MD(SEXP Var,const char* VarName)
       {
         jl_array_t* ret;
         if (IS_UTF8(Var))
-          ret= CreateArray(jl_utf8_string_type,jl_tuple_len(dims),dims);
-       else
-        ret= CreateArray(jl_ascii_string_type,jl_tuple_len(dims),dims);
+         ret= CreateArray(jl_utf8_string_type,jl_tuple_len(dims),dims);
+        else
+         ret= CreateArray(jl_ascii_string_type,jl_tuple_len(dims),dims);
         JL_GC_PUSH1(&ret);
         jl_value_t** retData=jl_array_data(ret); 
         for(size_t i=0; i<jl_array_len(ret); i++)
