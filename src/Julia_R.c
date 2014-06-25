@@ -474,7 +474,7 @@ SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
  UNPROTECT(1);
  //set class as data frame
  setAttrib(ans,R_ClassSymbol,mkString("data.frame"));
- SET_OBJECT(ans, 1) ; 
+ //SET_OBJECT(ans, 1) ; 
  UNPROTECT(1);
  return ans;
 }
