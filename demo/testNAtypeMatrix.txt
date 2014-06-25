@@ -8,13 +8,13 @@ x[1]=NA
 x[5]<-NA
 x[8]<-NA
 x
-r_julia(x,"xy")
-y<-julia_eval("xy")
+r2j(x,"xy")
+y<-j2r("xy")
 y
-y<-julia_eval("length(xy)")
+y<-j2r("length(xy)")
 y
-y<-julia_eval("length(xy.na)")
+y<-j2r("length(xy.na)")
 y
-y<-julia_eval("length(xy.data)")
+y<-j2r("length(xy.data)")
 y
 

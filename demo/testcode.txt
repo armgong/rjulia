@@ -6,58 +6,58 @@ f=function(n){
  {   
   #pass R double vector to Julia
   x<-1.01:5.01
-  r_julia(x,"tt")
+  r2j(x,"tt")
   #get passed vector from Julia
-  y<-julia_eval("tt")
+  y<-j2r("tt")
   cat("float vector:",y,"\n")
  
 
  #pass R int vector to Julia
   x<-1:5
-  r_julia(x,"tt")
+  r2j(x,"tt")
   #get passed vector from Julia
-  y<-julia_eval("tt")
+  y<-j2r("tt")
   cat("int vector:",y,"\n")
   
  #pass R int vector to Julia
   x<-c(TRUE,FALSE,TRUE)
-  r_julia(x,"ttt")
-  yy<-julia_eval("ttt")
+  r2j(x,"ttt")
+  yy<-j2r("ttt")
   cat("bool vector:",yy,"\n")
 
   
   x<-1
-  r_julia(x,"ss")
-  yy<-julia_eval("ss")
+  r2j(x,"ss")
+  yy<-j2r("ss")
   cat("int :",yy,"\n")
 
   
   
   x<-1.1
-  r_julia(x,"ss")
-  yy<-julia_eval("ss")
+  r2j(x,"ss")
+  yy<-j2r("ss")
   cat("float :",yy,"\n")
 
   
   x<-TRUE
-  r_julia(x,"ss")
-  yy<-julia_eval("ss")
+  r2j(x,"ss")
+  yy<-j2r("ss")
   cat("bool :",yy,"\n")
 
  
   # pass string vector to julia,need to verify 
   x<-c("tttt","xxxx")
-  r_julia(x,"sss")
-  yy<-julia_eval("sss")
+  r2j(x,"sss")
+  yy<-j2r("sss")
   cat("string vector :",yy,"\n")
-  yy<-julia_eval("sss[1]")
+  yy<-j2r("sss[1]")
   cat("string :",yy,"\n")
   
   # pass string vector to julia,need to verify
   julia_void_eval('xx=["ttt","xxxx"]')
-  y<-julia_eval("xx")
+  y<-j2r("xx")
   cat("string vector:",y,"\n")
-  y<-julia_eval("xx[1]")
+  y<-j2r("xx[1]")
   cat("string:",y,"\n")
   cat("run time is:",i,"\n")
  }  

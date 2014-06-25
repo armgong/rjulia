@@ -6,16 +6,16 @@ f=function(n){
  {   
   #pass R double vector to Julia
   x<-matrix(1.01:6.01,3,2)
-  r_julia(x,"tt")
+  r2j(x,"tt")
   #get passed vector from Julia
-  y<-julia_eval("tt")
+  y<-j2r("tt")
   cat("Matrix:","\n")
   print(y)
   cat("run time is:",i,"\n")
  }
  #create 2d array in julia,get from R
  julia_void_eval("x = rand(2,2)")
- yy<-julia_eval("x")
+ yy<-j2r("x")
  cat("Matrix:","\n")
  print(yy)
 }

@@ -6,8 +6,8 @@ f=function(n){
  {   
   #pass R double vector to Julia
   x<-array(1.01:18.01,c(3,3,2))
-  r_julia(x,"tt")
-  y<-julia_eval("tt")
+  r2j(x,"tt")
+  y<-j2r("tt")
   cat("MD array:","\n")
   print(y)
   cat("run times is:",i,"\n")

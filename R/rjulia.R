@@ -84,7 +84,6 @@ julia_void_eval<-function(expression)
   } 
   invisible(.Call("jl_void_eval",expression,PACKAGE="rjulia"))
 }
-
 r_julia<-function(x,y)
 {
  if (!Julia_is_running())
@@ -131,4 +130,21 @@ julia_LoadDataArrayFrame<-function()
  {
   warning("DataArray and DataFrame not load,please install or check dir")
  }
+}
+#short and precise name for object type mapping
+r2j<-function(x,y)
+{
+  r_julia(x,y)
+}
+j2r<-function(expression)
+{
+  return (julia_eval(expression))
+}
+jdfinited<-function()
+{
+  return (julia_DataArrayFrameInited())
+}
+jloaddf<-function()
+{
+ julia_LoadDataArrayFrame()
 }
