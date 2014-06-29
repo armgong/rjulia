@@ -37,7 +37,7 @@ JuliaIsExist<-function(juliahome)
 }
 
 
-julia_init <- function(juliahome,disablegc=TRUE)
+julia_init <- function(juliahome,disablegc=TRUE,parallel=FALSE)
 {
  findjl<-JuliaIsExist(juliahome)	
  if (findjl[[1]])	
@@ -45,6 +45,16 @@ julia_init <- function(juliahome,disablegc=TRUE)
   invisible(.Call("initJulia",findjl[[2]],disablegc,PACKAGE="rjulia"))
   #pacth on windows for pkg.dir() not correct because R 
   julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
+  #act same as client.jl _start function,to init parallel fuction
+  if (parallel)
+  { #early_init
+    julia_void_eval("Sys.init_sysinfo()")
+    julia_void_eval('if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV)) ENV["OPENBLAS_NUM_THREADS"] = 8 end')
+    #init_parallel
+    julia_void_eval("Base.init_parallel()")
+    #init_bind_addr(ARGS)
+    julia_void_eval("Base.init_bind_addr(ARGS)")
+  }
  }
  else
  stop("Could't Find Julia,Besure juliahome your passed is right")
@@ -98,7 +108,7 @@ r_julia<-function(x,y)
    }
   else 
   {
-   if (!anyNA(x))
+   if (!anyNA(x)&&!is.factor(x))
     {
      invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
     }
