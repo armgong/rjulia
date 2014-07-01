@@ -114,12 +114,12 @@ jl_value_t* R_Julia_MD(SEXP Var,const char* VarName)
         }
         case VECSXP:
         {
-          char eltcmd[1024];
+          char eltcmd[eltsize];
           jl_tuple_t* ret=jl_alloc_tuple(length(Var));
           JL_GC_PUSH1(&ret);
           for (int i=0; i<length(Var); i++)
             {
-              sprintf(eltcmd,"%selement%d",VarName,i);
+              snprintf(eltcmd,eltsize,"%selement%d",VarName,i);
               jl_tupleset(ret,i,R_Julia_MD(VECTOR_ELT(Var,i),eltcmd));
             }
           jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t*)ret);
@@ -142,10 +142,10 @@ jl_value_t* R_Julia_MD(SEXP Var,const char* VarName)
 //second pass assign NA to element
 jl_value_t* TransArrayToDataArray(jl_array_t* mArray,jl_array_t* mboolArray,const char* VarName)
 {
-  char evalcmd[4096];
+  char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t*)mArray);
   jl_set_global(jl_main_module, jl_symbol("TransVarNamebool"), (jl_value_t*)mboolArray);
-  sprintf(evalcmd,"%s=DataArray(TransVarName,TransVarNamebool)",VarName);
+  snprintf(evalcmd,evalsize,"%s=DataArray(TransVarName,TransVarNamebool)",VarName);
   jl_value_t* ret=jl_eval_string(evalcmd);
   if (jl_exception_occurred())
     {
@@ -284,14 +284,14 @@ jl_value_t* R_Julia_MD_NA(SEXP Var,const char* VarName)
 //basically factor in R is 1-dim INTSXP and contain levels
 jl_value_t* TransArrayToPoolDataArray(jl_array_t* mArray,jl_array_t* mpoolArray,size_t len,const char* VarName)
 {
-  char evalcmd[4096];
+  char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("varpools"), (jl_value_t*)mpoolArray);
   jl_set_global(jl_main_module, jl_symbol("varrefs"), (jl_value_t*)mArray);
-  sprintf(evalcmd,"%s=PooledDataArray(ASCIIString,Uint32,%d)",VarName,len);
+  snprintf(evalcmd,evalsize,"%s=PooledDataArray(ASCIIString,Uint32,%d)",VarName,len);
   jl_eval_string(evalcmd);
-  sprintf(evalcmd,"%s.pool=%s",VarName,"varpools");
+  snprintf(evalcmd,evalsize,"%s.pool=%s",VarName,"varpools");
   jl_eval_string(evalcmd);
-  sprintf(evalcmd,"%s.refs=%s",VarName,"varrefs");
+  snprintf(evalcmd,evalsize,"%s.refs=%s",VarName,"varrefs");
   jl_eval_string(evalcmd);
   jl_value_t* ret=jl_eval_string((char*)VarName);
   if (jl_exception_occurred())
@@ -359,13 +359,13 @@ jl_value_t* R_Julia_MD_NA_DataFrame(SEXP Var,const char* VarName)
   size_t len=LENGTH(Var);
   if (TYPEOF(Var)!=VECSXP||len==0||names==R_NilValue)
     return (jl_value_t*) jl_nothing;
-  char evalcmd[4096];
-  char eltcmd[1024];
+  char evalcmd[evalsize];
+  char eltcmd[eltsize];
   const char* onename;
   SEXP elt;
   for (size_t i=0; i<len; i++)
     {
-      sprintf(eltcmd,"%sdfelt%d",VarName,i+1);
+      snprintf(eltcmd,eltsize,"%sdfelt%d",VarName,i+1);
       elt=VECTOR_ELT(Var,i);
       //vector is factor or not
       if (getAttrib(elt,R_LevelsSymbol)!=R_NilValue)
@@ -375,9 +375,9 @@ jl_value_t* R_Julia_MD_NA_DataFrame(SEXP Var,const char* VarName)
 
       onename=CHAR(STRING_ELT(names, i));
       if (i==0)
-        sprintf(evalcmd,"%s=DataFrame(%s =%s)",VarName,onename,eltcmd);
+        snprintf(evalcmd,evalsize,"%s=DataFrame(%s =%s)",VarName,onename,eltcmd);
       else
-        sprintf(evalcmd,"%s[symbol(\"%s\")]=%s",VarName,onename,eltcmd);
+        snprintf(evalcmd,evalsize,"%s[symbol(\"%s\")]=%s",VarName,onename,eltcmd);
       //Rprintf("%s\n",evalcmd);
       jl_eval_string(evalcmd);
       if (jl_exception_occurred())

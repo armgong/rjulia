@@ -615,12 +615,12 @@ return ans;
 SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
 {
  SEXP ans,names,rownames;
- char evalcmd[4096];
+ char evalcmd[evalsize];
  int i;
  const char* dfname="DataFrameName0tmp";
  jl_set_global(jl_main_module, jl_symbol(dfname), (jl_value_t*)Var);
  //Get Frame cols 
- sprintf(evalcmd,"size(%s,2)",dfname);
+ snprintf(evalcmd,evalsize,"size(%s,2)",dfname);
  jl_value_t* cols=jl_eval_string(evalcmd);
  int collen=jl_unbox_long(cols);
  jl_value_t* eachcolvector;
@@ -632,9 +632,9 @@ SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
  for (i=0;i<collen;i++)
  {
   
-  sprintf(evalcmd,"%s[%d]",dfname,i+1);
+  snprintf(evalcmd,evalsize,"%s[%d]",dfname,i+1);
   eachcolvector=jl_eval_string(evalcmd);
-  sprintf(evalcmd,"isa(%s[%d],PooledDataArray)",dfname,i+1);
+  snprintf(evalcmd,evalsize,"isa(%s[%d],PooledDataArray)",dfname,i+1);
   coltype=jl_eval_string(evalcmd);
   if (jl_unbox_bool(coltype))
    SET_VECTOR_ELT(ans,i,Julia_R_MD_NA_Factor(eachcolvector));
@@ -642,7 +642,7 @@ SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
    SET_VECTOR_ELT(ans,i,Julia_R_MD_NA(eachcolvector));
  }
  //set names attribute
- sprintf(evalcmd,"names(%s)",dfname);
+ snprintf(evalcmd,evalsize,"names(%s)",dfname);
  jl_value_t* ret=jl_eval_string(evalcmd);
  jl_value_t* onesymbol;
  if (jl_is_array(ret))
@@ -658,7 +658,7 @@ SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
   UNPROTECT(1);
  } 
  //set row names
- sprintf(evalcmd,"size(%s,1)",dfname);
+ snprintf(evalcmd,evalsize,"size(%s,1)",dfname);
  jl_value_t* rows=jl_eval_string(evalcmd);
  int rowlen=jl_unbox_long(rows);
  PROTECT(rownames=allocVector(INTSXP,rowlen));
