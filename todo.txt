@@ -1,7 +1,7 @@
 1 verify R STRSXP to julia array is correct(done but need more work)
 2 R array to Julia array (done)
 3 R matrix to Julia matrix(done matrix is 2d array)
-4 R dataframe to Julia dataframe(DataArray already done,Dataframe done,but factor still not convert)
+4 R dataframe to Julia dataframe(DataArray already done,Dataframe done,factor also done)
 5 write more samples and docs
 6 R long vector to Julia array(long term becasue this need modify code heavily)
 7 julia tuple to R list and R list to Julia tuple(done)

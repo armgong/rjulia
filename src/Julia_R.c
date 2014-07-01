@@ -9,6 +9,7 @@ Copyright (C) 2014 by Yu Gong
 #include <Rdefines.h>
 #include <Rmath.h>
 #include <julia.h>
+#include "dataframe.h"
 #include "Julia_R.h"
 #define pkgdebug
 #ifndef jl_is_int8
@@ -17,11 +18,57 @@ Copyright (C) 2014 by Yu Gong
 #define jl_is_uint8(v)       jl_typeis(v,jl_uint8_type)
 #define jl_is_uint16(v)      jl_typeis(v,jl_uint16_type)
 #endif
+bool jl_is_NAtype(jl_value_t* Var)
+{
+  if (strcmp(jl_typeof_str(Var),"NAtype")==0)
+    return true;
+  else
+    return false;
+}
+bool jl_is_DataArray(jl_value_t* Var)
+{
+  if (strcmp(jl_typeof_str(Var),"DataArray")==0||
+      strcmp(jl_typeof_str(Var),"DataVector")==0||
+      strcmp(jl_typeof_str(Var),"DataMatrix")==0)
+    return true;
+  else
+    return false;
+}  
+bool jl_is_PooledDataArray(jl_value_t* Var)
+{
+  if (strcmp(jl_typeof_str(Var),"PooledDataArray")==0||
+      strcmp(jl_typeof_str(Var),"PooledDataVector")==0||
+      strcmp(jl_typeof_str(Var),"PooledDataMatrix")==0)
+    return true;
+  else
+    return false;
+}  
+bool jl_is_DataFrame(jl_value_t* Var)
+{
+  if (strcmp(jl_typeof_str(Var),"DataFrame")==0)
+    return true;
+  else
+    return false;
+} 
+
+bool jl_is_DataArrayFrame(jl_value_t* Var)
+{
+  if (strcmp(jl_typeof_str(Var),"DataArray")==0||
+           strcmp(jl_typeof_str(Var),"DataVector")==0||
+           strcmp(jl_typeof_str(Var),"DataMatrix")==0||
+           strcmp(jl_typeof_str(Var),"PooledDataArray")==0||
+           strcmp(jl_typeof_str(Var),"PooledDataVector")==0||
+           strcmp(jl_typeof_str(Var),"PooledDataMatrix")==0||
+           strcmp(jl_typeof_str(Var),"DataFrame")==0||
+           strcmp(jl_typeof_str(Var),"NAtype")==0)
+    return true;
+  else
+    return false;
+} 
 
 SEXP Julia_R_Scalar(jl_value_t* Var) 
 {
   SEXP ans=R_NilValue;
-
   //most common type is here
   if (jl_is_int32(Var))
   {
@@ -425,6 +472,144 @@ else if (jl_is_ascii_string(val))
 return ans;
 }
 
+//this function is for factor convert it maybe not safe
+//because PooledDataArray.refs is Uint32 or bigger
+//but in pratice it should be ok
+SEXP Julia_R_MD_INT(jl_value_t* Var)
+{
+ SEXP ans=R_NilValue; 
+ jl_value_t* val; 
+ if (((jl_array_t*)Var)->ptrarray)
+    val = jl_cellref(Var, 0);
+ else
+    val = jl_arrayref((jl_array_t*)Var,0);
+ int len=jl_array_len(Var);
+ if (len==0) return ans;
+
+ 
+ if (jl_is_int32(val))
+ {
+  PROTECT(ans = allocVector(INTSXP, len));
+  int32_t* p=(int32_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+ else if (jl_is_int64(val))
+ {
+  PROTECT(ans = allocVector(INTSXP, len));
+  int64_t* p=(int64_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+ else if (jl_is_int8(val))
+ {
+  PROTECT(ans = allocVector(INTSXP, len));
+  int8_t* p=(int8_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+ else if (jl_is_int16(val))
+   {
+  PROTECT(ans = allocVector(INTSXP, len));
+   int16_t* p=(int16_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+ else if (jl_is_uint8(val))
+   {
+  PROTECT(ans = allocVector(INTSXP, len));
+  uint8_t* p=(uint8_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+ else if (jl_is_uint16(val))
+   {
+  PROTECT(ans = allocVector(INTSXP, len));
+  uint16_t* p=(uint16_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+ else if (jl_is_uint32(val))
+  {
+  PROTECT(ans = allocVector(INTSXP, len));
+  uint32_t* p=(uint32_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+ else if (jl_is_uint64(val))
+ {
+  PROTECT(ans = allocVector(INTSXP, len));
+  uint64_t* p=(uint64_t*) jl_array_data(Var);
+  for (size_t i=0;i<len;i++)
+  {
+  if (p[i]==0)
+   INTEGER(ans)[i]=NA_INTEGER;
+  else
+   INTEGER(ans)[i]=p[i]; 
+  } 
+ }
+UNPROTECT(1);
+return ans;
+}
+SEXP Julia_R_MD_NA_Factor(jl_value_t* Var)
+{
+ SEXP ans=R_NilValue; 
+ char* strData="Varname0tmp.refs";
+ char* strlevels="VarPools=Array(ASCIIString,length(Varname0tmp.pool))\r\n" 
+                 "for i in 1:length(Varname0tmp.pool) \r\n"
+                 "VarPools[i]=string(Varname0tmp.pool[i])\r\n"
+                 "end\r\n"
+                 "VarPools\r\n"; 
+ jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t*)Var);
+ jl_value_t* retData=jl_eval_string(strData); 
+ jl_value_t* retlevels=jl_eval_string(strlevels); 
+ //first get refs data,dims=n
+ ans=Julia_R_MD_INT(retData);
+ //second trans ans to 1d array
+ PROTECT(ans);
+ //second setAttrib R levels
+ SEXP levels=Julia_R_MD(retlevels);
+ setAttrib(ans,R_LevelsSymbol,levels);
+ setAttrib(ans,R_ClassSymbol,mkString("factor"));
+ UNPROTECT(1);
+return ans;
+}
+
 SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
 {
  SEXP ans,names,rownames;
@@ -437,15 +622,22 @@ SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
  jl_value_t* cols=jl_eval_string(evalcmd);
  int collen=jl_unbox_long(cols);
  jl_value_t* eachcolvector;
+ jl_value_t* coltype;
  //Create VECSXP
 
  //Create SEXP for Each Column and assign
  PROTECT(ans=allocVector(VECSXP,collen));
  for (i=0;i<collen;i++)
  {
+  
   sprintf(evalcmd,"%s[%d]",dfname,i+1);
   eachcolvector=jl_eval_string(evalcmd);
-  SET_VECTOR_ELT(ans,i,Julia_R_MD_NA(eachcolvector));
+  sprintf(evalcmd,"isa(%s[%d],PooledDataArray)",dfname,i+1);
+  coltype=jl_eval_string(evalcmd);
+  if (jl_unbox_bool(coltype))
+   SET_VECTOR_ELT(ans,i,Julia_R_MD_NA_Factor(eachcolvector));
+  else
+   SET_VECTOR_ELT(ans,i,Julia_R_MD_NA(eachcolvector));
  }
  //set names attribute
  sprintf(evalcmd,"names(%s)",dfname);
@@ -476,5 +668,48 @@ SEXP Julia_R_MD_NA_DataFrame(jl_value_t* Var)
  setAttrib(ans,R_ClassSymbol,mkString("data.frame"));
  //SET_OBJECT(ans, 1) ; 
  UNPROTECT(1);
+ return ans;
+}
+
+//Convert Julia Type To R,Real interface
+SEXP Julia_R(jl_value_t* Var)
+{  
+  SEXP ans=R_NilValue;
+  if (jl_is_nothing(Var)||jl_is_null(Var))
+    return ans;
+
+  //Array To Vector
+  JL_GC_PUSH1(&Var);
+  if (jl_is_array(Var))
+  {
+   ans=Julia_R_MD(Var); 
+  }
+  else if (jl_is_DataArrayFrame(Var))
+   {
+    //try to load DataArrays DataFrames package
+    if (!LoadDF())
+    {
+     JL_GC_POP();
+     return R_NilValue;
+    }
+    if(jl_is_NAtype(Var))
+        ans=Julia_R_Scalar_NA(Var); 
+    else if (jl_is_DataFrame(Var))
+        ans=Julia_R_MD_NA_DataFrame(Var);
+    else if (jl_is_DataArray(Var))
+     ans=Julia_R_MD_NA(Var);
+    else if (jl_is_PooledDataArray(Var))
+     ans=Julia_R_MD_NA_Factor(Var);
+    else if (jl_is_tuple(Var))
+    {
+     PROTECT(ans=allocVector(VECSXP,jl_tuple_len(Var)));
+     for(int i=0;i<jl_tuple_len(Var);i++)
+      SET_ELEMENT(ans,i,Julia_R(jl_tupleref(Var,i)));
+     UNPROTECT(1);
+    } 
+   }  
+  else 
+    ans=Julia_R_Scalar(Var); 
+ JL_GC_POP();
  return ans;
 }

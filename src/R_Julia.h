@@ -1,14 +1,26 @@
 /*
 Copyright (C) 2014 by Yu Gong
 */
-#include <stdio.h>
-#include <math.h>
-#include <R.h>
-#include <Rinternals.h>
-#include <Rmath.h>
-#include <julia.h>
-#define pkgdebug
+#ifndef JULIA_R_H
+#define JULIA_R_H
 
-jl_value_t* R_Julia_MD(SEXP Var,const char* VarName);
-jl_value_t* R_Julia_MD_NA(SEXP Var,const char* VarName);
-jl_value_t* R_Julia_MD_NA_DataFrame(SEXP Var,const char* VarName);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <R.h>
+#include <julia.h>
+//Convert R Type To Julia,which not contain NA
+SEXP R_Julia(SEXP Var,SEXP VarNam);
+//Convert R Type To Julia,which contain NA
+SEXP R_Julia_NA(SEXP Var,SEXP VarNam);
+//Convert R Type To Julia,which contain NA
+SEXP R_Julia_NA_Factor(SEXP Var,SEXP VarNam);
+//Convert R data frame To Julia
+SEXP R_Julia_NA_DataFrame(SEXP Var,SEXP VarNam);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

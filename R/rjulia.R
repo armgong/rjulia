@@ -100,7 +100,7 @@ r_julia<-function(x,y)
  {
   stop("Julia not running,use julia_init to start it")
  }   
- if (is.vector(x)||is.matrix(x)||is.array(x)||is.data.frame(x))
+ if (is.vector(x)||is.factor(x)||is.matrix(x)||is.array(x)||is.data.frame(x))
  {
   if (is.data.frame(x))
    {
@@ -114,8 +114,11 @@ r_julia<-function(x,y)
     }
    else
    {
+    if(is.factor(x))
+    invisible(.Call("R_Julia_NA_Factor",x,y,PACKAGE="rjulia")) 
+    else 
     #r_julia_na(x,y)
-   invisible(.Call("R_Julia_NA",x,y,PACKAGE="rjulia"))
+    invisible(.Call("R_Julia_NA",x,y,PACKAGE="rjulia"))
    }
   }
  }
