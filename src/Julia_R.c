@@ -586,12 +586,13 @@ SEXP Julia_R_MD_INT(jl_value_t* Var)
 UNPROTECT(1);
 return ans;
 }
+
 SEXP Julia_R_MD_NA_Factor(jl_value_t* Var)
 {
  SEXP ans=R_NilValue; 
  char* strData="Varname0tmp.refs";
  char* strlevels="VarPools=Array(ASCIIString,length(Varname0tmp.pool))\r\n" 
-                 "for i in 1:length(Varname0tmp.pool) \r\n"
+                 "for i in 1:length(Varname0tmp.pool)\r\n"
                  "VarPools[i]=string(Varname0tmp.pool[i])\r\n"
                  "end\r\n"
                  "VarPools\r\n"; 
@@ -599,10 +600,11 @@ SEXP Julia_R_MD_NA_Factor(jl_value_t* Var)
  jl_value_t* retData=jl_eval_string(strData); 
  jl_value_t* retlevels=jl_eval_string(strlevels); 
  //first get refs data,dims=n
+ //caution this convert to int32 SEXP,it should be ok in reality,
+ //but if have a lot factor may be cause int32 overrun.
  ans=Julia_R_MD_INT(retData);
- //second trans ans to 1d array
  PROTECT(ans);
- //second setAttrib R levels
+ //second setAttrib R levels and class
  SEXP levels=Julia_R_MD(retlevels);
  setAttrib(ans,R_LevelsSymbol,levels);
  setAttrib(ans,R_ClassSymbol,mkString("factor"));
