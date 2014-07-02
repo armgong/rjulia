@@ -11,16 +11,15 @@ extern "C" {
 #include <R.h>
 #include <julia.h>
 //Convert R Type To Julia,which not contain NA
-SEXP R_Julia(SEXP Var,SEXP VarNam);
+SEXP R_Julia(SEXP Var, SEXP VarNam);
 //Convert R Type To Julia,which contain NA
-SEXP R_Julia_NA(SEXP Var,SEXP VarNam);
+SEXP R_Julia_NA(SEXP Var, SEXP VarNam);
 //Convert R Type To Julia,which contain NA
-SEXP R_Julia_NA_Factor(SEXP Var,SEXP VarNam);
+SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarNam);
 //Convert R data frame To Julia
-SEXP R_Julia_NA_DataFrame(SEXP Var,SEXP VarNam);
+SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP VarNam);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif
