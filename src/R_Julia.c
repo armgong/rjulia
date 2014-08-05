@@ -17,12 +17,12 @@ Copyright (C) 2014 by Yu Gong
 #define ASCII_MASK (1<<6)
 #define IS_ASCII(x) ((x)->sxpinfo.gp & ASCII_MASK)
 #define IS_UTF8(x) ((x)->sxpinfo.gp & UTF8_MASK)
-jl_array_t *CreateArray(jl_datatype_t *type, size_t ndim, jl_tuple_t *dims)
+static jl_array_t *CreateArray(jl_datatype_t *type, size_t ndim, jl_tuple_t *dims)
 {
   return jl_new_array(jl_apply_array_type(type, ndim), dims);;
 }
 
-jl_tuple_t *RDims_JuliaTuple(SEXP Var)
+static jl_tuple_t *RDims_JuliaTuple(SEXP Var)
 {
   jl_tuple_t *d;
   SEXP dims = getAttrib(Var, R_DimSymbol);
@@ -49,7 +49,7 @@ jl_tuple_t *RDims_JuliaTuple(SEXP Var)
   return d;
 }
 
-jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 {
 
   if ((LENGTH(Var)) != 0)
@@ -139,8 +139,8 @@ jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 
 //first pass creat array then convert it to DataArray
 //second pass assign NA to element
-jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, const char *VarName)
-{
+static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, const char *VarName)
+{ 
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t *)mArray);
   jl_set_global(jl_main_module, jl_symbol("TransVarNamebool"), (jl_value_t *)mboolArray);
@@ -156,7 +156,7 @@ jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, co
   return ret;
 }
 
-jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
 {
   if ((LENGTH(Var)) != 0)
   {
@@ -281,7 +281,7 @@ jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
 }
 
 //basically factor in R is 1-dim INTSXP and contain levels
-jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray, size_t len, const char *VarName)
+static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray, size_t len, const char *VarName)
 {
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("varpools"), (jl_value_t *)mpoolArray);
@@ -303,7 +303,7 @@ jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray
   return ret;
 }
 
-jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
 {
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
   if (levels == R_NilValue)
@@ -353,7 +353,7 @@ jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   return (jl_value_t *) jl_nothing;
 }
 
-jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 {
   SEXP names = getAttrib(Var, R_NamesSymbol);
   size_t len = LENGTH(Var);

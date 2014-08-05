@@ -37,7 +37,7 @@ JuliaIsExist<-function(juliahome)
 }
 
 
-julia_init <- function(juliahome,disablegc=TRUE,parallel=FALSE)
+julia_init <- function(juliahome,disablegc=FALSE,parallel=FALSE)
 {
  findjl<-JuliaIsExist(juliahome)	
  if (findjl[[1]])	

@@ -101,18 +101,18 @@ Copyright (C) 2014 by Yu Gong
     }\
     UNPROTECT(1);
 
-bool inInt32Range(double val)
+static bool inInt32Range(double val)
 {
   return (val<=INT32_MAX && val>=INT32_MIN)?true:false;
 }
-bool jl_is_NAtype(jl_value_t *Var)
+static bool jl_is_NAtype(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "NAtype") == 0)
     return true;
   else
     return false;
 }
-bool jl_is_DataArray(jl_value_t *Var)
+static bool jl_is_DataArray(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "DataArray") == 0 ||
       strcmp(jl_typeof_str(Var), "DataVector") == 0 ||
@@ -121,7 +121,7 @@ bool jl_is_DataArray(jl_value_t *Var)
   else
     return false;
 }
-bool jl_is_PooledDataArray(jl_value_t *Var)
+static bool jl_is_PooledDataArray(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "PooledDataArray") == 0 ||
       strcmp(jl_typeof_str(Var), "PooledDataVector") == 0 ||
@@ -130,7 +130,7 @@ bool jl_is_PooledDataArray(jl_value_t *Var)
   else
     return false;
 }
-bool jl_is_DataFrame(jl_value_t *Var)
+static bool jl_is_DataFrame(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "DataFrame") == 0)
     return true;
@@ -138,7 +138,7 @@ bool jl_is_DataFrame(jl_value_t *Var)
     return false;
 }
 
-bool jl_is_DataArrayFrame(jl_value_t *Var)
+static bool jl_is_DataArrayFrame(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "DataArray") == 0 ||
       strcmp(jl_typeof_str(Var), "DataVector") == 0 ||
@@ -153,7 +153,7 @@ bool jl_is_DataArrayFrame(jl_value_t *Var)
     return false;
 }
 
-SEXP Julia_R_Scalar(jl_value_t *Var)
+static SEXP Julia_R_Scalar(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
   double tmpfloat;
@@ -240,7 +240,7 @@ SEXP Julia_R_Scalar(jl_value_t *Var)
   return ans;
 }
 
-SEXP Julia_R_MD(jl_value_t *Var)
+static SEXP Julia_R_MD(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
   jl_value_t *val;
@@ -341,7 +341,7 @@ SEXP Julia_R_MD(jl_value_t *Var)
   return ans;
 }
 
-SEXP Julia_R_Scalar_NA(jl_value_t *Var)
+static SEXP Julia_R_Scalar_NA(jl_value_t *Var)
 {
   SEXP ans;
   PROTECT(ans = ScalarInteger(NA_INTEGER));
@@ -349,7 +349,7 @@ SEXP Julia_R_Scalar_NA(jl_value_t *Var)
   return ans;
 }
 
-SEXP Julia_R_MD_NA(jl_value_t *Var)
+static SEXP Julia_R_MD_NA(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
   char *strData = "Varname0tmp.data";
@@ -468,7 +468,7 @@ SEXP Julia_R_MD_NA(jl_value_t *Var)
 //this function is for factor convert it maybe not safe
 //because PooledDataArray.refs is Uint32 or bigger
 //but in pratice it should be ok
-SEXP Julia_R_MD_INT(jl_value_t *Var)
+static SEXP Julia_R_MD_INT(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
   jl_value_t *val;
@@ -522,7 +522,7 @@ SEXP Julia_R_MD_INT(jl_value_t *Var)
   return ans;
 }
 
-SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
+static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
   char *strData = "Varname0tmp.refs";
@@ -547,7 +547,7 @@ SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
   return ans;
 }
 
-SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
+static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
 {
   SEXP ans, names, rownames;
   char evalcmd[evalsize];
