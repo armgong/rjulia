@@ -18,6 +18,93 @@ Copyright (C) 2014 by Yu Gong
 #define jl_is_uint8(v)       jl_typeis(v,jl_uint8_type)
 #define jl_is_uint16(v)      jl_typeis(v,jl_uint16_type)
 #endif
+//macro for julia type to r,for shorter code
+#define jlint_to_r              PROTECT(ans = allocArray(INTSXP, dims));\
+    for (size_t i = 0; i < len; i++)\
+      INTEGER(ans)[i] = p[i];\
+    UNPROTECT(1);
+#define jlfloat_to_r          PROTECT(ans = allocArray(REALSXP, dims));\
+    for (size_t i = 0; i < len; i++)\
+      REAL(ans)[i] = p[i];\
+    UNPROTECT(1);    
+#define jlbiggerint_to_r       bool isInt32=true;\
+    for (size_t ii=0;ii<len;ii++)\
+    {\
+      if (p[ii]>INT32_MAX || p[ii]<INT32_MIN)\
+      {\
+        isInt32=false;\
+        break;\
+      }\
+    }\
+    if (isInt32)\
+    {\
+      PROTECT(ans = allocArray(INTSXP, dims));\
+      for (size_t i = 0; i < len; i++)\
+      INTEGER(ans)[i] = p[i];\
+      UNPROTECT(1);\
+    }\
+    else\
+    {\
+      PROTECT(ans = allocArray(REALSXP, dims));\
+      for (size_t i = 0; i < len; i++)\
+      REAL(ans)[i] = p[i];\
+      UNPROTECT(1);\
+    }
+//macro for julia type which include NA to r,for shorter code
+#define jlint_to_r_na           PROTECT(ans = allocArray(INTSXP, dims));\
+    for (size_t i = 0; i < len; i++)\
+    {\
+      if (pNA[i])\
+        INTEGER(ans)[i] = NA_INTEGER;\
+      else\
+        INTEGER(ans)[i] = p[i];\
+    }\
+    UNPROTECT(1);    
+#define jlfloat_to_r_na        PROTECT(ans = allocArray(REALSXP, dims));\
+    for (size_t i = 0; i < len; i++)\
+      if (pNA[i])\
+        REAL(ans)[i] = NA_REAL;\
+      else\
+        REAL(ans)[i] = p[i];\
+    UNPROTECT(1);    
+#define jlbiggerint_to_r_na    bool isInt32=true;\
+  for (size_t ii=0;ii<len;ii++)\
+  {\
+    if (p[ii]>INT32_MAX || p[ii]<INT32_MIN)\
+    {\
+      isInt32=false;\
+      break;\
+    } \
+  }\
+  if (isInt32)\
+  {\
+    PROTECT(ans = allocArray(INTSXP, dims));\
+    for (size_t i = 0; i < len; i++)\
+    INTEGER(ans)[i] = p[i];\
+    UNPROTECT(1); \
+  } \
+  else\
+  {\
+    PROTECT(ans = allocArray(REALSXP, dims));\
+    for (size_t i = 0; i < len; i++)\
+    REAL(ans)[i] = p[i];\
+    UNPROTECT(1);\
+  }
+//macro for julia type which include factor to r,for shorter code
+#define jlint_to_r_md          PROTECT(ans = allocVector(INTSXP, len));\
+    for (size_t i = 0; i < len; i++)\
+    {\
+      if (p[i] == 0)\
+        INTEGER(ans)[i] = NA_INTEGER;\
+      else\
+        INTEGER(ans)[i] = p[i];\
+    }\
+    UNPROTECT(1);
+
+bool inInt32Range(double val)
+{
+  return (val<=INT32_MAX && val>=INT32_MIN)?true:false;
+}
 bool jl_is_NAtype(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "NAtype") == 0)
@@ -69,6 +156,7 @@ bool jl_is_DataArrayFrame(jl_value_t *Var)
 SEXP Julia_R_Scalar(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
+  double tmpfloat;
   //most common type is here
   if (jl_is_int32(Var))
   {
@@ -77,18 +165,30 @@ SEXP Julia_R_Scalar(jl_value_t *Var)
   }
   else if (jl_is_int64(Var))
   {
-    PROTECT(ans = ScalarReal((double)jl_unbox_int64(Var)));
+    tmpfloat=(double)jl_unbox_int64(Var);
+    if (inInt32Range(tmpfloat))
+     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_int64(Var)));
+    else
+     PROTECT(ans = ScalarReal(tmpfloat)); 
     UNPROTECT(1);
   }
   //more integer type
   if (jl_is_uint32(Var))
   {
-    PROTECT(ans = ScalarReal((double)jl_unbox_uint32(Var)));
+    tmpfloat=(double)jl_unbox_uint32(Var);
+    if (inInt32Range(tmpfloat))
+     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_uint32(Var)));
+    else
+    PROTECT(ans = ScalarReal(tmpfloat));
     UNPROTECT(1);
   }
   else if (jl_is_uint64(Var))
   {
-    PROTECT(ans = ScalarReal((double)jl_unbox_uint64(Var)));
+    tmpfloat=(double)jl_unbox_int64(Var);
+    if (inInt32Range(tmpfloat))
+     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_uint64(Var)));
+    else
+    PROTECT(ans = ScalarReal(tmpfloat));
     UNPROTECT(1);
   }
   else if (jl_is_float64(Var))
@@ -173,85 +273,55 @@ SEXP Julia_R_MD(jl_value_t *Var)
   else if (jl_is_int32(val))
   {
     int32_t *p = (int32_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r;
   }
   //int64
   else if (jl_is_int64(val))
   {
     int64_t *p = (int64_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlbiggerint_to_r;  
   }
   //more integer type
   else if (jl_is_int8(val))
   {
     int8_t *p = (int8_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r;
   }
   else if (jl_is_int16(val))
   {
     int16_t *p = (int16_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r;
   }
   else if (jl_is_uint8(val))
   {
     uint8_t *p = (uint8_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r;
   }
   else if (jl_is_uint16(val))
   {
     uint16_t *p = (uint16_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r;
   }
   else if (jl_is_uint32(val))
   {
     uint32_t *p = (uint32_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlbiggerint_to_r;
   }
   else if (jl_is_uint64(val))
   {
     uint64_t *p = (uint64_t *) jl_array_data(Var);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlbiggerint_to_r;
   }
   //double
   else if (jl_is_float64(val))
   {
     double *p = (double *) jl_array_data(Var);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlfloat_to_r;
   }
   else if (jl_is_float32(val))
   {
     float *p = (float *) jl_array_data(Var);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlfloat_to_r;
   }
   //convert string array to STRSXP ,but not sure it is corret?
   else if (jl_is_utf8_string(val))
@@ -321,117 +391,55 @@ SEXP Julia_R_MD_NA(jl_value_t *Var)
   else if (jl_is_int32(val))
   {
     int32_t *p = (int32_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-    {
-      if (pNA[i])
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
-    UNPROTECT(1);
+    jlint_to_r_na;
   }
   //int64
   else if (jl_is_int64(val))
   {
     int64_t *p = (int64_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        REAL(ans)[i] = NA_REAL;
-      else
-        REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlbiggerint_to_r_na;
   }
   //more integer type
   else if (jl_is_int8(val))
   {
     int8_t *p = (int8_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r_na;
   }
   else if (jl_is_int16(val))
   {
     int16_t *p = (int16_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r_na;
   }
   else if (jl_is_uint8(val))
   {
     uint8_t *p = (uint8_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r_na;
   }
   else if (jl_is_uint16(val))
   {
     uint16_t *p = (uint16_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(INTSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlint_to_r_na;
   }
   else if (jl_is_uint32(val))
   {
     uint32_t *p = (uint32_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        REAL(ans)[i] = NA_REAL;
-      else
-        REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlbiggerint_to_r_na;
   }
   else if (jl_is_uint64(val))
   {
     uint64_t *p = (uint64_t *) jl_array_data(retData);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        REAL(ans)[i] = NA_REAL;
-      else
-        REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlbiggerint_to_r_na;
   }
   //double
   else if (jl_is_float64(val))
   {
     double *p = (double *) jl_array_data(retData);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        REAL(ans)[i] = NA_REAL;
-      else
-        REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlfloat_to_r_na;
   }
   else if (jl_is_float32(val))
   {
     float *p = (float *) jl_array_data(retData);
-    PROTECT(ans = allocArray(REALSXP, dims));
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        REAL(ans)[i] = NA_REAL;
-      else
-        REAL(ans)[i] = p[i];
-    UNPROTECT(1);
+    jlfloat_to_r_na;
   }
   //convert string array to STRSXP
   else if (jl_is_utf8_string(val))
@@ -471,104 +479,46 @@ SEXP Julia_R_MD_INT(jl_value_t *Var)
   int len = jl_array_len(Var);
   if (len == 0) return ans;
 
-
   if (jl_is_int32(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     int32_t *p = (int32_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
   else if (jl_is_int64(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     int64_t *p = (int64_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
   else if (jl_is_int8(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     int8_t *p = (int8_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
   else if (jl_is_int16(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     int16_t *p = (int16_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
   else if (jl_is_uint8(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     uint8_t *p = (uint8_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
   else if (jl_is_uint16(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     uint16_t *p = (uint16_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
   else if (jl_is_uint32(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     uint32_t *p = (uint32_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
   else if (jl_is_uint64(val))
   {
-    PROTECT(ans = allocVector(INTSXP, len));
     uint64_t *p = (uint64_t *) jl_array_data(Var);
-    for (size_t i = 0; i < len; i++)
-    {
-      if (p[i] == 0)
-        INTEGER(ans)[i] = NA_INTEGER;
-      else
-        INTEGER(ans)[i] = p[i];
-    }
+    jlint_to_r_md;
   }
-  UNPROTECT(1);
   return ans;
 }
 
@@ -686,14 +636,14 @@ SEXP Julia_R(jl_value_t *Var)
     else if (jl_is_DataArray(Var))
       ans = Julia_R_MD_NA(Var);
     else if (jl_is_PooledDataArray(Var))
-      ans = Julia_R_MD_NA_Factor(Var);
-    else if (jl_is_tuple(Var))
-    {
+      ans = Julia_R_MD_NA_Factor(Var);    
+  }
+  else if (jl_is_tuple(Var))
+  {
       PROTECT(ans = allocVector(VECSXP, jl_tuple_len(Var)));
       for (int i = 0; i < jl_tuple_len(Var); i++)
         SET_ELEMENT(ans, i, Julia_R(jl_tupleref(Var, i)));
       UNPROTECT(1);
-    }
   }
   else
     ans = Julia_R_Scalar(Var);

@@ -3,28 +3,24 @@
 \alias{rjulia}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+rjulia is a package that enable R commuication with julia.
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+RJulia provides an interface between R and Julia,which can convert R and julia object mutually,and run julia script from R.
+R is a sophisticated feature-rich statistical software but a bit slow,julia is new advanced computing language,which is fast and llvm-based JIT.so combine R and julia will allow us do better statistical computing.
 }
 \details{
 \tabular{ll}{
 Package: \tab rjulia\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
-Date: \tab 2014-04-17\cr
-License: \tab What license is it under?\cr
+Date: \tab 2014-07-02\cr
+License: \tab GPL 2\cr
 }
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-Who wrote it
-
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Yu Gong <armgong@yahoo.com>
 }
 \references{
 ~~ Literature or other references for background information ~~

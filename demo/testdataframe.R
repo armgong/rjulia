@@ -13,11 +13,14 @@ y<-j2r("xx")
 y
 #todo factor and pooldataarray
 
-#y<-j2r('pdv = @pdata(["Group A", "Group A", "Group A","Group B", "Group B", "Group B"])')
-#y<-j2r('levels(pdv)')
-
-#y<-j2r('df = DataFrame(A = [1, 1, 1, 2, 2, 2],B = ["X", "X", "X", "Y", "Y", "Y"])')
-#y<-j2r('pool!(df, [:A, :B])')
-
+y<-j2r('pdv = @pdata(["Group A", "Group A", "Group A","Group B", "Group B", "Group B"])')
+y
+y<-j2r('levels(pdv)')
+y
+y<-j2r('df = DataFrame(A = [1, 1, 1, 2, 2, 2],B = ["X", "X", "X", "Y", "Y", "Y"])')
+y
+y<-j2r('pool!(df, [:A, :B])')
+y<-j2r('df')
+y
 
 #xx=DataFrame(Ssl =xxdfelt1,sw =xxdfelt2,pl =xxdfelt3,wl =xxdfelt4,NA =xxdfelt5)
