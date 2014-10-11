@@ -38,26 +38,33 @@ JuliaExists <- function(juliahome) {
 }
 
 
-julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE){
- findjl<-JuliaExists(juliahome)	
- if (findjl[[1]])	
- {
-  invisible(.Call("initJulia",findjl[[2]],disablegc,PACKAGE="rjulia"))
-  #pacth on windows for pkg.dir() not correct because R 
-  julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
-  #act same as client.jl _start function,to init parallel fuction
-  if (parallel)
-  { #early_init
-    julia_void_eval("Sys.init_sysinfo()")
-    julia_void_eval('if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV)) ENV["OPENBLAS_NUM_THREADS"] = 8 end')
-    #init_parallel
-    julia_void_eval("Base.init_parallel()")
-    #init_bind_addr(ARGS)
-    julia_void_eval("Base.init_bind_addr(ARGS)")
-  }
+julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE) {
+ 
+ #Check Julia exists on the system. If it doesn't, stop immediately.
+ findjl <- JuliaExists(juliahome)	
+ if(!findjl[[1]]) {
+   
+   stop("Julia could not be found on this system. Check the juliahome value you provided is correct.")
+   
  }
- else
- stop("Could't Find Julia,Besure juliahome your passed is right")
+ 
+ #Otherwise, initialise Julia using the provided home directory.
+ invisible(.Call(.NAME = "initJulia",findjl[[2]], PACKAGE = "rjulia", disablegc))
+ 
+ #If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
+ julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
+ 
+ #If the intent is for a parallelised session, initialise that.
+ if (parallel) {
+ 
+  julia_void_eval("Sys.init_sysinfo()")
+  julia_void_eval('if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV)) ENV["OPENBLAS_NUM_THREADS"] = 8 end')
+  #init_parallel
+  julia_void_eval("Base.init_parallel()")
+  #init_bind_addr(ARGS)
+  julia_void_eval("Base.init_bind_addr(ARGS)")
+  
+ }
 }
 
 Julia_is_running<-function()
