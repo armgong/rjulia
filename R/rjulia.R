@@ -82,13 +82,6 @@ julia_eval<-function(expression)
  y<-.Call("jl_eval",expression,PACKAGE="rjulia")
  if ((length(dim(y))==1)||(length(y)==1))
  return (as.vector(y))
- #else if(length(dim(y))==2)
- #return (as.matrix(y))
- #else if (inherits(y,"data.frame"))
- # {
- #   print("this is a data frame") 
- #   return (as.data.frame(y))
- #  } 
  else  
   return (y)
 }
