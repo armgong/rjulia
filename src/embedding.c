@@ -38,7 +38,7 @@ SEXP initJulia(SEXP julia_home, SEXP DisableGC)
     error("Julia not initialized");
     jlrunning = 0;
   }
-  if (LOGICAL(DisableGC))
+  if (LOGICAL(DisableGC)[0])
     jl_gc_disable();
   return R_NilValue;
 }

@@ -27,7 +27,7 @@ Copyright (C) 2014 by Yu Gong
     for (size_t i = 0; i < len; i++)\
       REAL(ans)[i] = p[i];\
     UNPROTECT(1);    
-#define jlbiggerint_to_r       bool isInt32=true;\
+#define jlbigint_to_r       bool isInt32=true;\
     for (size_t ii=0;ii<len;ii++)\
     {\
       if (p[ii]>INT32_MAX || p[ii]<INT32_MIN)\
@@ -67,7 +67,7 @@ Copyright (C) 2014 by Yu Gong
       else\
         REAL(ans)[i] = p[i];\
     UNPROTECT(1);    
-#define jlbiggerint_to_r_na    bool isInt32=true;\
+#define jlbigint_to_r_na    bool isInt32=true;\
   for (size_t ii=0;ii<len;ii++)\
   {\
     if (p[ii]>INT32_MAX || p[ii]<INT32_MIN)\
@@ -100,6 +100,12 @@ Copyright (C) 2014 by Yu Gong
         INTEGER(ans)[i] = p[i];\
     }\
     UNPROTECT(1);
+static bool biginttodouble=false;
+SEXP Julia_BigintToDouble(SEXP Var)
+{
+ biginttodouble=LOGICAL(Var)[0];
+ return R_NilValue;
+}
 
 static bool inInt32Range(double val)
 {
@@ -279,7 +285,10 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   else if (jl_is_int64(val))
   {
     int64_t *p = (int64_t *) jl_array_data(Var);
-    jlbiggerint_to_r;  
+    if (biginttodouble)
+     {jlfloat_to_r;}
+    else
+     {jlbigint_to_r;}  
   }
   //more integer type
   else if (jl_is_int8(val))
@@ -305,12 +314,18 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   else if (jl_is_uint32(val))
   {
     uint32_t *p = (uint32_t *) jl_array_data(Var);
-    jlbiggerint_to_r;
+    if (biginttodouble)
+     {jlfloat_to_r;}
+    else
+     {jlbigint_to_r;}
   }
   else if (jl_is_uint64(val))
   {
     uint64_t *p = (uint64_t *) jl_array_data(Var);
-    jlbiggerint_to_r;
+    if (biginttodouble)
+     {jlfloat_to_r;}
+    else
+     {jlbigint_to_r;}
   }
   //double
   else if (jl_is_float64(val))
@@ -397,7 +412,10 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   else if (jl_is_int64(val))
   {
     int64_t *p = (int64_t *) jl_array_data(retData);
-    jlbiggerint_to_r_na;
+    if (biginttodouble)
+     {jlfloat_to_r_na;}
+    else
+     {jlbigint_to_r_na;}
   }
   //more integer type
   else if (jl_is_int8(val))
@@ -423,12 +441,18 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   else if (jl_is_uint32(val))
   {
     uint32_t *p = (uint32_t *) jl_array_data(retData);
-    jlbiggerint_to_r_na;
+    if (biginttodouble)
+     {jlfloat_to_r_na;}
+    else
+    {jlbigint_to_r_na;}
   }
   else if (jl_is_uint64(val))
   {
     uint64_t *p = (uint64_t *) jl_array_data(retData);
-    jlbiggerint_to_r_na;
+    if (biginttodouble)
+     {jlfloat_to_r_na;}
+    else
+     {jlbigint_to_r_na;}
   }
   //double
   else if (jl_is_float64(val))

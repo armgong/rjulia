@@ -49,7 +49,7 @@ julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE) {
  }
  
  #Otherwise, initialise Julia using the provided home directory.
- invisible(.Call(.NAME = "initJulia",findjl[[2]], PACKAGE = "rjulia", disablegc))
+ invisible(.Call("initJulia",findjl[[2]],disablegc, PACKAGE = "rjulia"))
  
  #If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
  julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
@@ -167,4 +167,12 @@ jdfinited<-function()
 jloaddf<-function()
 {
  julia_LoadDataArrayFrame()
+}
+julia_BigintToDouble<-function(mode =FALSE)
+{
+ if (!Julia_is_running())
+ {
+  stop("Julia not running,use julia_init to start it")
+ } 
+ invisible(.Call("Julia_BigintToDouble",mode,PACKAGE="rjulia"))
 }

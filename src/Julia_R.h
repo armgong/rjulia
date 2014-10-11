@@ -12,7 +12,7 @@ extern "C" {
 #include <julia.h>
 
 SEXP Julia_R(jl_value_t* Var);
-
+SEXP Julia_BigintToDouble(SEXP Var);
 #ifdef __cplusplus
 }
 #endif
