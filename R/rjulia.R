@@ -1,70 +1,68 @@
 #Check if Julia exists on the local system and set the home directory if it does
-JuliaExists <- function(juliahome) {
+julia_exists <- function(juliahome) {
 
- #If a name is provided, user that. If not, go through common system environment names and rely
- #on the first valid one
- if (nchar(juliahome) > 0) {  
-   julia_home_dir <- juliahome
- } else {
-   
-   #Grab all the common system environment variable names
-   env_vars <- Sys.getenv(x = c("JULIA_HOME","Julia_Home","JULIAHOME",
+  #If a name is provided, user that. If not, go through common system environment names and rely
+  #on the first valid one
+  if (nchar(juliahome) > 0) {  
+    julia_home_dir <- juliahome
+  } else {
+    
+    #Grab all the common system environment variable names
+    env_vars <- Sys.getenv(x = c("JULIA_HOME","Julia_Home","JULIAHOME",
                                 "JuliaHome","JULIA","julia"), names = FALSE)
+    
+    #set jhome to the first one that exists
+    julia_home_dir <- env_vars[nchar(env_vars) > 0][1]
    
-   #set jhome to the first one that exists
-   julia_home_dir <- env_vars[nchar(env_vars) > 0][1]
-   
-   #If no entry meets that, set julia_found to FALSE
-   if(is.na(julia_home_dir)) {
-     julia_found <- FALSE
-   }
-   
- }
+    #If no entry meets that, set julia_found to FALSE
+    if(is.na(julia_home_dir)) {
+      julia_found <- FALSE
+    }
+  
+  }
  
- #If the terminating character is a slash of some kind, don't add a slash to the full sys.ji address.
- if(grepl(x = julia_home_dir, pattern = "/") || grepl(x = julia_home_dir, pattern = "\\", fixed = TRUE)) {
-  sysfile <- paste0(julia_home_dir,"../lib/julia/sys.ji")
- } else {
-   sysfile <- paste0(julia_home_dir,"/../lib/julia/sys.ji")
- }
+  #If the terminating character is a slash of some kind, don't add a slash to the full sys.ji address.
+  if(grepl(x = julia_home_dir, pattern = "/") || grepl(x = julia_home_dir, pattern = "\\", fixed = TRUE)) {
+    sysfile <- paste0(julia_home_dir,"../lib/julia/sys.ji")
+  } else {
+    sysfile <- paste0(julia_home_dir,"/../lib/julia/sys.ji")
+  }
  
- #If julia_found wasn't already set, it's TRUE
- if(!exists("julia_found")){
-   julia_found <- TRUE
- }
- 
- #Return
- return (list(julia_found, julia_home_dir))
+  #If julia_found wasn't already set, it's TRUE
+  if(!exists("julia_found")){
+    julia_found <- TRUE
+  }
+  
+  #Return
+  return (list(julia_found, julia_home_dir))
 }
 
-
+#Initialise Julia
 julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE) {
  
- #Check Julia exists on the system. If it doesn't, stop immediately.
- findjl <- JuliaExists(juliahome)	
- if(!findjl[[1]]) {
-   
-   stop("Julia could not be found on this system. Check the juliahome value you provided is correct.")
-   
- }
+  #Check Julia exists on the system. If it doesn't, stop immediately.
+  findjl <- julia_exists(juliahome)	
+  if(!findjl[[1]]) {  
+    stop("Julia could not be found on this system. Check the juliahome value you provided is correct.")
+  }
  
- #Otherwise, initialise Julia using the provided home directory.
- invisible(.Call(.NAME = "initJulia",findjl[[2]], PACKAGE = "rjulia", disablegc))
+  #Otherwise, initialise Julia using the provided home directory.
+  invisible(.Call(.NAME = "initJulia",findjl[[2]], PACKAGE = "rjulia", disablegc))
  
- #If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
- julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
+  #If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
+  julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
  
- #If the intent is for a parallelised session, initialise that.
- if (parallel) {
- 
-  julia_void_eval("Sys.init_sysinfo()")
-  julia_void_eval('if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV)) ENV["OPENBLAS_NUM_THREADS"] = 8 end')
-  #init_parallel
-  julia_void_eval("Base.init_parallel()")
-  #init_bind_addr(ARGS)
-  julia_void_eval("Base.init_bind_addr(ARGS)")
-  
- }
+  #If the intent is for a parallelised session, initialise that.
+  if (parallel) {
+    
+    julia_void_eval("Sys.init_sysinfo()")
+    julia_void_eval('if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV)) ENV["OPENBLAS_NUM_THREADS"] = 8 end')
+    #init_parallel
+    julia_void_eval("Base.init_parallel()")
+    #init_bind_addr(ARGS)
+    julia_void_eval("Base.init_bind_addr(ARGS)")
+    
+  }
 }
 
 Julia_is_running<-function()
