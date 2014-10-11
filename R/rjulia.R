@@ -130,7 +130,7 @@ r_julia<-function(x,y)
   }
  }
  else
-  warning("only accept vector or matrix or array of string int float")
+  warning("only support vector,matrix ,array,list(contain no NA values) and data frame ,which data type must be string int float boolean")
 }
 
 julia_DataArrayFrameInited<-function()
