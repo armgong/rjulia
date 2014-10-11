@@ -4,3 +4,7 @@
 *.exe
 *.a
 *.lib
+.Rhistory
+.Rbuildignore
+.Rdata
+.Rproj.user
