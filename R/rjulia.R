@@ -1,45 +1,45 @@
-JuliaIsExist<-function(juliahome) 
-{  
- if (nchar(juliahome)>0)
- {  
-   jhome<-juliahome
- }
- else
- {
-   jhome<-""
-   if (nchar(Sys.getenv("JULIA_HOME"))>0)
-   jhome<-Sys.getenv("JULIA_HOME")
-   if  (nchar(Sys.getenv("Julia_Home"))>0)
-   jhome<-Sys.getenv("Julia_Home")
-   if  (nchar(Sys.getenv("JULIAHOME"))>0)
-   jhome<-Sys.getenv("JULIAHOME")
-   if  (nchar(Sys.getenv("JuliaHome"))>0)
-   jhome<-Sys.getenv("JuliaHome")
-   if  (nchar(Sys.getenv("JULIA"))>0)
-   jhome<-Sys.getenv("JULIA")
-   if  (nchar(Sys.getenv("Julia"))>0)
-   jhome<-Sys.getenv("Julia")
- }
+#Check if Julia exists on the local system and set the home directory if it does
+JuliaExists <- function(juliahome) {
 
- if (nchar(jhome)>0)
- { 
-   if ((jhome[length(jhome)]!="/")||(jhome[length(jhome)]!="\\"))
-   sysfile<-paste(jhome,"/../lib/julia/sys.ji",sep="")
-   else
-   sysfile<-paste(jhome,"../lib/julia/sys.ji",sep="")
-   ret<-file.exists(sysfile)
- }  
- else
- {
-   ret<-FALSE
+ #If a name is provided, user that. If not, go through common system environment names and rely
+ #on the first valid one
+ if (nchar(juliahome) > 0) {  
+   julia_home_dir <- juliahome
+ } else {
+   
+   #Grab all the common system environment variable names
+   env_vars <- Sys.getenv(x = c("JULIA_HOME","Julia_Home","JULIAHOME",
+                                "JuliaHome","JULIA","julia"), names = FALSE)
+   
+   #set jhome to the first one that exists
+   julia_home_dir <- env_vars[nchar(env_vars) > 0][1]
+   
+   #If no entry meets that, set julia_found to FALSE
+   if(is.na(julia_home_dir)) {
+     julia_found <- FALSE
+   }
+   
  }
- return (list(ret,jhome))
+ 
+ #If the terminating character is a slash of some kind, don't add a slash to the full sys.ji address.
+ if(grepl(x = julia_home_dir, pattern = "/") || grepl(x = julia_home_dir, pattern = "\\", fixed = TRUE)) {
+  sysfile <- paste0(julia_home_dir,"../lib/julia/sys.ji")
+ } else {
+   sysfile <- paste0(julia_home_dir,"/../lib/julia/sys.ji")
+ }
+ 
+ #If julia_found wasn't already set, it's TRUE
+ if(!exists("julia_found")){
+   julia_found <- TRUE
+ }
+ 
+ #Return
+ return (list(julia_found, julia_home_dir))
 }
 
 
-julia_init <- function(juliahome,disablegc=FALSE,parallel=TRUE)
-{
- findjl<-JuliaIsExist(juliahome)	
+julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE){
+ findjl<-JuliaExists(juliahome)	
  if (findjl[[1]])	
  {
   invisible(.Call("initJulia",findjl[[2]],disablegc,PACKAGE="rjulia"))
