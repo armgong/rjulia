@@ -4,6 +4,7 @@
 *.exe
 *.a
 *.lib
+*.so
 .Rhistory
 .Rbuildignore
 .Rdata
