@@ -64,23 +64,19 @@ julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE) {
   }
 }
 
-Julia_is_running<-function()
-{
-  y<-.Call("Julia_is_running",PACKAGE="rjulia")
-  return (y)
-}
-
-julia_eval<-function(expression)
-{
- if (!Julia_is_running())
- {
-  stop("Julia not running,use julia_init to start it")
- } 
- y<-.Call("jl_eval",expression,PACKAGE="rjulia")
- if ((length(dim(y))==1)||(length(y)==1))
- return (as.vector(y))
- else  
-  return (y)
+julia_eval <- function(expression) {
+  
+  #Check if Julia is running. Obviously if it's not, stop.
+  if (!.Call("Julia_is_running", PACKAGE="rjulia")) {
+    stop("Julia is not running. Call julia_init() to start it.")
+  }
+  
+  #Otherwise, evaluate the expression and return the results of that evaluation. If it's appropriate
+  #to provide it to the user as a vector, do so - otherwise provide it raw.
+  eval_result <- .Call("jl_eval", expression, PACKAGE="rjulia")
+  if((length(dim(y)) == 1)||(length(y) == 1)) {
+    return (as.vector(y))
+  }
 }
 
 julia_void_eval<-function(expression)
