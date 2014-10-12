@@ -45,8 +45,9 @@ julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE) {
   if(!findjl[[1]]) {  
     stop("Julia could not be found on this system. Check the juliahome value you provided is correct.")
   }
- 
- 
+  #Otherwise, initialise Julia using the provided home directory.
+  invisible(.Call("initJulia",findjl[[2]],disablegc, PACKAGE = "rjulia"))
+  
   #If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
   julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
  
