@@ -12,12 +12,6 @@ Copyright (C) 2014 by Yu Gong
 #include "dataframe.h"
 #include "Julia_R.h"
 #define pkgdebug
-#ifndef jl_is_int8
-#define jl_is_int8(v)        jl_typeis(v,jl_int8_type)
-#define jl_is_int16(v)       jl_typeis(v,jl_int16_type)
-#define jl_is_uint8(v)       jl_typeis(v,jl_uint8_type)
-#define jl_is_uint16(v)      jl_typeis(v,jl_uint16_type)
-#endif
 //macro for julia type to r,for shorter code
 #define jlint_to_r              PROTECT(ans = allocArray(INTSXP, dims));\
     for (size_t i = 0; i < len; i++)\
@@ -62,14 +56,17 @@ Copyright (C) 2014 by Yu Gong
     UNPROTECT(1);    
 #define jlfloat_to_r_na        PROTECT(ans = allocArray(REALSXP, dims));\
     for (size_t i = 0; i < len; i++)\
+    {\
       if (pNA[i])\
         REAL(ans)[i] = NA_REAL;\
       else\
         REAL(ans)[i] = p[i];\
+    }\
     UNPROTECT(1);    
 #define jlbigint_to_r_na    bool isInt32=true;\
   for (size_t ii=0;ii<len;ii++)\
   {\
+    if (pNA[ii]) continue;\
     if (p[ii]>INT32_MAX || p[ii]<INT32_MIN)\
     {\
       isInt32=false;\
@@ -80,14 +77,24 @@ Copyright (C) 2014 by Yu Gong
   {\
     PROTECT(ans = allocArray(INTSXP, dims));\
     for (size_t i = 0; i < len; i++)\
-    INTEGER(ans)[i] = p[i];\
+     {\
+      if (pNA[i])\
+       INTEGER(ans)[i] = NA_INTEGER;\
+      else\
+       INTEGER(ans)[i] = p[i];\
+     }\
     UNPROTECT(1); \
   } \
   else\
   {\
     PROTECT(ans = allocArray(REALSXP, dims));\
     for (size_t i = 0; i < len; i++)\
-    REAL(ans)[i] = p[i];\
+    {\
+      if (pNA[i])\
+        REAL(ans)[i] = NA_REAL;\
+      else\
+        REAL(ans)[i] = p[i];\
+    }\
     UNPROTECT(1);\
   }
 //macro for julia type which include factor to r,for shorter code
