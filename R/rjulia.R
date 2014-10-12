@@ -74,8 +74,8 @@ julia_eval <- function(expression) {
   #Otherwise, evaluate the expression and return the results of that evaluation. If it's appropriate
   #to provide it to the user as a vector, do so - otherwise provide it raw.
   eval_result <- .Call("jl_eval", expression, PACKAGE="rjulia")
-  if((length(dim(y)) == 1)||(length(y) == 1)) {
-    return (as.vector(y))
+  if((length(dim(eval_result)) == 1)||(length(eval_result) == 1)) {
+    return (as.vector(eval_result))
   }
 }
 
