@@ -81,18 +81,20 @@ julia_eval <- function(expression) {
 
 julia_void_eval<-function(expression)
 {
-  if (!Julia_is_running())
-  {
-    stop("Julia not running,use julia_init to start it")
-  } 
+  #Check if Julia is running. Obviously if it's not, stop.
+  if (!.Call("Julia_is_running", PACKAGE="rjulia")) {
+    stop("Julia is not running. Call julia_init() to start it.")
+  }
+  
   invisible(.Call("jl_void_eval",expression,PACKAGE="rjulia"))
 }
 r_julia<-function(x,y)
 {
- if (!Julia_is_running())
- {
-  stop("Julia not running,use julia_init to start it")
- }   
+  #Check if Julia is running. Obviously if it's not, stop.
+  if (!.Call("Julia_is_running", PACKAGE="rjulia")) {
+    stop("Julia is not running. Call julia_init() to start it.")
+  }
+  
  if (is.vector(x)||is.factor(x)||is.matrix(x)||is.array(x)||is.data.frame(x))
  {
   if (is.data.frame(x))
@@ -127,10 +129,11 @@ julia_DataArrayFrameInited<-function()
 
 julia_LoadDataArrayFrame<-function()
 {
- if (!Julia_is_running())
- {
-  stop("Julia not running,use julia_init to start it")
- } 
+  #Check if Julia is running. Obviously if it's not, stop.
+  if (!.Call("Julia_is_running", PACKAGE="rjulia")) {
+    stop("Julia is not running. Call julia_init() to start it.")
+  }
+  
  invisible(.Call("Julia_LoadDataArrayFrame",PACKAGE="rjulia"))
  if (julia_DataArrayFrameInited()==F)
  {
