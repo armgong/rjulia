@@ -8,7 +8,7 @@ It currently supports use on Linux and Windows from the console.
 Install
 -------------
 
-1. Install julia v0.3 or the current master branch; v0.2 does not have an embedded API.
+1. Install julia v0.3 or the current master branch; v0.2 does not have an embedded API; R version >=3.1.0.
 2. Compile Rjulia. This requires you to set the environment variable JULIA\_SRC. A typical
 Julia install directory should look like:
   
