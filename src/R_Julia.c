@@ -65,8 +65,8 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       for (size_t i = 0; i < jl_array_len(ret); i++)
         retData[i] = LOGICAL(Var)[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      return (jl_value_t *) ret;
       JL_GC_POP();
+      return (jl_value_t *) ret;
       break;
     };
     case INTSXP:
@@ -77,8 +77,8 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       for (size_t i = 0; i < jl_array_len(ret); i++)
         retData[i] = INTEGER(Var)[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      return (jl_value_t *) ret;
       JL_GC_POP();
+      return (jl_value_t *) ret;
       break;
     }
     case REALSXP:

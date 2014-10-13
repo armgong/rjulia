@@ -47,7 +47,7 @@ julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE) {
   }
   #Otherwise, initialise Julia using the provided home directory.
   #now disable gc due to julia issue https://github.com/JuliaLang/julia/issues/8671,utils it get fixed
-  disablegc<-TRUE
+  #disablegc<-TRUE
   invisible(.Call("initJulia",findjl[[2]],disablegc, PACKAGE = "rjulia"))
   
   #If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
