@@ -79,6 +79,10 @@ julia_eval <- function(expression) {
   if((length(dim(eval_result)) == 1)||(length(eval_result) == 1)) {
     return (as.vector(eval_result))
   }
+  else
+   {
+    return (eval_result)
+   }
 }
 
 julia_void_eval<-function(expression)
