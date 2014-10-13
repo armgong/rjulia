@@ -185,8 +185,9 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
+      jl_value_t * ans=TransArrayToDataArray(ret, ret1, VarName);
       JL_GC_POP();
-      return TransArrayToDataArray(ret, ret1, VarName);
+      return ans;
       break;
     };
     case INTSXP:
@@ -210,8 +211,9 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
+      jl_value_t * ans= TransArrayToDataArray(ret, ret1, VarName);
       JL_GC_POP();
-      return TransArrayToDataArray(ret, ret1, VarName);
+      return ans;
       break;
     }
     case REALSXP:
@@ -234,8 +236,9 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
+      jl_value_t * ans= TransArrayToDataArray(ret, ret1, VarName);
       JL_GC_POP();
-      return TransArrayToDataArray(ret, ret1, VarName);
+      return ans;
       break;
     }
     case STRSXP:
@@ -267,8 +270,9 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
+      jl_value_t * ans= TransArrayToDataArray(ret, ret1, VarName);
       JL_GC_POP();
-      return TransArrayToDataArray(ret, ret1, VarName);
+      return ans;
       break;
     }
     default:
@@ -340,8 +344,10 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
           retData[i] = INTEGER(Var)[i];
         }
       }
+
+      jl_value_t * ans=TransArrayToPoolDataArray(ret, ret1, LENGTH(Var), VarName);
       JL_GC_POP();
-      return TransArrayToPoolDataArray(ret, ret1, LENGTH(Var), VarName);
+      return ans;
       break;
     }
     default:
