@@ -364,7 +364,6 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
       snprintf(evalcmd, evalsize, "%s=DataFrame(%s =%s)", VarName, onename, eltcmd);
     else
       snprintf(evalcmd, evalsize, "%s[symbol(\"%s\")]=%s", VarName, onename, eltcmd);
-    //Rprintf("%s\n",evalcmd);
     jl_eval_string(evalcmd);
     if (jl_exception_occurred())
     {
