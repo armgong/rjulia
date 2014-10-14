@@ -106,6 +106,8 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     {
       char eltcmd[eltsize];
       ret =(jl_value_t *) jl_alloc_tuple(length(Var));
+      for (int i = 0; i < length(Var); i++)
+      {
         snprintf(eltcmd, eltsize, "%selement%d", VarName, i);
         jl_tupleset((jl_tuple_t *)ret, i, R_Julia_MD(VECTOR_ELT(Var, i), eltcmd));
       }
