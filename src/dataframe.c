@@ -32,11 +32,11 @@ SEXP Julia_DataArrayFrameInited()
 }
 bool LoadDF()
 {
-  if (LOGICAL(Julia_DataArrayFrameInited())[0])
+  if (DataArrayFrameInited)
     return true;
 
   Julia_LoadDataArrayFrame();
-  if (!LOGICAL(Julia_DataArrayFrameInited())[0])
+  if (!DataArrayFrameInited)
   {
     error("DataArrays and DataFrames can't be load,please check this\n");
     return false;
