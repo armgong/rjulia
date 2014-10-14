@@ -1,6 +1,6 @@
 library(rjulia)
 #init embedding julia,paraments are julia_home and disable_gc
-julia_init("d:/codes/julia32/usr/bin",F)
+julia_init("d:/codes/julia32/usr/bin")
 julia_LoadDataArrayFrame()
 
 x<-matrix(1:9,c(3,3))

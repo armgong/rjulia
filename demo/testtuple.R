@@ -1,6 +1,6 @@
 library(rjulia)
 #init embedding julia,paraments are julia_home and disable_gc
-julia_init("d:/codes/julia32/usr/bin",F)
+julia_init("d:/codes/julia32/usr/bin")
 x<-1:3
 x1<-c("hello","world")
 y<-matrix(1:12,c(3,4))

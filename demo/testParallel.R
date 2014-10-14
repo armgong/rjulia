@@ -1,7 +1,7 @@
 library(rjulia)
 # julia_home disable_gc =false parallel=T
 # this init make julia can start multi-process for distribute computing
-julia_init("d:/codes/julia32/usr/bin",F,T)
+julia_init("d:/codes/julia32/usr/bin",T,T)
 julia_eval("addprocs(3)")
 for (i in 1:4)
 {

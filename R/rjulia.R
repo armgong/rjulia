@@ -11,7 +11,7 @@ julia_exists <- function(juliahome) {
     env_vars <- Sys.getenv(x = c("JULIA_HOME","Julia_Home","JULIAHOME",
                                 "JuliaHome","JULIA","julia"), names = FALSE)
     
-    #set jhome to the first one that exists
+    #set julia_home_dir to the first one that exists
     julia_home_dir <- env_vars[nchar(env_vars) > 0][1]
    
     #If no entry meets that, set julia_found to FALSE
@@ -22,23 +22,18 @@ julia_exists <- function(juliahome) {
   }
  
   #If the terminating character is a slash of some kind, don't add a slash to the full sys.ji address.
-  if(grepl(x = julia_home_dir, pattern = "/") || grepl(x = julia_home_dir, pattern = "\\", fixed = TRUE)) {
-    sysfile <- paste0(julia_home_dir,"../lib/julia/sys.ji")
-  } else {
-    sysfile <- paste0(julia_home_dir,"/../lib/julia/sys.ji")
-  }
- 
-  #If julia_found wasn't already set, it's TRUE
-  if(!exists("julia_found")){
-    julia_found <- TRUE
-  }
-  
+  if ((julia_home_dir[length(julia_home_dir)]!="/")||(julia_home_dir[length(julia_home_dir)]!="\\"))
+   sysfile<-paste(julia_home_dir,"/../lib/julia/sys.ji",sep="")		
+   else		
+   sysfile<-paste(julia_home_dir,"../lib/julia/sys.ji",sep="")		
+
+  julia_found<-file.exists(sysfile) 
   #Return
   return (list(julia_found, julia_home_dir))
 }
 
 #Initialise Julia
-julia_init <- function(juliahome, disablegc = FALSE, parallel = TRUE) {
+julia_init <- function(juliahome, disablegc = TRUE, parallel = TRUE) {
  
   #Check Julia exists on the system. If it doesn't, stop immediately.
   findjl <- julia_exists(juliahome)	
