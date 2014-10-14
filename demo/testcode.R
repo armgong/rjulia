@@ -1,6 +1,16 @@
 library(rjulia)
 #init embedding julia,paraments are julia_home and disable_gc
-julia_init("d:/codes/julia32/usr/bin")
+if(.Platform$OS.type == "unix") {
+ julia_init("/usr/bin",F,T)  
+}
+else
+{  
+ if (.Platform$r_arch=="x64")   
+  julia_init("c:/julia/bin",F,T)
+ else
+   julia_init("c:/julia32/bin",F,T)  
+}
+
 f=function(n){
  for (i in 1:n)
  {   
