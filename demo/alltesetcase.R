@@ -280,10 +280,10 @@ for (i in 1:10000)
   y<-j2r('df = DataFrame(A = [1, 1, 1, 2, 2, 2],B = ["X", "X", "X", "Y", "Y", "Y"])')
   y<-j2r('pool!(df, [:A, :B])')
   y<-j2r('df')
-  names(iris)<-c("sl","sw","pl","wl","speics")
-  r2j(iris,"xx")
-  y<-j2r("xx")
-  y
+  #names(iris)<-c("sl","sw","pl","wl","speics")
+  #r2j(iris,"xx")
+  #y<-j2r("xx")
+  #y
   cat("run time is:",i,"\n")
 }
 
