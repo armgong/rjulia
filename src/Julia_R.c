@@ -559,7 +559,7 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
     uint64_t *p = (uint64_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  JL_GC_POP()
+  JL_GC_POP();
   return ans;
 }
 
@@ -604,7 +604,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   jl_value_t *ret=NULL;
   JL_GC_PUSH2(&eachcolvector,&ret);
   
-  int collen = jl_unbox_long(jl_eval_string(evalcmd););
+  int collen = jl_unbox_long(jl_eval_string(evalcmd));
   //Create SEXP for Each Column and assign
   PROTECT(ans = allocVector(VECSXP, collen));
   for (i = 0; i < collen; i++)

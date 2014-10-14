@@ -24,28 +24,25 @@ static jl_array_t *CreateArray(jl_datatype_t *type, size_t ndim, jl_tuple_t *dim
 
 static jl_tuple_t *RDims_JuliaTuple(SEXP Var)
 {
-  jl_tuple_t *d;
-  SEXP dims = getAttrib(Var, R_DimSymbol);
+ jl_tuple_t *d=NULL;
+ JL_GC_PUSH1(&d);
+ SEXP dims = getAttrib(Var, R_DimSymbol);
   //array or matrix
   if (dims != R_NilValue)
   {
     int ndims = LENGTH(dims);
     d = jl_alloc_tuple(ndims);
-    JL_GC_PUSH1(&d);
-    size_t i;
-    for (i = 0; i < ndims; i++)
+    for (size_t i = 0; i < ndims; i++)
     {
       jl_tupleset(d, i, jl_box_long(INTEGER(dims)[i]));
     }
-    JL_GC_POP();
   }
   else     //vector
   {
     d = jl_alloc_tuple(1);
-    JL_GC_PUSH1(&d);
     jl_tupleset(d, 0, jl_box_long(LENGTH(Var)));
-    JL_GC_POP();
   }
+  JL_GC_POP();
   return d;
 }
 
@@ -56,7 +53,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
      return (jl_value_t *) jl_nothing;
     
    jl_array_t *ret =NULL;
-   jl_tuple_t *dims = RDims_JuliaTuple(Var);
+   jl_tuple_t *dims=RDims_JuliaTuple(Var);
    JL_GC_PUSH2(&ret,&dims);
    switch (TYPEOF(Var))
    {
@@ -153,7 +150,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
  jl_tuple_t *dims = RDims_JuliaTuple(Var);
  jl_array_t *ret =NULL;
  jl_array_t *ret1 =NULL;
- jl_value_t * ans=NULL;
+ jl_value_t *ans=NULL;
  JL_GC_PUSH4(&ret, &ret1,&dims,&ans);
  
  switch (TYPEOF(Var))
@@ -271,12 +268,17 @@ static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpo
   jl_set_global(jl_main_module, jl_symbol("varpools"), (jl_value_t *)mpoolArray);
   jl_set_global(jl_main_module, jl_symbol("varrefs"), (jl_value_t *)mArray);
   snprintf(evalcmd, evalsize, "%s=PooledDataArray(ASCIIString,Uint32,%d)", VarName, len);
-  jl_eval_string(evalcmd);
+  jl_value_t *ret1=NULL;
+  jl_value_t *ret2=NULL;
+  jl_value_t *ret3=NULL;
+  JL_GC_PUSH3(&ret1,&ret2,&ret3);
+  ret1=jl_eval_string(evalcmd);
   snprintf(evalcmd, evalsize, "%s.pool=%s", VarName, "varpools");
-  jl_eval_string(evalcmd);
+  ret2=jl_eval_string(evalcmd);
   snprintf(evalcmd, evalsize, "%s.refs=%s", VarName, "varrefs");
-  jl_eval_string(evalcmd);
+  ret3=jl_eval_string(evalcmd);
   jl_value_t *ret = jl_eval_string((char *)VarName);
+  JL_GC_POP();
   if (jl_exception_occurred())
   {
     jl_show(jl_stderr_obj(), jl_exception_occurred());
@@ -300,14 +302,14 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   jl_array_t *ret=NULL; 
   jl_array_t *ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_ascii_string_type, 1), LENGTH(levels));
   jl_value_t **retData1 = jl_array_data(ret1);
-  JL_GC_PUSH4(&ret, &ret1,&retData1,&ans);
+  JL_GC_PUSH3(&ret, &ret1,&ans);
 
   for (size_t i = 0; i < jl_array_len(ret1); i++)
    { 
     if (!IS_ASCII(Var))
-      retData1[i] = jl_cstr_to_string(translateChar0(STRING_ELT(levels, i)));
+     retData1[i] = jl_cstr_to_string(translateChar0(STRING_ELT(levels, i)));
     else
-      retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
+     retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
    }
 
   switch (TYPEOF(Var))
