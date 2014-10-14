@@ -105,16 +105,11 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     case VECSXP:
     {
       char eltcmd[eltsize];
-      jl_tuple_t *ret1 = jl_alloc_tuple(length(Var));
-      JL_GC_PUSH1(&ret1);
-      for (int i = 0; i < length(Var); i++)
-      {
+      ret =(jl_value_t *) jl_alloc_tuple(length(Var));
         snprintf(eltcmd, eltsize, "%selement%d", VarName, i);
-        jl_tupleset(ret, i, R_Julia_MD(VECTOR_ELT(Var, i), eltcmd));
+        jl_tupleset((jl_tuple_t *)ret, i, R_Julia_MD(VECTOR_ELT(Var, i), eltcmd));
       }
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      ret=(jl_value_t *)ret1;
-      JL_GC_POP();
       break;
     }
     default:
@@ -148,18 +143,24 @@ static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolAr
 
 static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
 {
-  if ((LENGTH(Var)) != 0)
+  if ((LENGTH(Var)) == 0)
   {
-    jl_tuple_t *dims = RDims_JuliaTuple(Var);
+    return (jl_value_t *) jl_nothing;
+  }//if length !=0
 
-    switch (TYPEOF(Var))
-    {
+ jl_tuple_t *dims = RDims_JuliaTuple(Var);
+ jl_array_t *ret =NULL;
+ jl_array_t *ret1 =NULL;
+ jl_value_t * ans=NULL;
+ JL_GC_PUSH4(&ret, &ret1,&dims,&ans);
+ 
+ switch (TYPEOF(Var))
+   {
     case LGLSXP:
     {
-      jl_array_t *ret = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
-      jl_array_t *ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
-      JL_GC_PUSH(&ret, &ret1);
-
+      ret = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
+      ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
+      
       char *retData = (char *)jl_array_data(ret);
       bool *retData1 = (bool *)jl_array_data(ret1);
       for (size_t i = 0; i < jl_array_len(ret); i++)
@@ -175,16 +176,13 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
-      jl_value_t * ans=TransArrayToDataArray(ret, ret1, VarName);
-      JL_GC_POP();
-      return ans;
+      ans=TransArrayToDataArray(ret, ret1, VarName);
       break;
     };
     case INTSXP:
     {
-      jl_array_t *ret = CreateArray(jl_int32_type, jl_tuple_len(dims), dims);
-      jl_array_t *ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
-      JL_GC_PUSH(&ret, &ret1);
+      ret = CreateArray(jl_int32_type, jl_tuple_len(dims), dims);
+      ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
 
       int *retData = (int *)jl_array_data(ret);
       bool *retData1 = (bool *)jl_array_data(ret1);
@@ -201,16 +199,13 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
-      jl_value_t * ans= TransArrayToDataArray(ret, ret1, VarName);
-      JL_GC_POP();
-      return ans;
+      ans= TransArrayToDataArray(ret, ret1, VarName);
       break;
     }
     case REALSXP:
     {
-      jl_array_t *ret = CreateArray(jl_float64_type, jl_tuple_len(dims), dims);
-      jl_array_t *ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
-      JL_GC_PUSH(&ret, &ret1);
+      ret = CreateArray(jl_float64_type, jl_tuple_len(dims), dims);
+      ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
       double *retData = (double *)jl_array_data(ret);
       bool *retData1 = (bool *)jl_array_data(ret1);
       for (size_t i = 0; i < jl_array_len(ret); i++)
@@ -226,22 +221,18 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
-      jl_value_t * ans= TransArrayToDataArray(ret, ret1, VarName);
-      JL_GC_POP();
-      return ans;
+      ans= TransArrayToDataArray(ret, ret1, VarName);
       break;
     }
     case STRSXP:
     {
-      jl_array_t *ret;
       if (!IS_ASCII(Var))
         ret = CreateArray(jl_utf8_string_type, jl_tuple_len(dims), dims);
       else
         ret = CreateArray(jl_ascii_string_type, jl_tuple_len(dims), dims);
 
-      jl_array_t *ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
+      ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
 
-      JL_GC_PUSH(&ret, &ret1);
       jl_value_t **retData = jl_array_data(ret);
       bool *retData1 = (bool *)jl_array_data(ret1);
       for (size_t i = 0; i < jl_array_len(ret); i++)
@@ -260,19 +251,16 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
-      jl_value_t * ans= TransArrayToDataArray(ret, ret1, VarName);
-      JL_GC_POP();
-      return ans;
+      ans= TransArrayToDataArray(ret, ret1, VarName);
       break;
     }
     default:
-      return (jl_value_t *) jl_nothing;
+      ans=(jl_value_t *) jl_nothing;
       break;
     }//case end
-    return (jl_value_t *) jl_nothing;
-  }//if length !=0
-  return (jl_value_t *) jl_nothing;
-}
+    JL_GC_POP();
+    return ans;
+ }
 
 //basically factor in R is 1-dim INTSXP and contain levels
 static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray, size_t len, const char *VarName)
@@ -299,28 +287,32 @@ static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpo
 
 static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
 {
-  SEXP levels = getAttrib(Var, R_LevelsSymbol);
+  if ((LENGTH(Var))== 0)
+   return jl_nothing;
+  SEXP levels = getAttrib(Var, R_LevelsSymbol); 
   if (levels == R_NilValue)
     return jl_nothing;
 
   //create string array for levels in julia
+  jl_value_t *ans=NULL;
+  jl_array_t *ret=NULL; 
   jl_array_t *ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_ascii_string_type, 1), LENGTH(levels));
   jl_value_t **retData1 = jl_array_data(ret1);
+  JL_GC_PUSH4(&ret, &ret1,&retData1,&ans);
 
   for (size_t i = 0; i < jl_array_len(ret1); i++)
+   { 
     if (!IS_ASCII(Var))
       retData1[i] = jl_cstr_to_string(translateChar0(STRING_ELT(levels, i)));
     else
       retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
+   }
 
-  if ((LENGTH(Var)) != 0)
-  {
-    switch (TYPEOF(Var))
-    {
+  switch (TYPEOF(Var))
+   {
     case INTSXP:
     {
-      jl_array_t *ret = jl_alloc_array_1d(jl_apply_array_type(jl_uint32_type, 1), LENGTH(Var));
-      JL_GC_PUSH(&ret, &ret1);
+      ret = jl_alloc_array_1d(jl_apply_array_type(jl_uint32_type, 1), LENGTH(Var));
       int *retData = (int *)jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
       {
@@ -334,19 +326,15 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
           retData[i] = INTEGER(Var)[i];
         }
       }
-
-      jl_value_t * ans=TransArrayToPoolDataArray(ret, ret1, LENGTH(Var), VarName);
-      JL_GC_POP();
-      return ans;
+      ans=TransArrayToPoolDataArray(ret, ret1, LENGTH(Var), VarName);
       break;
     }
     default:
-      return (jl_value_t *) jl_nothing;
+     ans=(jl_value_t *) jl_nothing;
       break;
     }//case end
-    return (jl_value_t *) jl_nothing;
-  }//if length !=0
-  return (jl_value_t *) jl_nothing;
+  JL_GC_POP();
+  return ans;
 }
 
 static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
