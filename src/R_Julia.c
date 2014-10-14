@@ -52,55 +52,47 @@ static jl_tuple_t *RDims_JuliaTuple(SEXP Var)
 static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 {
 
-  if ((LENGTH(Var)) != 0)
-  {
-    jl_tuple_t *dims = RDims_JuliaTuple(Var);
-    switch (TYPEOF( Var))
-    {
+   if ((LENGTH(Var))==0)
+     return (jl_value_t *) jl_nothing;
+    
+   jl_array_t *ret =NULL;
+   jl_tuple_t *dims = RDims_JuliaTuple(Var);
+   JL_GC_PUSH2(&ret,&dims);
+   switch (TYPEOF(Var))
+   {
     case LGLSXP:
     {
-      jl_array_t *ret = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
-      JL_GC_PUSH1(&ret);
+      ret = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
       char *retData = (char *)jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
         retData[i] = LOGICAL(Var)[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      JL_GC_POP();
-      return (jl_value_t *) ret;
       break;
     };
     case INTSXP:
     {
-      jl_array_t *ret = CreateArray(jl_int32_type, jl_tuple_len(dims), dims);
-      JL_GC_PUSH1(&ret);
+      ret = CreateArray(jl_int32_type, jl_tuple_len(dims), dims);
       int *retData = (int *)jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
         retData[i] = INTEGER(Var)[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      JL_GC_POP();
-      return (jl_value_t *) ret;
       break;
     }
     case REALSXP:
     {
-      jl_array_t *ret = CreateArray(jl_float64_type, jl_tuple_len(dims), dims);
-      JL_GC_PUSH1(&ret);
+      ret = CreateArray(jl_float64_type, jl_tuple_len(dims), dims);
       double *retData = (double *)jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
         retData[i] = REAL(Var)[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      JL_GC_POP();
-      return (jl_value_t *) ret;
       break;
     }
     case STRSXP:
     {
-      jl_array_t *ret;
       if (!IS_ASCII(Var))
         ret = CreateArray(jl_utf8_string_type, jl_tuple_len(dims), dims);
       else
         ret = CreateArray(jl_ascii_string_type, jl_tuple_len(dims), dims);
-      JL_GC_PUSH1(&ret);
       jl_value_t **retData = jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
         if (!IS_ASCII(Var))
@@ -108,33 +100,31 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
         else
           retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      JL_GC_POP();
-      return (jl_value_t *) ret;
       break;
     }
     case VECSXP:
     {
       char eltcmd[eltsize];
-      jl_tuple_t *ret = jl_alloc_tuple(length(Var));
-      JL_GC_PUSH1(&ret);
+      jl_tuple_t *ret1 = jl_alloc_tuple(length(Var));
+      JL_GC_PUSH1(&ret1);
       for (int i = 0; i < length(Var); i++)
       {
         snprintf(eltcmd, eltsize, "%selement%d", VarName, i);
         jl_tupleset(ret, i, R_Julia_MD(VECTOR_ELT(Var, i), eltcmd));
       }
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
+      ret=(jl_value_t *)ret1;
       JL_GC_POP();
-      return (jl_value_t *) ret;
+      break;
     }
     default:
     {
-      return (jl_value_t *) jl_nothing;
+      ret=(jl_value_t *)jl_nothing;
+      break; 
     }
-    break;
-    }
-    return (jl_value_t *) jl_nothing;
-  }
-  return (jl_value_t *) jl_nothing;
+   }
+  JL_GC_POP();
+  return (jl_value_t *)ret;
 }
 
 //first pass creat array then convert it to DataArray
