@@ -1,15 +1,13 @@
 library(rjulia)
 #init embedding julia,paraments are julia_home and disable_gc
-if(.Platform$OS.type == "unix") {
- julia_init("/usr/bin",F,T)  
-}
-else
-{  
- if (.Platform$r_arch=="x64")   
-  julia_init("c:/julia/bin",F,T)
- else
-   julia_init("c:/julia32/bin",F,T)  
-}
+if(.Platform$OS.type == "unix") julia_init("/usr/bin",F,T) else 
+{
+  if (.Platform$r_arch=="x64")   
+   {julia_init("c:/julia/bin",F,T)}
+  else 
+   {julia_init("c:/julia32/bin",F,T)}  
+ }
+
 
 jloaddf()
 y<-j2r('df = DataFrame(A = 1:4, B = ["M", "F", "F", "M"])')
