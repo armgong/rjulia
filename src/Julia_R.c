@@ -497,6 +497,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
     UNPROTECT(1);
   }
   JL_GC_POP();
+  jl_eval_string("Varname0tmp=0;");
   return ans;
 }
 
@@ -567,11 +568,11 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
   char *strData = "Varname0tmp.refs";
-  char *strlevels = "VarPools=Array(ASCIIString,length(Varname0tmp.pool))\r\n"
+  char *strlevels = "Varname0tmp.pool";/*"VarPools=Array(ASCIIString,length(Varname0tmp.pool))\r\n"
                     "for i in 1:length(Varname0tmp.pool)\r\n"
                     "VarPools[i]=string(Varname0tmp.pool[i])\r\n"
                     "end\r\n"
-                    "VarPools\r\n";
+                    "VarPools\r\n";*/
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
   jl_value_t *retData = jl_eval_string(strData);
   jl_value_t *retlevels = jl_eval_string(strlevels);
@@ -584,6 +585,7 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
   //second setAttrib R levels and class
   SEXP levels = Julia_R_MD(retlevels);
   JL_GC_POP();
+  jl_eval_string("Varname0tmp=0");  
   setAttrib(ans, R_LevelsSymbol, levels);
   setAttrib(ans, R_ClassSymbol, mkString("factor"));
   UNPROTECT(1);
@@ -643,6 +645,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   //set class as data frame
   setAttrib(ans, R_ClassSymbol, mkString("data.frame"));
   UNPROTECT(1);
+  jl_eval_string("DataFrameName0tmp=0;");
   return ans;
 }
 

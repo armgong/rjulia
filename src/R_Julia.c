@@ -107,6 +107,9 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       {
         snprintf(eltcmd, eltsize, "%selement%d", VarName, i);
         jl_tupleset((jl_tuple_t *)ret, i, R_Julia_MD(VECTOR_ELT(Var, i), eltcmd));
+        //clear
+        snprintf(eltcmd, eltsize, "%selement%d=0;", VarName, i);
+        jl_eval_string(eltcmd);
       }
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
@@ -130,6 +133,7 @@ static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolAr
   jl_set_global(jl_main_module, jl_symbol("TransVarNamebool"), (jl_value_t *)mboolArray);
   snprintf(evalcmd, evalsize, "%s=DataArray(TransVarName,TransVarNamebool)", VarName);
   jl_value_t *ret = jl_eval_string(evalcmd);
+  jl_eval_string("TransVarName=0;TransVarNamebool=0;");
   if (jl_exception_occurred())
   {
     jl_show(jl_stderr_obj(), jl_exception_occurred());
@@ -279,6 +283,7 @@ static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpo
   ret3=jl_eval_string(evalcmd);
   jl_value_t *ret = jl_eval_string((char *)VarName);
   JL_GC_POP();
+  jl_eval_string("varpools=0;varrefs=0;");
   if (jl_exception_occurred())
   {
     jl_show(jl_stderr_obj(), jl_exception_occurred());
@@ -367,6 +372,11 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
     else
       snprintf(evalcmd, evalsize, "%s[symbol(\"%s\")]=%s", VarName, onename, eltcmd);
     jl_eval_string(evalcmd);
+    
+    //clear
+    snprintf(eltcmd, eltsize, "%sdfelt%d=0;", VarName, i + 1);
+    jl_eval_string(eltcmd);
+
     if (jl_exception_occurred())
     {
       jl_show(jl_stderr_obj(), jl_exception_occurred());
