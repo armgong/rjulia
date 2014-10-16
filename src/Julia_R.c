@@ -608,7 +608,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
 
   //gc args
   jl_value_t *eachcolvector=NULL;
-  jl_value_t *allcolvector=jl_get_field(Var,jl_symbol("columns"));
+  jl_value_t *allcolvector=jl_get_field(Var,"columns");
   jl_value_t *ret=NULL
   JL_GC_PUSH3(&allcolvector,&eachcolvector,&ret);
   jl_function_t *getindex=jl_get_function(jl_main_module,"getindex");
