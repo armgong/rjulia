@@ -370,15 +370,15 @@ static SEXP Julia_R_Scalar_NA(jl_value_t *Var)
   UNPROTECT(1);
   return ans;
 }
-
 static SEXP Julia_R_MD_NA(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  char *strData = "Varname0tmp.data";
-  char *strNA = "bitunpack(Varname0tmp.na)";
-  jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-  jl_value_t *retData = jl_eval_string(strData);
-  jl_value_t *retNA = jl_eval_string(strNA);
+  //char *strData = "Varname0tmp.data";
+  //char *strNA = "bitunpack(Varname0tmp.na)";
+  //jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
+  jl_value_t *retData =jl_get_field(Var,"data");//jl_eval_string(strData);
+  jl_function_t *bitunpack=jl_get_function(jl_main_module,"bitunpack");
+  jl_value_t *retNA = jl_call1(bitunpack,jl_get_field(Var,"na"));//jl_eval_string(strNA);
   jl_value_t *val=NULL;
   JL_GC_PUSH3(&retData,&retNA,&val);
 
@@ -497,7 +497,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
     UNPROTECT(1);
   }
   JL_GC_POP();
-  jl_eval_string("Varname0tmp=0;");
+  //jl_eval_string("Varname0tmp=0;");
   return ans;
 }
 
@@ -567,15 +567,16 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
 static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  char *strData = "Varname0tmp.refs";
-  char *strlevels = "Varname0tmp.pool";/*"VarPools=Array(ASCIIString,length(Varname0tmp.pool))\r\n"
-                    "for i in 1:length(Varname0tmp.pool)\r\n"
-                    "VarPools[i]=string(Varname0tmp.pool[i])\r\n"
-                    "end\r\n"
-                    "VarPools\r\n";*/
+  /*char *strData = "Varname0tmp.refs";
+  char *strlevels = "Varname0tmp.pool";
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
   jl_value_t *retData = jl_eval_string(strData);
   jl_value_t *retlevels = jl_eval_string(strlevels);
+  */
+  jl_value_t *retData =jl_get_field(Var,"refs");
+  jl_value_t *retNA = jl_get_field(Var,"pool"));
+  
+
   JL_GC_PUSH2(&retData,&retlevels);
   //first get refs data,dims=n
   //caution this convert to int32 SEXP,it should be ok in reality,
@@ -585,7 +586,7 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
   //second setAttrib R levels and class
   SEXP levels = Julia_R_MD(retlevels);
   JL_GC_POP();
-  jl_eval_string("Varname0tmp=0");  
+  //jl_eval_string("Varname0tmp=0");  
   setAttrib(ans, R_LevelsSymbol, levels);
   setAttrib(ans, R_ClassSymbol, mkString("factor"));
   UNPROTECT(1);
@@ -597,31 +598,40 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   SEXP ans, names, rownames;
   char evalcmd[evalsize];
   int i;
-  const char *dfname = "DataFrameName0tmp";
-  jl_set_global(jl_main_module, jl_symbol(dfname), (jl_value_t *)Var);
+  //const char *dfname = "DataFrameName0tmp";
+  //jl_set_global(jl_main_module, jl_symbol(dfname), (jl_value_t *)Var);
   //Get Frame cols
-  snprintf(evalcmd, evalsize, "size(%s,2)", dfname);
+  //snprintf(evalcmd, evalsize, "size(%s,2)", dfname);
+
+  jl_function_t *size=jl_get_function(jl_main_module,"size");
+  int collen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(2))));
+
   //gc args
   jl_value_t *eachcolvector=NULL;
-  jl_value_t *ret=NULL;
-  JL_GC_PUSH2(&eachcolvector,&ret);
-  
-  int collen = jl_unbox_long(jl_eval_string(evalcmd));
+  jl_value_t *allcolvector=jl_get_field(Var,jl_symbol("columns"));
+  jl_value_t *ret=NULL
+  JL_GC_PUSH3(&allcolvector,&eachcolvector,&ret);
+  jl_function_t *getindex=jl_get_function(jl_main_module,"getindex");
+   
+  //int collen = jl_unbox_long(jl_eval_string(evalcmd));
   //Create SEXP for Each Column and assign
   PROTECT(ans = allocVector(VECSXP, collen));
   for (i = 0; i < collen; i++)
   {
-    snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
-    eachcolvector = jl_eval_string(evalcmd);
-    snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
-    if (jl_unbox_bool(jl_eval_string(evalcmd)))
+    //snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
+    //eachcolvector = jl_eval_string(evalcmd);
+    //snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
+    eachcolvector=jl_call2(getindex,allcolvector,jl_box_int32(i+1)));
+   if (strcmp(jl_typeof_str(eachcolvector), "PooledDataArray") == 0 )
       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
     else
       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
   }
   //set names attribute
-  snprintf(evalcmd, evalsize, "names(%s)", dfname);
-  ret = jl_eval_string(evalcmd);
+  //snprintf(evalcmd, evalsize, "names(%s)", dfname);
+  jl_function_t *names=jl_get_function(jl_main_module,"names");
+  ret=jl_call1(names,Var); 
+  //ret = jl_eval_string(evalcmd);
   if (jl_is_array(ret))
   {
     PROTECT(names = allocVector(STRSXP, collen));
@@ -635,8 +645,9 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   }
   JL_GC_POP();
   //set row names
-  snprintf(evalcmd, evalsize, "size(%s,1)", dfname);
-  int rowlen=jl_unbox_long(jl_eval_string(evalcmd));
+  //snprintf(evalcmd, evalsize, "size(%s,1)", dfname);
+  //int rowlen=jl_unbox_long(jl_eval_string(evalcmd));
+  int rowlen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(1))));
   PROTECT(rownames = allocVector(INTSXP, rowlen));
   for (i = 0; i < rowlen; i++)
     INTEGER(rownames)[i] = i + 1;
@@ -645,7 +656,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   //set class as data frame
   setAttrib(ans, R_ClassSymbol, mkString("data.frame"));
   UNPROTECT(1);
-  jl_eval_string("DataFrameName0tmp=0;");
+  //jl_eval_string("DataFrameName0tmp=0;");
   return ans;
 }
 
