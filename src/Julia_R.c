@@ -596,12 +596,7 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
 {
   SEXP ans, names, rownames;
-  char evalcmd[evalsize];
   int i;
-  //const char *dfname = "DataFrameName0tmp";
-  //jl_set_global(jl_main_module, jl_symbol(dfname), (jl_value_t *)Var);
-  //Get Frame cols
-  //snprintf(evalcmd, evalsize, "size(%s,2)", dfname);
 
   jl_function_t *size=jl_get_function(jl_main_module,"size");
   int collen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(2)));
@@ -613,14 +608,10 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   JL_GC_PUSH3(&allcolvector,&eachcolvector,&ret);
   jl_function_t *getindex=jl_get_function(jl_main_module,"getindex");
 
-  //int collen = jl_unbox_long(jl_eval_string(evalcmd));
   //Create SEXP for Each Column and assign
   PROTECT(ans = allocVector(VECSXP, collen));
   for (i = 0; i < collen; i++)
   {
-    //snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
-    //eachcolvector = jl_eval_string(evalcmd);
-    //snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
     eachcolvector=jl_call2(getindex,allcolvector,jl_box_int32(i+1));
    if (strcmp(jl_typeof_str(eachcolvector), "PooledDataArray") == 0 ||strcmp(jl_typeof_str(Var), "PooledDataVector") == 0)
       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
@@ -631,7 +622,6 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   //snprintf(evalcmd, evalsize, "names(%s)", dfname);
   jl_function_t *names1=jl_get_function(jl_main_module,"names");
   ret=jl_call1(names1,Var);
-  //ret = jl_eval_string(evalcmd);
   if (jl_is_array(ret))
   {
     PROTECT(names = allocVector(STRSXP, collen));
@@ -645,8 +635,6 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   }
   JL_GC_POP();
   //set row names
-  //snprintf(evalcmd, evalsize, "size(%s,1)", dfname);
-  //int rowlen=jl_unbox_long(jl_eval_string(evalcmd));
   int rowlen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(1)));
   PROTECT(rownames = allocVector(INTSXP, rowlen));
   for (i = 0; i < rowlen; i++)
