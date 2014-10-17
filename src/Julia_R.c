@@ -20,7 +20,7 @@ Copyright (C) 2014 by Yu Gong
 #define jlfloat_to_r          PROTECT(ans = allocArray(REALSXP, dims));\
     for (size_t i = 0; i < len; i++)\
       REAL(ans)[i] = p[i];\
-    UNPROTECT(1);    
+    UNPROTECT(1);
 #define jlbigint_to_r       bool isInt32=true;\
     for (size_t ii=0;ii<len;ii++)\
     {\
@@ -53,7 +53,7 @@ Copyright (C) 2014 by Yu Gong
       else\
         INTEGER(ans)[i] = p[i];\
     }\
-    UNPROTECT(1);    
+    UNPROTECT(1);
 #define jlfloat_to_r_na        PROTECT(ans = allocArray(REALSXP, dims));\
     for (size_t i = 0; i < len; i++)\
     {\
@@ -62,7 +62,7 @@ Copyright (C) 2014 by Yu Gong
       else\
         REAL(ans)[i] = p[i];\
     }\
-    UNPROTECT(1);    
+    UNPROTECT(1);
 #define jlbigint_to_r_na    bool isInt32=true;\
   for (size_t ii=0;ii<len;ii++)\
   {\
@@ -182,7 +182,7 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
     if (inInt32Range(tmpfloat))
      PROTECT(ans = ScalarInteger((int32_t)jl_unbox_int64(Var)));
     else
-     PROTECT(ans = ScalarReal(tmpfloat)); 
+     PROTECT(ans = ScalarReal(tmpfloat));
     UNPROTECT(1);
   }
   //more integer type
@@ -295,7 +295,7 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     if (biginttodouble)
      {jlfloat_to_r;}
     else
-     {jlbigint_to_r;}  
+     {jlbigint_to_r;}
   }
   //more integer type
   else if (jl_is_int8(val))
@@ -514,9 +514,9 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
   else
     val = jl_arrayref((jl_array_t *)Var, 0);
   int len = jl_array_len(Var);
-  if (len == 0) 
+  if (len == 0)
   {
-   JL_GC_POP(); 
+   JL_GC_POP();
    return ans;
   }
 
@@ -574,19 +574,19 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
   jl_value_t *retlevels = jl_eval_string(strlevels);
   */
   jl_value_t *retData =jl_get_field(Var,"refs");
-  jl_value_t *retNA = jl_get_field(Var,"pool"));
-  
+  jl_value_t *retNA = jl_get_field(Var,"pool");
+  //jl_value_t *retlevels=NULL;
 
-  JL_GC_PUSH2(&retData,&retlevels);
+  JL_GC_PUSH2(&retData,&retNA);
   //first get refs data,dims=n
   //caution this convert to int32 SEXP,it should be ok in reality,
   //but if have a lot factor may be cause int32 overrun.
   ans = Julia_R_MD_INT(retData);
   PROTECT(ans);
   //second setAttrib R levels and class
-  SEXP levels = Julia_R_MD(retlevels);
+  SEXP levels = Julia_R_MD(retNA);
   JL_GC_POP();
-  //jl_eval_string("Varname0tmp=0");  
+  //jl_eval_string("Varname0tmp=0");
   setAttrib(ans, R_LevelsSymbol, levels);
   setAttrib(ans, R_ClassSymbol, mkString("factor"));
   UNPROTECT(1);
@@ -604,15 +604,15 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   //snprintf(evalcmd, evalsize, "size(%s,2)", dfname);
 
   jl_function_t *size=jl_get_function(jl_main_module,"size");
-  int collen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(2))));
+  int collen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(2)));
 
   //gc args
   jl_value_t *eachcolvector=NULL;
   jl_value_t *allcolvector=jl_get_field(Var,"columns");
-  jl_value_t *ret=NULL
+  jl_value_t *ret=NULL;
   JL_GC_PUSH3(&allcolvector,&eachcolvector,&ret);
   jl_function_t *getindex=jl_get_function(jl_main_module,"getindex");
-   
+
   //int collen = jl_unbox_long(jl_eval_string(evalcmd));
   //Create SEXP for Each Column and assign
   PROTECT(ans = allocVector(VECSXP, collen));
@@ -621,16 +621,16 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
     //snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
     //eachcolvector = jl_eval_string(evalcmd);
     //snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
-    eachcolvector=jl_call2(getindex,allcolvector,jl_box_int32(i+1)));
-   if (strcmp(jl_typeof_str(eachcolvector), "PooledDataArray") == 0 )
+    eachcolvector=jl_call2(getindex,allcolvector,jl_box_int32(i+1));
+   if (strcmp(jl_typeof_str(eachcolvector), "PooledDataArray") == 0 ||strcmp(jl_typeof_str(Var), "PooledDataVector") == 0)
       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
     else
       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
   }
   //set names attribute
   //snprintf(evalcmd, evalsize, "names(%s)", dfname);
-  jl_function_t *names=jl_get_function(jl_main_module,"names");
-  ret=jl_call1(names,Var); 
+  jl_function_t *names1=jl_get_function(jl_main_module,"names");
+  ret=jl_call1(names1,Var);
   //ret = jl_eval_string(evalcmd);
   if (jl_is_array(ret))
   {
@@ -647,7 +647,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   //set row names
   //snprintf(evalcmd, evalsize, "size(%s,1)", dfname);
   //int rowlen=jl_unbox_long(jl_eval_string(evalcmd));
-  int rowlen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(1))));
+  int rowlen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(1)));
   PROTECT(rownames = allocVector(INTSXP, rowlen));
   for (i = 0; i < rowlen; i++)
     INTEGER(rownames)[i] = i + 1;
@@ -688,7 +688,7 @@ SEXP Julia_R(jl_value_t *Var)
     else if (jl_is_DataArray(Var))
       ans = Julia_R_MD_NA(Var);
     else if (jl_is_PooledDataArray(Var))
-      ans = Julia_R_MD_NA_Factor(Var);    
+      ans = Julia_R_MD_NA_Factor(Var);
   }
   else if (jl_is_tuple(Var))
   {
