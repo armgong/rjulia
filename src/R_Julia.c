@@ -33,9 +33,7 @@ static jl_tuple_t *RDims_JuliaTuple(SEXP Var)
     int ndims = LENGTH(dims);
     d = jl_alloc_tuple(ndims);
     for (size_t i = 0; i < ndims; i++)
-    {
       jl_tupleset(d, i, jl_box_long(INTEGER(dims)[i]));
-    }
   }
   else     //vector
   {
@@ -64,7 +62,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       for (size_t i = 0; i < jl_array_len(ret); i++)
         retData[i] = LOGICAL(Var)[i];
       break;
-    };
+    }
     case INTSXP:
     {
       ret = CreateArray(jl_int32_type, jl_tuple_len(dims), dims);
@@ -151,7 +149,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         }
       }
       break;
-    };
+    }
     case INTSXP:
     {
       ans=jl_call2(DataArray,(jl_value_t*) jl_int32_type,(jl_value_t*) dims);
@@ -240,8 +238,6 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   if (LENGTH(Var)== 0||levels == R_NilValue||TYPEOF(Var)!=INTSXP)
     return jl_nothing;
   
-  
-
   //create string array for levels in julia
   jl_value_t *ans=NULL;
   jl_value_t *ret=NULL;
@@ -280,7 +276,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   return ans;
 }
 
-static void Julia_MD_NA_Factor(jl_value_t *retelt,SEXP Var)
+static void Julia_1D_NA_Factor(jl_value_t *retelt,SEXP Var)
 {
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
   if (LENGTH(Var)== 0||levels == R_NilValue||TYPEOF(Var)!=INTSXP)
@@ -289,8 +285,9 @@ static void Julia_MD_NA_Factor(jl_value_t *retelt,SEXP Var)
   jl_value_t *ret=NULL;
   jl_value_t *ret1=NULL;
   jl_value_t **retData1 = NULL;
+
   JL_GC_PUSH2(&ret, &ret1);
-  ret =jl_get_field(retelt,"refs");
+  ret=jl_get_field(retelt,"refs");
   int *retData = (int *)jl_array_data(ret);
   for (size_t i = 0; i < jl_array_len(ret); i++)
   {
@@ -316,18 +313,19 @@ static void Julia_MD_NA_Factor(jl_value_t *retelt,SEXP Var)
   JL_GC_POP();
 }
 
-static void Julia_MD_NA(jl_value_t *retelt,SEXP Var)
+static void Julia_1D_NA(jl_value_t *retelt,SEXP Var)
 {
  if ((LENGTH(Var)) == 0)
     return ;
 
- jl_tuple_t *dims = RDims_JuliaTuple(Var);
  jl_value_t *ret =NULL;
  jl_value_t *ret1 =NULL;
- JL_GC_PUSH3(&ret, &ret1,&dims);
+ JL_GC_PUSH2(&ret, &ret1);
+ 
  ret =jl_get_field(retelt,"data");
  ret1 =jl_get_field(retelt,"na");
  jl_function_t *setindex=jl_get_function(jl_main_module,"setindex!");
+ 
  switch (TYPEOF(Var))
    {
     case LGLSXP:
@@ -425,16 +423,20 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
   const char *onename;
   jl_array_t *ret1=NULL;
   jl_array_t *retName=NULL;
+  jl_array_t *retfactor=NULL;
   jl_value_t *ans=NULL;
-  JL_GC_PUSH3(&ret1, &retName,&ans);
+  JL_GC_PUSH4(&ret1, &retName,&retfactor,&ans);
+
   ret1=jl_alloc_array_1d(jl_apply_array_type(jl_datatype_type, 1), len);
   retName=jl_alloc_array_1d(jl_apply_array_type(jl_symbol_type, 1), len);
+  retfactor=jl_alloc_array_1d(jl_apply_array_type(jl_bool_type, 1), len);
   for (size_t i = 0; i < len; i++)
   {
    onename = CHAR(STRING_ELT(names, i));
    jl_arrayset(retName,(jl_value_t *)jl_symbol(onename), i);
    elt = VECTOR_ELT(Var, i);
-   switch (TYPEOF(Var))
+   jl_arrayset(retfactor,jl_box_bool(0), i);
+   switch (TYPEOF(elt))
    {
     case LGLSXP:
     {
@@ -443,8 +445,18 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
     };
     case INTSXP:
     {
-      jl_arrayset(ret1,(jl_value_t *)jl_int32_type, i);
-      break;
+      //if factor then need pooled array
+      if ( getAttrib(elt, R_LevelsSymbol)!=R_NilValue)
+       {
+        jl_arrayset(retfactor,jl_box_bool(1), i);
+        if (!IS_ASCII(elt))
+         jl_arrayset(ret1,(jl_value_t *)jl_ascii_string_type, i);
+        else
+         jl_arrayset(ret1,(jl_value_t *)jl_utf8_string_type, i);
+       }
+       else  
+         jl_arrayset(ret1,(jl_value_t *)jl_int32_type, i);
+       break;
     }
     case REALSXP:
     {
@@ -453,7 +465,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
     }
     case STRSXP:
     {
-      if (!IS_ASCII(Var))
+      if (!IS_ASCII(elt))
        jl_arrayset(ret1,(jl_value_t *)jl_ascii_string_type, i);
       else
        jl_arrayset(ret1,(jl_value_t *)jl_utf8_string_type, i);
@@ -466,29 +478,32 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
   }
   //Create data Frame
    jl_function_t *DataFrame=jl_get_function(jl_main_module,"DataFrame");
-   ans=jl_call3(DataFrame,(jl_value_t *)ret1,(jl_value_t *)retName,jl_box_int32(rows));
+   jl_value_t **argv;
+   JL_GC_PUSHARGS(argv,4);
+   argv[0]=(jl_value_t *)ret1;
+   argv[1]=(jl_value_t *)retName;
+   argv[2]=(jl_value_t *)retfactor;
+   argv[3]=jl_box_int32(rows);
+   ans=jl_call(DataFrame,argv,4);
+   JL_GC_POP();
+
    jl_function_t *getindex=jl_get_function(jl_main_module,"getindex");
-   jl_value_t  *allret=jl_get_field(ans,"columns");
-   jl_value_t *retelt=NULL;
   //assign value
   for (size_t i = 0; i < len; i++)
   {
     elt = VECTOR_ELT(Var, i);
-    retelt=jl_call2(getindex,allret,jl_box_int32(i));
+    jl_value_t *retelt=jl_call2(getindex,ans,jl_box_int32(i+1));
     JL_GC_PUSH1(&retelt);
     //vector is factor or not
     if (getAttrib(elt, R_LevelsSymbol) != R_NilValue)
-      Julia_MD_NA_Factor(retelt,elt);
+      Julia_1D_NA_Factor(retelt,elt);
     else
-      Julia_MD_NA(retelt,elt);
+      Julia_1D_NA(retelt,elt);
     JL_GC_POP();
    } 
-
   if (VarName!=NULL && strlen(VarName)>0)
    jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ans);
- 
   JL_GC_POP();
-
   if (jl_exception_occurred())
     {
       jl_show(jl_stderr_obj(), jl_exception_occurred());
