@@ -654,39 +654,45 @@ SEXP Julia_R(jl_value_t *Var)
   SEXP ans = R_NilValue;
   if (jl_is_nothing(Var) || jl_is_null(Var))
     return ans;
-
-  //Array To Vector
-  JL_GC_PUSH1(&Var);
-  if (jl_is_array(Var))
+  JL_TRY
   {
-    ans = Julia_R_MD(Var);
-  }
-  else if (jl_is_DataArrayFrame(Var))
-  {
-    //try to load DataArrays DataFrames package
-    if (!LoadDF())
+    //Array To Vector
+    JL_GC_PUSH1(&Var);
+    if (jl_is_array(Var))
     {
-      JL_GC_POP();
-      return R_NilValue;
+      ans = Julia_R_MD(Var);
     }
-    if (jl_is_NAtype(Var))
-      ans = Julia_R_Scalar_NA(Var);
-    else if (jl_is_DataFrame(Var))
-      ans = Julia_R_MD_NA_DataFrame(Var);
-    else if (jl_is_DataArray(Var))
-      ans = Julia_R_MD_NA(Var);
-    else if (jl_is_PooledDataArray(Var))
-      ans = Julia_R_MD_NA_Factor(Var);
+    else if (jl_is_DataArrayFrame(Var))
+    {
+      //try to load DataArrays DataFrames package
+      if (!LoadDF())
+      {
+        JL_GC_POP();
+        return R_NilValue;
+      }
+      if (jl_is_NAtype(Var))
+        ans = Julia_R_Scalar_NA(Var);
+      else if (jl_is_DataFrame(Var))
+        ans = Julia_R_MD_NA_DataFrame(Var);
+      else if (jl_is_DataArray(Var))
+        ans = Julia_R_MD_NA(Var);
+      else if (jl_is_PooledDataArray(Var))
+        ans = Julia_R_MD_NA_Factor(Var);
+    }
+    else if (jl_is_tuple(Var))
+    {
+        PROTECT(ans = allocVector(VECSXP, jl_tuple_len(Var)));
+        for (int i = 0; i < jl_tuple_len(Var); i++)
+          SET_ELEMENT(ans, i, Julia_R(jl_tupleref(Var, i)));
+        UNPROTECT(1);
+    }
+    else
+      ans = Julia_R_Scalar(Var);
+    JL_GC_POP();
+    jl_exception_clear();
   }
-  else if (jl_is_tuple(Var))
+  JL_CATCH 
   {
-      PROTECT(ans = allocVector(VECSXP, jl_tuple_len(Var)));
-      for (int i = 0; i < jl_tuple_len(Var); i++)
-        SET_ELEMENT(ans, i, Julia_R(jl_tupleref(Var, i)));
-      UNPROTECT(1);
-  }
-  else
-    ans = Julia_R_Scalar(Var);
-  JL_GC_POP();
+  }  
   return ans;
 }
