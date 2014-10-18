@@ -38,7 +38,7 @@ to be done
 
 **Important Information**
 -------------
-now develop on two branch,master branch is stable version,nextgen branch is development version.nextgen branch uses pure julia C API to call julia function, don't mix julia script and c code,*so it  fast than master branch and use less memory ,but  less stable*.
+now develop on two branch,master branch is stable version,nextgen branch is development version.nextgen branch uses pure julia C API to call julia function, don't mix julia script and c code,**so it  fast than master branch and use less memory ,but  less stable**.
 
 if you want use nextgen branch, please patch your DataFrames package, add one function into it:
 ```julia
