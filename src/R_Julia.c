@@ -516,32 +516,60 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 //Convert R Type To Julia,which not contain NA
 SEXP R_Julia(SEXP Var, SEXP VarNam)
 {
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD(Var, VarName);
+  JL_TRY 
+  {
+    const char *VarName = CHAR(STRING_ELT(VarNam, 0));
+    R_Julia_MD(Var, VarName);
+    jl_exception_clear();
+  }
+  JL_CATCH 
+  {
+  }
   return R_NilValue;
 }
 
 //Convert R Type To Julia,which contain NA
 SEXP R_Julia_NA(SEXP Var, SEXP VarNam)
 {
-  LoadDF();
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD_NA(Var, VarName);
+  JL_TRY 
+  {
+   LoadDF();
+   const char *VarName = CHAR(STRING_ELT(VarNam, 0));
+   R_Julia_MD_NA(Var, VarName);
+   jl_exception_clear();
+  }
+  JL_CATCH 
+  {
+  }  
   return R_NilValue;
 }
 //Convert R factor To Julia,which contain NA
 SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarNam)
 {
-  LoadDF();
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD_NA_Factor(Var, VarName);
+  JL_TRY 
+  {
+   LoadDF();
+   const char *VarName = CHAR(STRING_ELT(VarNam, 0));
+   R_Julia_MD_NA_Factor(Var, VarName);
+   jl_exception_clear();
+  }
+  JL_CATCH 
+  {
+  }    
   return R_NilValue;
 }
 //Convert R data frame To Julia
 SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP VarNam)
 {
-  LoadDF();
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD_NA_DataFrame(Var, VarName);
+  JL_TRY 
+  {
+   LoadDF();
+   const char *VarName = CHAR(STRING_ELT(VarNam, 0));
+   R_Julia_MD_NA_DataFrame(Var, VarName);
+   jl_exception_clear();
+  }
+  JL_CATCH 
+  {
+  }  
   return R_NilValue;
 }
