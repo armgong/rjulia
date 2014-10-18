@@ -3,12 +3,10 @@ library(rjulia)
 if(.Platform$OS.type == "unix") julia_init("/usr/bin",F,T) else 
 {
   if (.Platform$r_arch=="x64")   
-   {julia_init("c:/julia/bin",F,T)}
+  {julia_init("c:/julia/64/bin",F,T)}
   else 
-   {julia_init("c:/julia32/bin",F,T)}  
- }
-
-
+  {julia_init("c:/julia/32/bin",F,T)}  
+}
 f=function(n){
   for (i in 1:n)
   {   
@@ -109,7 +107,7 @@ f=function(n){
 f(1)
 f(10)
 xdd<-f(10000)
-
+rm(list=ls())
 
 julia_void_eval("using DataArrays,DataFrames")
 
@@ -119,11 +117,11 @@ for (i in 1:10000)
   x[2]<-NA
   r2j(x,"ttt")
   y<-j2r("ttt[10]")
-
+  
   y<-j2r("ttt[2]")
-
+  
   y<-j2r("ttt")
-
+  
   
   
   
@@ -131,11 +129,11 @@ for (i in 1:10000)
   x[2]<-NA
   r2j(x,"ttt")
   y<-j2r("ttt[3]")
-
+  
   y<-j2r("ttt[2]")
-
+  
   y<-j2r("ttt")
-
+  
   
   
   
@@ -143,21 +141,21 @@ for (i in 1:10000)
   x[2]<-NA
   r2j(x,"ttt")
   y<-j2r("ttt[10]")
-
+  
   y<-j2r("ttt[2]")
-
+  
   y<-j2r("ttt")
-
+  
   
   x<-c("x","y","z","u","v","w","a")
   x[2]<-NA
   r2j(x,"ttt")
   y<-j2r("ttt[3]")
-
+  
   y<-j2r("ttt[2]")
-
+  
   y<-j2r("ttt")
-
+  
   x<-matrix(1:9,c(3,3))
   x[1]=NA
   x[5]<-NA
@@ -165,13 +163,13 @@ for (i in 1:10000)
   x
   r2j(x,"xy")
   y<-j2r("xy")
-
+  
   y<-j2r("length(xy)")
-
+  
   y<-j2r("length(xy.na)")
-
+  
   y<-j2r("length(xy.data)")
-
+  
   
   x<-1:3
   x1<-c("hello","world")
@@ -179,42 +177,42 @@ for (i in 1:10000)
   z<-list(x,x1,y)
   r2j(z,"tupletest")
   y<-j2r("tupletest")
-
+  
   
   zz<-list(x,x1,y,z)
   r2j(zz,"tupletest")
   y<-j2r("tupletest")
-
+  
   #uint 8
   y<-j2r("x=convert(Uint8,1)")
-
+  
   #uint 16
   y<-j2r("x=convert(Uint16,1)")
-
+  
   #uint 32
   y<-j2r("x=convert(Uint32,1)")
-
+  
   #uint 64
   y<-j2r("x=convert(Uint64,1)")
-
+  
   #int 8
   y<-j2r("x=convert(Int8,1)")
-
+  
   #int 16
   y<-j2r("x=convert(Int16,1)")
-
+  
   #int 32
   y<-j2r("x=convert(Int32,1)")
-
+  
   #int 64
   y<-j2r("x=convert(Int64,1)")
-
+  
   #float32
   y<-j2r("x=convert(Float32,1.01)")
-
+  
   #float64
   y<-j2r("x=convert(Float64,1.01)")
-
+  
   
   #vector
   #uint 8
@@ -227,12 +225,12 @@ for (i in 1:10000)
   y<-j2r("x1=convert(Uint16,tt[1])")
   y<-j2r("x2=convert(Uint16,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   #uint 32
   y<-j2r("x1=convert(Uint32,tt[1])")
   y<-j2r("x2=convert(Uint32,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   #uint 64
   y<-j2r("x1=convert(Uint64,tt[1])")
   y<-j2r("x2=convert(Uint64,tt[2])")
@@ -241,22 +239,22 @@ for (i in 1:10000)
   y<-j2r("x1=convert(Int8,tt[1])")
   y<-j2r("x2=convert(Int8,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   #int 16
   y<-j2r("x1=convert(Int16,tt[1])")
   y<-j2r("x2=convert(Int16,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   #int 32
   y<-j2r("x1=convert(Int32,tt[1])")
   y<-j2r("x2=convert(Int32,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   #int 64
   y<-j2r("x1=convert(Int64,tt[1])")
   y<-j2r("x2=convert(Int64,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   
   x<-1.1:10.1
   #float32
@@ -264,12 +262,12 @@ for (i in 1:10000)
   y<-j2r("x1=convert(Float32,tt[1])")
   y<-j2r("x2=convert(Float32,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   #float64
   y<-j2r("x1=convert(Float64,tt[1])")
   y<-j2r("x2=convert(Float64,tt[2])")
   y<-j2r("x=[x1,x2]")
-
+  
   y<-j2r('df = DataFrame(A = 1:4, B = ["M", "F", "F", "M"])')
   typeof(y)
   is.data.frame(y)
@@ -280,21 +278,25 @@ for (i in 1:10000)
   y<-j2r('df = DataFrame(A = [1, 1, 1, 2, 2, 2],B = ["X", "X", "X", "Y", "Y", "Y"])')
   y<-j2r('pool!(df, [:A, :B])')
   y<-j2r('df')
-  #names(iris)<-c("sl","sw","pl","wl","speics")
-  #r2j(iris,"xx")
-  #y<-j2r("xx")
-  #y
+  julia_void_eval("df=0;")  
+  names(iris)<-c("sl","sw","pl","wl","speics")
+  r2j(iris,"xx")
+  y<-j2r("xx")
+  julia_void_eval("xx=0;")
+  
   cat("run time is:",i,"\n")
+  rm(list=ls())
 }
 
-julia_eval("addprocs(3)")
-for (i in 1:4)
-{
-  julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep=""))
-  y<-j2r(" fetch(r)")
-  cat("\n")
-  cat(paste("process ",i," get value:\n",sep=""))
-  print(y)
-}
-julia_eval("rmprocs(3)")
+#julia_void_eval("addprocs(3)")
+#for (i in 1:4)
+#{
+#  julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep=""))
+#  y<-j2r(" fetch(r)")
+#  cat("\n")
+#  cat(paste("process ",i," get value:\n",sep=""))
+
+#  print(y)
+#}
+#julia_void_eval("rmprocs(3)")
 
