@@ -287,14 +287,14 @@ for (i in 1:10000)
   cat("run time is:",i,"\n")
 }
 
-julia_eval("addprocs(3)")
-for (i in 1:4)
-{
-  julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep=""))
-  y<-j2r(" fetch(r)")
-  cat("\n")
-  cat(paste("process ",i," get value:\n",sep=""))
-  print(y)
-}
-julia_eval("rmprocs(3)")
+#julia_eval("addprocs(3)")
+#for (i in 1:4)
+#{
+#  julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep=""))
+#  y<-j2r(" fetch(r)")
+#  cat("\n")
+#  cat(paste("process ",i," get value:\n",sep=""))
+#  print(y)
+#}
+#julia_eval("rmprocs(3)")
 
