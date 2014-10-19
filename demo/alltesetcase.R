@@ -303,8 +303,7 @@ for (i in 1:2)
   y<-j2r(" fetch(r)")
   cat("\n")
   cat(paste("process ",i," get value:\n",sep=""))
-
   print(y)
 }
-julia_void_eval("rmprocs(1)")
+julia_void_eval("rmprocs(workers())")
 
