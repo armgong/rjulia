@@ -591,7 +591,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   int i;
 
   jl_function_t *size=jl_get_function(jl_main_module,"size");
-  int collen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(2)));
+  int collen=jl_unbox_long(jl_call2(size,Var,jl_box_long(2)));
 
   //gc args
   jl_value_t *eachcolvector=NULL;
@@ -604,7 +604,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   PROTECT(ans = allocVector(VECSXP, collen));
   for (i = 0; i < collen; i++)
   {
-    eachcolvector=jl_call2(getindex,allcolvector,jl_box_int32(i+1));
+    eachcolvector=jl_call2(getindex,allcolvector,jl_box_long(i+1));
    if (strcmp(jl_typeof_str(eachcolvector), "PooledDataArray") == 0 ||strcmp(jl_typeof_str(Var), "PooledDataVector") == 0)
       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
     else
@@ -627,7 +627,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   }
   JL_GC_POP();
   //set row names
-  int rowlen=jl_unbox_long(jl_call2(size,Var,jl_box_int32(1)));
+  int rowlen=jl_unbox_long(jl_call2(size,Var,jl_box_long(1)));
   PROTECT(rownames = allocVector(INTSXP, rowlen));
   for (i = 0; i < rowlen; i++)
     INTEGER(rownames)[i] = i + 1;

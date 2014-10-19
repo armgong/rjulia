@@ -140,12 +140,12 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         if (LOGICAL(Var)[i] == NA_LOGICAL)
         {
           retData[i] = 1;
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
           retData[i] = LOGICAL(Var)[i];
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -162,12 +162,12 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         if (INTEGER(Var)[i] == NA_INTEGER)
         {
           retData[i] = 999;
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
           retData[i] = INTEGER(Var)[i];
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -184,12 +184,12 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         if (ISNAN(REAL(Var)[i]))
         {
           retData[i] = 999.01;
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
           retData[i] = REAL(Var)[i];
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -209,7 +209,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         if (STRING_ELT(Var, i) == NA_STRING)
         {
           retData[i] = jl_cstr_to_string("999");
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
@@ -217,7 +217,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
             retData[i] = jl_cstr_to_string(translateChar0(STRING_ELT(Var, i)));
           else
             retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -245,7 +245,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   jl_value_t **retData1=NULL;
   JL_GC_PUSH3(&ret, &ret1,&ans);
   jl_function_t *PooledDataArray=jl_get_function(jl_main_module,"PooledDataArray");
-  ans=jl_call3(PooledDataArray,(jl_value_t*) jl_ascii_string_type,(jl_value_t*) jl_uint32_type,jl_box_int32(LENGTH(Var)));
+  ans=jl_call3(PooledDataArray,(jl_value_t*) jl_ascii_string_type,(jl_value_t*) jl_uint32_type,jl_box_long(LENGTH(Var)));
   ret =jl_get_field(ans,"refs");
   //int 
   int *retData = (int *)jl_array_data(ret);
@@ -336,12 +336,12 @@ static void Julia_1D_NA(jl_value_t *retelt,SEXP Var)
         if (LOGICAL(Var)[i] == NA_LOGICAL)
         {
           retData[i] = 1;
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
           retData[i] = LOGICAL(Var)[i];
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -354,12 +354,12 @@ static void Julia_1D_NA(jl_value_t *retelt,SEXP Var)
         if (INTEGER(Var)[i] == NA_INTEGER)
         {
           retData[i] = 999;
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
           retData[i] = INTEGER(Var)[i];
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -372,12 +372,12 @@ static void Julia_1D_NA(jl_value_t *retelt,SEXP Var)
         if (ISNAN(REAL(Var)[i]))
         {
           retData[i] = 999.01;
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
           retData[i] = REAL(Var)[i];
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -390,7 +390,7 @@ static void Julia_1D_NA(jl_value_t *retelt,SEXP Var)
         if (STRING_ELT(Var, i) == NA_STRING)
         {
           retData[i] = jl_cstr_to_string("999");
-          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(1),jl_box_long(i+1));
         }
         else
         {
@@ -398,7 +398,7 @@ static void Julia_1D_NA(jl_value_t *retelt,SEXP Var)
             retData[i] = jl_cstr_to_string(translateChar0(STRING_ELT(Var, i)));
           else
             retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
-          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_int32(i+1));
+          jl_call3(setindex,ret1,jl_box_bool(0),jl_box_long(i+1));
         }
       }
       break;
@@ -483,7 +483,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
    argv[0]=(jl_value_t *)ret1;
    argv[1]=(jl_value_t *)retName;
    argv[2]=(jl_value_t *)retfactor;
-   argv[3]=jl_box_int32(rows);
+   argv[3]=jl_box_long(rows);
    ans=jl_call(DataFrame,argv,4);
    JL_GC_POP();
 
@@ -492,7 +492,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
   for (size_t i = 0; i < len; i++)
   {
     elt = VECTOR_ELT(Var, i);
-    jl_value_t *retelt=jl_call2(getindex,ans,jl_box_int32(i+1));
+    jl_value_t *retelt=jl_call2(getindex,ans,jl_box_long(i+1));
     JL_GC_PUSH1(&retelt);
     //vector is factor or not
     if (getAttrib(elt, R_LevelsSymbol) != R_NilValue)
