@@ -7,6 +7,10 @@ if(.Platform$OS.type == "unix") julia_init("/usr/bin",F,T) else
   else 
   {julia_init("c:/julia/32/bin",F,T)}  
 }
+# load Julia DataFrames and DataArrays
+julia_void_eval("using DataArrays,DataFrames")
+
+
 f=function(n){
   for (i in 1:n)
   {   
@@ -107,9 +111,9 @@ f=function(n){
 f(1)
 f(10)
 xdd<-f(10000)
+cat("clear R Object begin\n")
 rm(list=ls())
-
-julia_void_eval("using DataArrays,DataFrames")
+cat("clear R Object Finish\n")
 
 for (i in 1:10000)
 {
@@ -285,7 +289,10 @@ for (i in 1:10000)
   julia_void_eval("xx=0;")
   
   cat("run time is:",i,"\n")
+  
+  cat("clear R Object begin\n")
   rm(list=ls())
+  cat("clear R Object Finish\n")
 }
 
 #julia_void_eval("addprocs(3)")

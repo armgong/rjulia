@@ -567,15 +567,8 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
 static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  /*char *strData = "Varname0tmp.refs";
-  char *strlevels = "Varname0tmp.pool";
-  jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-  jl_value_t *retData = jl_eval_string(strData);
-  jl_value_t *retlevels = jl_eval_string(strlevels);
-  */
   jl_value_t *retData =jl_get_field(Var,"refs");
   jl_value_t *retNA = jl_get_field(Var,"pool");
-  //jl_value_t *retlevels=NULL;
 
   JL_GC_PUSH2(&retData,&retNA);
   //first get refs data,dims=n
@@ -586,7 +579,6 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
   //second setAttrib R levels and class
   SEXP levels = Julia_R_MD(retNA);
   JL_GC_POP();
-  //jl_eval_string("Varname0tmp=0");
   setAttrib(ans, R_LevelsSymbol, levels);
   setAttrib(ans, R_ClassSymbol, mkString("factor"));
   UNPROTECT(1);
