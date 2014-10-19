@@ -297,7 +297,7 @@ for (i in 1:10000)
 #warning don't add too much procs in test
 #otherwise it will crash on low end machine
 julia_void_eval("addprocs(1)")
-for (i in 1:4)
+for (i in 1:2)
 {
   julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep=""))
   y<-j2r(" fetch(r)")
