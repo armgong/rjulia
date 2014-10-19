@@ -373,12 +373,9 @@ static SEXP Julia_R_Scalar_NA(jl_value_t *Var)
 static SEXP Julia_R_MD_NA(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  //char *strData = "Varname0tmp.data";
-  //char *strNA = "bitunpack(Varname0tmp.na)";
-  //jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-  jl_value_t *retData =jl_get_field(Var,"data");//jl_eval_string(strData);
+  jl_value_t *retData =jl_get_field(Var,"data");
   jl_function_t *bitunpack=jl_get_function(jl_main_module,"bitunpack");
-  jl_value_t *retNA = jl_call1(bitunpack,jl_get_field(Var,"na"));//jl_eval_string(strNA);
+  jl_value_t *retNA = jl_call1(bitunpack,jl_get_field(Var,"na"));
   jl_value_t *val=NULL;
   JL_GC_PUSH3(&retData,&retNA,&val);
 
@@ -497,7 +494,6 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
     UNPROTECT(1);
   }
   JL_GC_POP();
-  //jl_eval_string("Varname0tmp=0;");
   return ans;
 }
 
@@ -636,7 +632,6 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   //set class as data frame
   setAttrib(ans, R_ClassSymbol, mkString("data.frame"));
   UNPROTECT(1);
-  //jl_eval_string("DataFrameName0tmp=0;");
   return ans;
 }
 
@@ -649,7 +644,6 @@ SEXP Julia_R(jl_value_t *Var)
   JL_TRY
   {
     //Array To Vector
-    JL_GC_PUSH1(&Var);
     if (jl_is_array(Var))
     {
       ans = Julia_R_MD(Var);
@@ -659,7 +653,6 @@ SEXP Julia_R(jl_value_t *Var)
       //try to load DataArrays DataFrames package
       if (!LoadDF())
       {
-        JL_GC_POP();
         return R_NilValue;
       }
       if (jl_is_NAtype(Var))
@@ -680,7 +673,6 @@ SEXP Julia_R(jl_value_t *Var)
     }
     else
       ans = Julia_R_Scalar(Var);
-    JL_GC_POP();
     jl_exception_clear();
   }
   JL_CATCH 

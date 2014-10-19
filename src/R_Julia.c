@@ -35,7 +35,7 @@ static jl_tuple_t *RDims_JuliaTuple(SEXP Var)
     for (size_t i = 0; i < ndims; i++)
       jl_tupleset(d, i, jl_box_long(INTEGER(dims)[i]));
   }
-  else     //vector
+  else //vector
   {
     d = jl_alloc_tuple(1);
     jl_tupleset(d, 0, jl_box_long(LENGTH(Var)));

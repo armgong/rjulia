@@ -61,16 +61,21 @@ SEXP jl_void_eval(SEXP cmd)
 //eval julia script and return
 SEXP jl_eval(SEXP cmd)
 {
+  SEXP ans=R_NilValue;
   const char *s = CHAR(STRING_ELT(cmd, 0));
-  jl_value_t *ret = jl_eval_string((char *)s);
+  jl_value_t* ret= jl_eval_string((char *)s);;
+  JL_GC_PUSH1(&ret);
   if (jl_exception_occurred())
   {
     jl_show(jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
-    return R_NilValue;
+    JL_GC_POP();
+    return ans;
   }
-  return Julia_R(ret);
+  ans=Julia_R(ret);
+  JL_GC_POP();
+  return ans;
 }
 #ifdef __cplusplus
 }

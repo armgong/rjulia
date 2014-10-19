@@ -294,16 +294,17 @@ for (i in 1:10000)
   rm(list=ls())
   cat("clear R Object Finish\n")
 }
+#warning don't add too much procs in test
+#otherwise it will crash on low end machine
+julia_void_eval("addprocs(1)")
+for (i in 1:4)
+{
+  julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep=""))
+  y<-j2r(" fetch(r)")
+  cat("\n")
+  cat(paste("process ",i," get value:\n",sep=""))
 
-#julia_void_eval("addprocs(3)")
-#for (i in 1:4)
-#{
-#  julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep=""))
-#  y<-j2r(" fetch(r)")
-#  cat("\n")
-#  cat(paste("process ",i," get value:\n",sep=""))
-
-#  print(y)
-#}
-#julia_void_eval("rmprocs(3)")
+  print(y)
+}
+julia_void_eval("rmprocs(1)")
 
