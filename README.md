@@ -23,7 +23,7 @@ Julia install directory should look like:
 
 4. If you want to be able to type map R or Julia objects that contain NA values or factor or Data Frame, Julia packages DataArrays and DataFrames must be installed.
 
-5. Windows user please download built binary package from https://github.com/armgong/RJulia/releases
+5. Windows user please download built binary package from https://github.com/armgong/RJulia/tree/master/builtforwin or https://github.com/armgong/RJulia/tree/nextgen/builtforwin 
 
  
 
