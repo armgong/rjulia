@@ -178,31 +178,46 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
   }
   else if (jl_is_int64(Var))
   {
-    tmpfloat=(double)jl_unbox_int64(Var);
-    if (inInt32Range(tmpfloat))
-     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_int64(Var)));
-    else
-     PROTECT(ans = ScalarReal(tmpfloat)); 
+   tmpfloat=(double)jl_unbox_int64(Var);
+   if (biginttodouble || !inInt32Range(tmpfloat))
+   {
+    PROTECT(ans = ScalarReal(tmpfloat));
     UNPROTECT(1);
+   }
+   else
+   {
+     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_int64(Var)));
+     UNPROTECT(1);
+    }
   }
   //more integer type
   if (jl_is_uint32(Var))
   {
-    tmpfloat=(double)jl_unbox_uint32(Var);
-    if (inInt32Range(tmpfloat))
-     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_uint32(Var)));
-    else
+   tmpfloat=(double)jl_unbox_uint32(Var);
+   if (biginttodouble || !inInt32Range(tmpfloat))
+   {
     PROTECT(ans = ScalarReal(tmpfloat));
     UNPROTECT(1);
+   }
+   else
+   {
+     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_uint32(Var)));
+     UNPROTECT(1);
+   }
   }
   else if (jl_is_uint64(Var))
   {
-    tmpfloat=(double)jl_unbox_int64(Var);
-    if (inInt32Range(tmpfloat))
-     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_uint64(Var)));
-    else
+   tmpfloat=(double)jl_unbox_uint64(Var);
+  if (biginttodouble || !inInt32Range(tmpfloat))
+   {
     PROTECT(ans = ScalarReal(tmpfloat));
     UNPROTECT(1);
+   }
+   else
+   {
+     PROTECT(ans = ScalarInteger((int32_t)jl_unbox_uint64(Var)));
+     UNPROTECT(1);
+   }
   }
   else if (jl_is_float64(Var))
   {
