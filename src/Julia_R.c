@@ -267,19 +267,20 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
   }
   return ans;
 }
+static jl_datatype_t *realtype(jl_value_t *Var) 
+{
+  jl_function_t *eltype=jl_get_function(jl_main_module,"eltype");
+  return (jl_datatype_t*) jl_call1(eltype,Var);
+}
 static SEXP Julia_R_MD(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  jl_value_t *val;
-  if (((jl_array_t *)Var)->ptrarray)
-    val = jl_cellref(Var, 0);
-  else
-    val = jl_arrayref((jl_array_t *)Var, 0);
   //get Julia dims and set R array Dims
   int len = jl_array_len(Var);
   if (len == 0)
     return ans;
 
+  jl_datatype_t *vartype=realtype(Var);
   int ndims = jl_array_ndims(Var);
   SEXP dims;
   PROTECT(dims = allocVector(INTSXP, ndims));
@@ -289,7 +290,7 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   }
   UNPROTECT(1);
 
-  if (jl_is_bool(val))
+  if (jl_bool_type==vartype)
   {
     char *p = (char *) jl_array_data(Var);
     PROTECT(ans = allocArray(LGLSXP, dims));
@@ -297,13 +298,13 @@ static SEXP Julia_R_MD(jl_value_t *Var)
       LOGICAL(ans)[i] = p[i];
     UNPROTECT(1);
   }
-  else if (jl_is_int32(val))
+  else if (jl_int32_type==vartype)
   {
     int32_t *p = (int32_t *) jl_array_data(Var);
     jlint_to_r;
   }
   //int64
-  else if (jl_is_int64(val))
+  else if (jl_int64_type==vartype)
   {
     int64_t *p = (int64_t *) jl_array_data(Var);
     if (biginttodouble)
@@ -312,27 +313,27 @@ static SEXP Julia_R_MD(jl_value_t *Var)
      {jlbigint_to_r;}
   }
   //more integer type
-  else if (jl_is_int8(val))
+  else if (jl_int8_type==vartype)
   {
     int8_t *p = (int8_t *) jl_array_data(Var);
     jlint_to_r;
   }
-  else if (jl_is_int16(val))
+  else if (jl_int16_type==vartype)
   {
     int16_t *p = (int16_t *) jl_array_data(Var);
     jlint_to_r;
   }
-  else if (jl_is_uint8(val))
+  else if (jl_uint8_type==vartype)
   {
     uint8_t *p = (uint8_t *) jl_array_data(Var);
     jlint_to_r;
   }
-  else if (jl_is_uint16(val))
+  else if (jl_uint16_type==vartype)
   {
     uint16_t *p = (uint16_t *) jl_array_data(Var);
     jlint_to_r;
   }
-  else if (jl_is_uint32(val))
+  else if (jl_uint32_type==vartype)
   {
     uint32_t *p = (uint32_t *) jl_array_data(Var);
     if (biginttodouble)
@@ -340,7 +341,7 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     else
      {jlbigint_to_r;}
   }
-  else if (jl_is_uint64(val))
+  else if (jl_uint64_type==vartype)
   {
     uint64_t *p = (uint64_t *) jl_array_data(Var);
     if (biginttodouble)
@@ -349,25 +350,25 @@ static SEXP Julia_R_MD(jl_value_t *Var)
      {jlbigint_to_r;}
   }
   //double
-  else if (jl_is_float64(val))
+  else if (jl_float64_type==vartype)
   {
     double *p = (double *) jl_array_data(Var);
     jlfloat_to_r;
   }
-  else if (jl_is_float32(val))
+  else if (jl_float32_type==vartype)
   {
     float *p = (float *) jl_array_data(Var);
     jlfloat_to_r;
   }
   //convert string array to STRSXP ,but not sure it is corret?
-  else if (jl_is_utf8_string(val))
+  else if (jl_utf8_string_type==vartype)
   {
     PROTECT(ans = allocArray(STRSXP, dims));
     for (size_t i = 0; i < len; i++)
       SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(Var, i)), CE_UTF8));
     UNPROTECT(1);
   }
-  else if (jl_is_ascii_string(val))
+  else if (jl_ascii_string_type==vartype)
   {
     PROTECT(ans = allocArray(STRSXP, dims));
     for (size_t i = 0; i < len; i++)
@@ -390,13 +391,8 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   jl_value_t *retData =jl_get_field(Var,"data");
   jl_function_t *bitunpack=jl_get_function(jl_main_module,"bitunpack");
   jl_value_t *retNA = jl_call1(bitunpack,jl_get_field(Var,"na"));
-  jl_value_t *val=NULL;
-  JL_GC_PUSH3(&retData,&retNA,&val);
-
-  if (((jl_array_t *)retData)->ptrarray)
-    val = jl_cellref(retData, 0);
-  else
-    val = jl_arrayref((jl_array_t *)retData, 0);
+  JL_GC_PUSH2(&retData,&retNA);
+  jl_datatype_t *vartype=realtype(retData);
   int len = jl_array_len(retData);
   if (len == 0)
   {
@@ -413,7 +409,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   //bool array
   char *pNA = (char *) jl_array_data(retNA);
 
-  if (jl_is_bool(val))
+  if (jl_bool_type==vartype)
   {
     char *p = (char *) jl_array_data(retData);
     PROTECT(ans = allocArray(LGLSXP, dims));
@@ -424,13 +420,13 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
         LOGICAL(ans)[i] = p[i];
     UNPROTECT(1);
   }
-  else if (jl_is_int32(val))
+  else if (jl_int32_type==vartype)
   {
     int32_t *p = (int32_t *) jl_array_data(retData);
     jlint_to_r_na;
   }
   //int64
-  else if (jl_is_int64(val))
+  else if (jl_int64_type==vartype)
   {
     int64_t *p = (int64_t *) jl_array_data(retData);
     if (biginttodouble)
@@ -439,27 +435,27 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
      {jlbigint_to_r_na;}
   }
   //more integer type
-  else if (jl_is_int8(val))
+  else if (jl_int8_type==vartype)
   {
     int8_t *p = (int8_t *) jl_array_data(retData);
     jlint_to_r_na;
   }
-  else if (jl_is_int16(val))
+  else if (jl_int16_type==vartype)
   {
     int16_t *p = (int16_t *) jl_array_data(retData);
     jlint_to_r_na;
   }
-  else if (jl_is_uint8(val))
+  else if (jl_uint8_type==vartype)
   {
     uint8_t *p = (uint8_t *) jl_array_data(retData);
     jlint_to_r_na;
   }
-  else if (jl_is_uint16(val))
+  else if (jl_uint16_type==vartype)
   {
     uint16_t *p = (uint16_t *) jl_array_data(retData);
     jlint_to_r_na;
   }
-  else if (jl_is_uint32(val))
+  else if (jl_uint32_type==vartype)
   {
     uint32_t *p = (uint32_t *) jl_array_data(retData);
     if (biginttodouble)
@@ -467,7 +463,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
     else
     {jlbigint_to_r_na;}
   }
-  else if (jl_is_uint64(val))
+  else if (jl_uint64_type==vartype)
   {
     uint64_t *p = (uint64_t *) jl_array_data(retData);
     if (biginttodouble)
@@ -476,18 +472,18 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
      {jlbigint_to_r_na;}
   }
   //double
-  else if (jl_is_float64(val))
+  else if (jl_float64_type==vartype)
   {
     double *p = (double *) jl_array_data(retData);
     jlfloat_to_r_na;
   }
-  else if (jl_is_float32(val))
+  else if (jl_float32_type==vartype)
   {
     float *p = (float *) jl_array_data(retData);
     jlfloat_to_r_na;
   }
   //convert string array to STRSXP
-  else if (jl_is_utf8_string(val))
+  else if (jl_utf8_string_type==vartype)
   {
     PROTECT(ans = allocArray(STRSXP, dims));
     for (size_t i = 0; i < len; i++)
@@ -497,7 +493,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
         SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(retData, i)), CE_UTF8));
     UNPROTECT(1);
   }
-  else if (jl_is_ascii_string(val))
+  else if (jl_ascii_string_type==vartype)
   {
     PROTECT(ans = allocArray(STRSXP, dims));
     for (size_t i = 0; i < len; i++)
@@ -517,60 +513,53 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
 static SEXP Julia_R_MD_INT(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  jl_value_t *val=NULL;
-  JL_GC_PUSH1(&val);
-  if (((jl_array_t *)Var)->ptrarray)
-    val = jl_cellref(Var, 0);
-  else
-    val = jl_arrayref((jl_array_t *)Var, 0);
+  jl_datatype_t *vartype=realtype(Var);
   int len = jl_array_len(Var);
   if (len == 0)
   {
-   JL_GC_POP();
    return ans;
   }
 
-  if (jl_is_int32(val))
+  if (jl_int32_type==vartype)
   {
     int32_t *p = (int32_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  else if (jl_is_int64(val))
+  else if (jl_int64_type==vartype)
   {
     int64_t *p = (int64_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  else if (jl_is_int8(val))
+  else if (jl_int8_type==vartype)
   {
     int8_t *p = (int8_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  else if (jl_is_int16(val))
+  else if (jl_int16_type==vartype)
   {
     int16_t *p = (int16_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  else if (jl_is_uint8(val))
+  else if (jl_uint8_type==vartype)
   {
     uint8_t *p = (uint8_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  else if (jl_is_uint16(val))
+  else if (jl_uint16_type==vartype)
   {
     uint16_t *p = (uint16_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  else if (jl_is_uint32(val))
+  else if (jl_uint32_type==vartype)
   {
     uint32_t *p = (uint32_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  else if (jl_is_uint64(val))
+  else if (jl_uint64_type==vartype)
   {
     uint64_t *p = (uint64_t *) jl_array_data(Var);
     jlint_to_r_md;
   }
-  JL_GC_POP();
   return ans;
 }
 
