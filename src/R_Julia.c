@@ -464,7 +464,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
       if ( getAttrib(elt, R_LevelsSymbol)!=R_NilValue)
        {
         jl_arrayset(retfactor,jl_box_bool(1), i);
-        if (!ISASCII(elt))
+        if (ISASCII(elt))
          jl_arrayset(ret1,(jl_value_t *)jl_ascii_string_type, i);
         else
          jl_arrayset(ret1,(jl_value_t *)jl_utf8_string_type, i);
@@ -480,7 +480,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
     }
     case STRSXP:
     {
-      if (!ISASCII(elt))
+      if (ISASCII(elt))
        jl_arrayset(ret1,(jl_value_t *)jl_ascii_string_type, i);
       else
        jl_arrayset(ret1,(jl_value_t *)jl_utf8_string_type, i);
