@@ -108,7 +108,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       jl_value_t **retData = jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
         if (!ISASCII(Var))
-          retData[i] = jl_cstr_to_string(translateChar0(STRING_ELT(Var, i)));
+          retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
         else
           retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
@@ -263,7 +263,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         else
         {
           if (!ISASCII(Var))
-            retData[i] = jl_cstr_to_string(translateChar0(STRING_ELT(Var, i)));
+            retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
           else
             retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
           retData1[i] = false;
@@ -327,7 +327,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   for (size_t i = 0; i < jl_array_len(ret1); i++)
    { 
     if (!ISASCII(Var))
-     retData1[i] = jl_cstr_to_string(translateChar0(STRING_ELT(levels, i)));
+     retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
     else
      retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
    }
