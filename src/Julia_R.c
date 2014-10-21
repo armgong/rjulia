@@ -267,11 +267,7 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
   }
   return ans;
 }
-static jl_datatype_t *realtype(jl_value_t *Var) 
-{
-  jl_function_t *eltype=jl_get_function(jl_main_module,"eltype");
-  return (jl_datatype_t*) jl_call1(eltype,Var);
-}
+
 static SEXP Julia_R_MD(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
@@ -280,7 +276,7 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   if (len == 0)
     return ans;
 
-  jl_datatype_t *vartype=realtype(Var);
+  jl_datatype_t *vartype=jl_array_eltype(Var);
   int ndims = jl_array_ndims(Var);
   SEXP dims;
   PROTECT(dims = allocVector(INTSXP, ndims));
@@ -404,7 +400,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
     return ans;
   }
 
-  jl_datatype_t *vartype=realtype(retData);
+  jl_datatype_t *vartype=jl_array_eltype(retData);
   int ndims = jl_array_ndims(retData);
   SEXP dims;
   PROTECT(dims = allocVector(INTSXP, ndims));
@@ -527,7 +523,7 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
    return ans;
   }
 
-  jl_datatype_t *vartype=realtype(Var);
+  jl_datatype_t *vartype=jl_array_eltype(Var);
   if (jl_int32_type==vartype)
   {
     int32_t *p = (int32_t *) jl_array_data(Var);
