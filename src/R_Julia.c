@@ -17,6 +17,21 @@ Copyright (C) 2014 by Yu Gong
 #define ASCII_MASK (1<<6)
 #define IS_ASCII(x) ((x)->sxpinfo.gp & ASCII_MASK)
 #define IS_UTF8(x) ((x)->sxpinfo.gp & UTF8_MASK)
+static bool ISASCII(SEXP Var)
+{
+ bool result=true;
+ for (size_t i=0;i<LENGTH(Var);i++ )
+  {
+   if (STRING_ELT(Var, i) == NA_STRING)
+     continue;
+   if(!IS_ASCII(STRING_ELT(Var, i)))
+   {
+     result=false;
+     break;
+   }
+  }
+ return result;
+}
 static jl_value_t *CreateArray(jl_datatype_t *type, size_t ndim, jl_tuple_t *dims)
 {
   return (jl_value_t*) jl_new_array(jl_apply_array_type(type, ndim), dims);;
@@ -81,13 +96,13 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     }
     case STRSXP:
     {
-      if (!IS_ASCII(Var))
+      if (!ISASCII(Var))
         ret = CreateArray(jl_utf8_string_type, jl_tuple_len(dims), dims);
       else
         ret = CreateArray(jl_ascii_string_type, jl_tuple_len(dims), dims);
       jl_value_t **retData = jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
-        if (!IS_ASCII(Var))
+        if (!ISASCII(Var))
           retData[i] = jl_cstr_to_string(translateChar0(STRING_ELT(Var, i)));
         else
           retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
@@ -196,7 +211,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
     }
     case STRSXP:
     {
-      if (!IS_ASCII(Var))
+      if (!ISASCII(Var))
         ans=jl_call2(DataArray,(jl_value_t*) jl_utf8_string_type,(jl_value_t*) dims);
       else
         ans=jl_call2(DataArray,(jl_value_t*) jl_ascii_string_type,(jl_value_t*) dims);
@@ -213,7 +228,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         }
         else
         {
-          if (!IS_ASCII(Var))
+          if (!ISASCII(Var))
             retData[i] = jl_cstr_to_string(translateChar0(STRING_ELT(Var, i)));
           else
             retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
@@ -262,7 +277,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   retData1 = jl_array_data(ret1);
   for (size_t i = 0; i < jl_array_len(ret1); i++)
   {
-   if (!IS_ASCII(Var))
+   if (!ISASCII(Var))
      retData1[i] = jl_cstr_to_string(translateChar0(STRING_ELT(levels, i)));
    else
      retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
@@ -305,7 +320,7 @@ static void Julia_1D_NA_Factor(jl_value_t *retelt,SEXP Var)
   retData1 = jl_array_data(ret1);
   for (size_t i = 0; i < jl_array_len(ret1); i++)
   {
-   if (!IS_ASCII(Var))
+   if (!ISASCII(Var))
     retData1[i] = jl_cstr_to_string(translateChar0(STRING_ELT(levels, i)));
    else
     retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
@@ -394,7 +409,7 @@ static void Julia_1D_NA(jl_value_t *retelt,SEXP Var)
         }
         else
         {
-          if (!IS_ASCII(Var))
+          if (!ISASCII(Var))
             retData[i] = jl_cstr_to_string(translateChar0(STRING_ELT(Var, i)));
           else
             retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
@@ -449,7 +464,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
       if ( getAttrib(elt, R_LevelsSymbol)!=R_NilValue)
        {
         jl_arrayset(retfactor,jl_box_bool(1), i);
-        if (!IS_ASCII(elt))
+        if (!ISASCII(elt))
          jl_arrayset(ret1,(jl_value_t *)jl_ascii_string_type, i);
         else
          jl_arrayset(ret1,(jl_value_t *)jl_utf8_string_type, i);
@@ -465,7 +480,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
     }
     case STRSXP:
     {
-      if (!IS_ASCII(elt))
+      if (!ISASCII(elt))
        jl_arrayset(ret1,(jl_value_t *)jl_ascii_string_type, i);
       else
        jl_arrayset(ret1,(jl_value_t *)jl_utf8_string_type, i);
