@@ -281,12 +281,15 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
  }
 
 //basically factor in R is 1-dim INTSXP and contain levels
-static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray, size_t len, const char *VarName)
+static jl_value_t *TransArrayToPoolDataArray(bool ascii,jl_array_t *mArray, jl_array_t *mpoolArray, size_t len, const char *VarName)
 {
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("varpools"), (jl_value_t *)mpoolArray);
   jl_set_global(jl_main_module, jl_symbol("varrefs"), (jl_value_t *)mArray);
-  snprintf(evalcmd, evalsize, "%s=PooledDataArray(ASCIIString,Uint32,%d)", VarName, len);
+  if (ascii)
+   snprintf(evalcmd, evalsize, "%s=PooledDataArray(ASCIIString,Uint32,%d)", VarName, len);
+  else
+   snprintf(evalcmd, evalsize, "%s=PooledDataArray(UTF8String,Uint32,%d)" , VarName, len);
   jl_value_t *ret1=NULL;
   jl_value_t *ret2=NULL;
   jl_value_t *ret3=NULL;
@@ -319,14 +322,20 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
 
   //create string array for levels in julia
   jl_value_t *ans=NULL;
-  jl_array_t *ret=NULL; 
-  jl_array_t *ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_ascii_string_type, 1), LENGTH(levels));
+  jl_array_t *ret=NULL;
+  jl_array_t *ret1=NULL; 
+  bool ascii=ISASCII(levels);
+  if (ascii) 
+   ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_ascii_string_type,1), LENGTH(levels));
+  else
+   ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_utf8_string_type,1),LENGTH(levels));	  
+
   jl_value_t **retData1 = jl_array_data(ret1);
   JL_GC_PUSH3(&ret, &ret1,&ans);
 
   for (size_t i = 0; i < jl_array_len(ret1); i++)
    { 
-    if (!ISASCII(Var))
+    if (!ascii)
      retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
     else
      retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
@@ -350,7 +359,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
           retData[i] = INTEGER(Var)[i];
         }
       }
-      ans=TransArrayToPoolDataArray(ret, ret1, LENGTH(Var), VarName);
+      ans=TransArrayToPoolDataArray(ascii,ret, ret1, LENGTH(Var), VarName);
       break;
     }
     default:
