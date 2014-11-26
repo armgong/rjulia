@@ -23,7 +23,7 @@ Julia install directory should look like:
 
 4. If you want to be able to type map R or Julia objects that contain NA values or factor or Data Frame, Julia packages DataArrays and DataFrames must be installed.
 
-5. Windows user please download built binary package from https://github.com/armgong/RJulia/releases
+5. Windows user please download built binary package from https://github.com/armgong/RJulia/tree/master/builtforwin or https://github.com/armgong/RJulia/tree/nextgen/builtforwin  **(Caution: develop branch, not stable)**
 
  
 
@@ -36,6 +36,26 @@ Doc
 
 to be done
 
-k
+**Important Information**
+-------------
+now develop on two branch,master branch is stable version,nextgen branch is development version.nextgen branch uses pure julia C API to call julia function, don't mix julia script and c code,**so it  fast than master branch and use less memory ,but  less stable**.
+
+if you want use nextgen branch, please patch your DataFrames package, add one function into it:
+```julia
+# Initialize an empty DataFrame with specific eltypes and names and whether is pooled data array
+function DataFrame(column_eltypes::Vector, cnames::Vector,ispda::Vector, nrows::Integer)
+    p = length(column_eltypes)
+    columns = Array(Any, p)
+    for j in 1:p
+      if ispda[j]
+        columns[j] = PooledDataArray(column_eltypes[j], nrows)
+      else
+        columns[j] = DataArray(column_eltypes[j], nrows)
+      end  
+    end
+    return DataFrame(columns, Index(cnames))
+end
+
+
 
 Yu Gong
