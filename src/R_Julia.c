@@ -252,7 +252,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
   if (LENGTH(Var)== 0||levels == R_NilValue||TYPEOF(Var)!=INTSXP)
     return jl_nothing;
-  
+  bool ascii=ISASCII(levels); 
   //create string array for levels in julia
   jl_value_t *ans=NULL;
   jl_value_t *ret=NULL;
@@ -260,7 +260,11 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   jl_value_t **retData1=NULL;
   JL_GC_PUSH3(&ret, &ret1,&ans);
   jl_function_t *PooledDataArray=jl_get_function(jl_main_module,"PooledDataArray");
-  ans=jl_call3(PooledDataArray,(jl_value_t*) jl_ascii_string_type,(jl_value_t*) jl_uint32_type,jl_box_long(LENGTH(Var)));
+  if (ascii)
+   ans=jl_call3(PooledDataArray,(jl_value_t*) jl_ascii_string_type,(jl_value_t*) jl_uint32_type,jl_box_long(LENGTH(Var)));
+  else
+   ans=jl_call3(PooledDataArray,(jl_value_t*) jl_utf8_string_type,(jl_value_t*) jl_uint32_type,jl_box_long(LENGTH(Var)));
+
   ret =jl_get_field(ans,"refs");
   //int 
   int *retData = (int *)jl_array_data(ret);
@@ -273,11 +277,14 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   }
 
   //levels
-  ret1 = (jl_value_t*) jl_alloc_array_1d(jl_apply_array_type(jl_ascii_string_type, 1), LENGTH(levels));
+  if (ascii)
+   ret1 = (jl_value_t*) jl_alloc_array_1d(jl_apply_array_type(jl_ascii_string_type, 1), LENGTH(levels));
+  else
+   ret1 = (jl_value_t*) jl_alloc_array_1d(jl_apply_array_type(jl_utf8_string_type, 1), LENGTH(levels));
   retData1 = jl_array_data(ret1);
   for (size_t i = 0; i < jl_array_len(ret1); i++)
   {
-   if (!ISASCII(Var))
+   if (!ascii)
      retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
    else
      retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
@@ -320,7 +327,7 @@ static void Julia_1D_NA_Factor(jl_value_t *retelt,SEXP Var)
   retData1 = jl_array_data(ret1);
   for (size_t i = 0; i < jl_array_len(ret1); i++)
   {
-   if (!ISASCII(Var))
+   if (!ISASCII(levels))
     retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
    else
     retData1[i] = jl_cstr_to_string(CHAR(STRING_ELT(levels, i)));
@@ -463,8 +470,9 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
       //if factor then need pooled array
       if ( getAttrib(elt, R_LevelsSymbol)!=R_NilValue)
        {
+        SEXP levels = getAttrib(elt, R_LevelsSymbol);
         jl_arrayset(retfactor,jl_box_bool(1), i);
-        if (ISASCII(elt))
+        if (ISASCII(levels))
          jl_arrayset(ret1,(jl_value_t *)jl_ascii_string_type, i);
         else
          jl_arrayset(ret1,(jl_value_t *)jl_utf8_string_type, i);
