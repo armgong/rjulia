@@ -31,7 +31,12 @@ SEXP initJulia(SEXP julia_home, SEXP DisableGC)
     jl_init(NULL);
   else
     jl_init((char *)s);
-  JL_SET_STACK_BASE;
+ 
+  //v0.3 have this,and v0.4 delete this
+  #ifdef JL_SET_STACK_BASE
+   JL_SET_STACK_BASE;
+  #endif
+  
   jlrunning = 1;
   if (jl_exception_occurred())
   {
