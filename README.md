@@ -31,7 +31,7 @@ Simple Run it
 ------------- 
 library(rjulia)
 
-julia_init("/usr/bin") #suppose julia execute file is usr/bin/julia
+julia_init("/usr/bin") #**(suppose julia execute file is usr/bin/julia)**
 
 julia_eval("1+1")
 
