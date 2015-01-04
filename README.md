@@ -9,13 +9,15 @@ Install
 -------------
 
 1. Install julia v0.3 or the current master branch; v0.2 does not have an embedded API; R version >=3.1.0.
-2. Compile Rjulia. This requires you to set the environment variable JULIA\_SRC. A typical
-Julia install directory should look like:
+2. Compile Rjulia. This requires you to set the environment variable JULIA\_SRC. A typical Julia install directory should look like:
   
   juliainstalldir/bin/       (julia execute file)
+
   juliainstalldir/include    (julia include files)
+
   juliainstalldir/lib        (libjulia.so )
-  juliainstalldir/lib/julia  (julia base package files: sys.so sys0.so etc.)
+
+  juliainstalldir/lib/julia  (julia base package files: sys.so sys.ji etc.)
 
   if you install Julia into /usr/, change JULIA\_SRC to point to that directory. if you still have problem, please see the Makevar file in your source directoryfor more details.
 
@@ -25,7 +27,13 @@ Julia install directory should look like:
 
 5. Windows user please download built binary package from https://github.com/armgong/RJulia/tree/master/builtforwin or https://github.com/armgong/RJulia/tree/nextgen/builtforwin  **(Caution: develop branch, not stable)**
 
- 
+Simple Run it
+------------- 
+library(rjulia)
+
+julia_init("/usr/bin") #suppose julia execute file is usr/bin/julia
+
+julia_eval("1+1")
 
 Demo
 -------------
