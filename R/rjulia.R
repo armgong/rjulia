@@ -3,31 +3,31 @@ julia_exists <- function(juliahome) {
 
   #If a name is provided, user that. If not, go through common system environment names and rely
   #on the first valid one
-  if (nchar(juliahome) > 0) {  
-    julia_home_dir <- juliahome
-  } else {
+  #if (nchar(juliahome) > 0) {  
+  #  julia_home_dir <- juliahome
+  #} else {
     
     #Grab all the common system environment variable names
-    env_vars <- Sys.getenv(x = c("JULIA_HOME","Julia_Home","JULIAHOME",
-                                "JuliaHome","JULIA","julia"), names = FALSE)
+  #  env_vars <- Sys.getenv(x = c("JULIA_HOME","Julia_Home","JULIAHOME",
+  #                              "JuliaHome","JULIA","julia"), names = FALSE)
     
     #set julia_home_dir to the first one that exists
-    julia_home_dir <- env_vars[nchar(env_vars) > 0][1]
+  #  julia_home_dir <- env_vars[nchar(env_vars) > 0][1]
    
     #If no entry meets that, set julia_found to FALSE
-    if(is.na(julia_home_dir)) {
-      julia_found <- FALSE
-    }
+  #  if(is.na(julia_home_dir)) {
+  #    julia_found <- FALSE
+  #  }
   
-  }
+  #}
  
   #If the terminating character is a slash of some kind, don't add a slash to the full sys.ji address.
-  if ((julia_home_dir[length(julia_home_dir)]!="/")||(julia_home_dir[length(julia_home_dir)]!="\\"))
-   sysfile<-paste(julia_home_dir,"/../lib/julia/sys.ji",sep="")		
-   else		
-   sysfile<-paste(julia_home_dir,"../lib/julia/sys.ji",sep="")		
+  #if ((julia_home_dir[length(julia_home_dir)]!="/")||(julia_home_dir[length(julia_home_dir)]!="\\"))
+  # sysfile<-paste(julia_home_dir,"/../lib/julia/sys.ji",sep="")		
+  # else		
+  # sysfile<-paste(julia_home_dir,"../lib/julia/sys.ji",sep="")		
 
-  julia_found<-file.exists(sysfile) 
+  julia_found<-TRUE #file.exists(sysfile) 
   #Return
   return (list(julia_found, julia_home_dir))
 }
