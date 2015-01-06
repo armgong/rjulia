@@ -9,23 +9,22 @@ Install
 -------------
 
 1. Install julia v0.3 or the current master branch; v0.2 does not have an embedded API; R version >=3.1.0.
-2. Compile Rjulia. This requires you to set the environment variable JULIA\_SRC. A typical
-Julia install directory should look like:
-  
-  juliainstalldir/bin/       (julia execute file)
-  juliainstalldir/include    (julia include files)
-  juliainstalldir/lib        (libjulia.so )
-  juliainstalldir/lib/julia  (julia base package files: sys.so sys0.so etc.)
 
-  if you install Julia into /usr/, change JULIA\_SRC to point to that directory. if you still have problem, please see the Makevar file in your source directoryfor more details.
+2. add juliainstalldir/bin into your system PATH variable
 
-3. add juliainstalldir/bin into your system PATH variable, and ensure libjulia.so is in ld.so.conf.
+3. Compile Rjulia.
 
 4. If you want to be able to type map R or Julia objects that contain NA values or factor or Data Frame, Julia packages DataArrays and DataFrames must be installed.
 
 5. Windows user please download built binary package from https://github.com/armgong/RJulia/tree/master/builtforwin or https://github.com/armgong/RJulia/tree/nextgen/builtforwin  **(Caution: develop branch, not stable)**
 
- 
+Simple Run it
+------------- 
+library(rjulia)
+
+julia_init() #**(will auto find your julia home)**
+
+julia_eval("1+1")
 
 Demo
 -------------
@@ -33,7 +32,7 @@ Demo
 please see .R files in demo dir 
 
 Doc
-
+-------------
 to be done
 
 **Important Information**

@@ -1,11 +1,20 @@
-PKG_CPPFLAGS+= -I"$(JULIA_SRC)/include"
-#dev julia
-PKG_CPPFLAGS+= -I"$(JULIA_SRC)/../src" 
-PKG_CPPFLAGS+= -I"$(JULIA_SRC)/../src/support"
-# release julia
-PKG_CPPFLAGS+= -I"$(JULIA_SRC)/include/julia"
+#julia -E find include file
+myjuliahome="abspath(JULIA_HOME)"
+juliabinpath=$(shell julia -E $(myjuliahome))
+juliabinpath:=$(strip $(juliabinpath))
 
-PKG_LIBS=-ljulia -L"$(JULIA_SRC)/bin" -ljulia
-PKG_LIBS+=-L"$(JULIA_SRC)/lib" -ljulia
-PKG_LIBS+=-L"$(JULIA_SRC)/lib/julia" -ljulia
+#dev julia
+PKG_CPPFLAGS= -I$(juliabinpath)/../../src
+PKG_CPPFLAGS+= -I$(juliabinpath)/../../src/support
+#release julia
+PKG_CPPFLAGS+= -I$(juliabinpath)/../include
+PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia
+
+
+
+#use julia -E find libjulia.so path
+Libjulia="abspath(dirname(Sys.dlpath(\"libjulia\")))"
+libjuliapath=$(shell julia -E $(Libjulia))
+libjuliapath:=$(strip $(libjuliapath))
+PKG_LIBS=-ljulia -L$(libjuliapath)
 
