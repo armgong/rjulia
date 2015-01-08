@@ -10,7 +10,10 @@ Install
 
 1. Install julia v0.3 or the current master branch; R version >=3.1.0.
 
-  **(WARNING: due to https://github.com/JuliaLang/julia/issues/9117 rjulia compile fail under julia 0.3.4, user should use julia 0.3.3 or 0.4.0-dev ,or waitting julia 0.3.5 release)**
+  **(WARNING: due to https://github.com/JuliaLang/julia/issues/9117 , rjulia compile fail under julia 0.3.4. to slove this,there are two way:
+   1. use julia 0.3.3 or 0.4.0-dev to compile,install and use rjulia.
+   2. use julia 0.3.3 to compile and install rjula ,after that user can upgrade to julia 0.3.4
+   )**
 
 2. add juliainstalldir/bin into your system PATH variable
 
