@@ -8,7 +8,9 @@ It currently supports use on Linux and Windows from the console,but build on Win
 Install
 -------------
 
-1. Install julia v0.3 or the current master branch; v0.2 does not have an embedded API; R version >=3.1.0.
+1. Install julia v0.3 or the current master branch; R version >=3.1.0.
+
+  **(WARNING: due to https://github.com/JuliaLang/julia/issues/9117 rjulia compile fail under julia 0.3.4, user should use julia 0.3.3 or 0.4.0-dev ,or waitting julia 0.3.5 release)**
 
 2. add juliainstalldir/bin into your system PATH variable
 
