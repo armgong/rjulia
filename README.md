@@ -1,7 +1,7 @@
-RJulia
+rjulia
 ======
 
-RJula provides an interface between R and Julia. It allows a user to run a script in Julia from R, and maps objects between the two languages.
+rjulia provides an interface between R and Julia. It allows a user to run a script in Julia from R, and maps objects between the two languages.
 
 It currently supports use on Linux and Windows from the console,but build on Windows only for advance users.
 
@@ -22,7 +22,7 @@ Install
 
 4. If you want to be able to type map R or Julia objects that contain NA values or factor or Data Frame, Julia packages DataArrays and DataFrames must be installed.
 
-5. Windows user please download built binary package from https://github.com/armgong/RJulia/releases  **(Caution: use master branch build first, nextgen branch build not stable)**
+5. Windows user please download built binary package from https://github.com/armgong/rjulia/releases  **(Caution: use master branch build first, nextgen branch build not stable)**
 
 Simple Run it
 ------------- 
