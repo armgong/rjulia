@@ -1,9 +1,9 @@
-\name{rjulia-package}
-\alias{rjulia-package}
-\alias{rjulia}
+\name{RJulia-package}
+\alias{RJulia-package}
+\alias{RJulia}
 \docType{package}
 \title{
-rjulia is a package that enable R commuication with julia.
+RJulia is a package that enable R commuication with julia.
 }
 \description{
 RJulia provides an interface between R and Julia,which can convert R and julia object mutually,and run julia script from R.
@@ -11,7 +11,7 @@ R is a sophisticated feature-rich statistical software but a bit slow,julia is n
 }
 \details{
 \tabular{ll}{
-Package: \tab rjulia\cr
+Package: \tab RJulia\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
 Date: \tab 2014-07-02\cr
