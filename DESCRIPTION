@@ -1,4 +1,4 @@
-Package: RJulia
+Package: rjulia
 Type: Package
 Title: an R package which integrating R and Julia
 Version: 0.9
