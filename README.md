@@ -45,22 +45,4 @@ to be done
 -------------
 now develop on two branch,master branch is stable version,nextgen branch is development version.nextgen branch uses pure julia C API to call julia function, don't mix julia script and c code,**so it  fast than master branch and use less memory ,but  less stable**.
 
-if you want use nextgen branch, please patch your DataFrames package, add one function into it:
-```julia
-# Initialize an empty DataFrame with specific eltypes and names and whether is pooled data array
-function DataFrame(column_eltypes::Vector, cnames::Vector,ispda::Vector, nrows::Integer)
-    p = length(column_eltypes)
-    columns = Array(Any, p)
-    for j in 1:p
-      if ispda[j]
-        columns[j] = PooledDataArray(column_eltypes[j], nrows)
-      else
-        columns[j] = DataArray(column_eltypes[j], nrows)
-      end  
-    end
-    return DataFrame(columns, Index(cnames))
-end
-
-
-
-Yu Gong
+if you want use nextgen branch, please ensure  DataFrames package version >=0.60
