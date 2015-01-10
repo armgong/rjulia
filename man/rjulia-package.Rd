@@ -6,7 +6,7 @@
 rjulia is a package that enable R commuication with julia.
 }
 \description{
-RJulia provides an interface between R and Julia,which can convert R and julia object mutually,and run julia script from R.
+rjulia provides an interface between R and Julia,which can convert R and julia object mutually,and run julia script from R.
 R is a sophisticated feature-rich statistical software but a bit slow,julia is new advanced computing language,which is fast and llvm-based JIT.so combine R and julia will allow us do better statistical computing.
 }
 \details{
