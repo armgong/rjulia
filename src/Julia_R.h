@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 by Yu Gong
+Copyright (C) 2014, 2015 by Yu Gong
 */
 #ifndef JULIA_R_H
 #define JULIA_R_H

@@ -1,10 +1,11 @@
 /*
-Copyright (C) 2014 by Yu Gong
+Copyright (C) 2014, 2015 by Yu Gong
 */
 #include <R.h>
 #include <Rinternals.h>
 #include <julia.h>
 #include <stdbool.h>
+
 #include "dataframe.h"
 
 static int DataArrayFrameInited = 0;
