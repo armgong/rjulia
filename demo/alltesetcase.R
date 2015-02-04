@@ -1,14 +1,21 @@
 library(rjulia)
-## init embedding julia,paraments are julia_home and disable_gc
-if(.Platform$OS.type == "unix") julia_init("/usr/bin",F,T) else
-{
-  if (.Platform$r_arch=="x64")
-  {julia_init("c:/julia/64/bin",F,T)}
-  else
-  {julia_init("c:/julia/32/bin",F,T)}
-}
-## load Julia DataFrames and DataArrays
-julia_void_eval("using DataArrays,DataFrames")
+
+julia_init(parallel = FALSE)
+## ## init embedding julia,paraments are julia_home and disable_gc
+## if(.Platform$OS.type == "unix") julia_init("/usr/bin",F,T) else
+## {
+##   if (.Platform$r_arch=="x64")
+##   {julia_init("c:/julia/64/bin",F,T)}
+##   else
+##   {julia_init("c:/julia/32/bin",F,T)}
+## }
+
+## load Julia DataFrames and DataArrays -- with care
+T <- tryCatch(julia_void_eval("using DataArrays,DataFrames"),
+                          error = function(e) e)
+## MM [2015-02-04, lynne]:
+## LoadError("/u/maechler/.julia/v0.3/DataArrays/src/DataArrays.jl",59,LoadError("/u/maechler/.julia/v0.3/DataArrays/src/abstractdataarray.jl",5,UndefVarError(:StoredArray)))
+okDF <- !inherits(T, "error")
 
 
 f <- function(n)
@@ -75,25 +82,29 @@ xdd <- f(10000)
 f2 <- function(n)
 {
   stopifnot(n >= 1)
-  for (i in 1:n)
-  {
-    ## pass R double vector to Julia
-    x <- matrix(1.01:6.01,3,2)
-    r2j(x,"tt")
-    ## get passed vector from Julia
-    y <- j2r("tt")
-    cat("Matrix:","\n")
-    print(y)
-    cat("run time is:",i,"\n")
+  for (i in 1:n) {
+    x <- matrix(1.01:6.01, 3,2)
+    st <- system.time({
+        ## pass R matrix to Julia
+        r2j(x,"tt")
+        ## and get it passed back from Julia
+        y <- j2r("tt")
+    })
+    cat("Matrix passed to julia and back: ")
+    stopifnot(identical(y, x))
+    cat(sprintf("[Ok].  Elapsed system.time(): %g\n", st[["elapsed"]]))
   }
+  ##
   ## create 2d array in julia,get from R
   julia_void_eval("x = rand(2,2)")
   yy <- j2r("x")
-  cat("Matrix:","\n")
+  cat("rand(2,2) matrix:\n")
   print(yy)
-}
+} ## end{f2}
+
 f2(1)
 f2(10)
+## !!!! If I interrupt the following,  R is taken down !!! BUG !!!
 xdd <- f2(10000)
 
 f3 <- function(n) {
@@ -146,8 +157,7 @@ for (i in 1:10000)
   y <- j2r("ttt")
 
 
-  x <- c("x","y","z","u","v","w","a")
-  x[2] <- NA
+  x <- c("x", NA, "z","u","v","w","a")
   r2j(x,"ttt")
   y <- j2r("ttt[3]")
 
@@ -155,10 +165,8 @@ for (i in 1:10000)
 
   y <- j2r("ttt")
 
-  x <- matrix(1:9,c(3,3))
-  x[1] = NA
-  x[5] <- NA
-  x[8] <- NA
+  x <- matrix(1:9, 3,3)
+  x[c(1,5,8)] <- NA
   x
   r2j(x,"xy")
   y <- j2r("xy")
@@ -172,7 +180,7 @@ for (i in 1:10000)
 
   x <- 1:3
   x1 <- c("hello","world")
-  y <- matrix(1:12,c(3,4))
+  y <- matrix(1:12, 3,4)
   z <- list(x,x1,y)
   r2j(z,"tupletest")
   y <- j2r("tupletest")

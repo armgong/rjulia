@@ -1,28 +1,27 @@
 library(rjulia)
-#init embedding julia,paraments are julia_home and disable_gc
-if(.Platform$OS.type == "unix") julia_init("/usr/bin",F,T) else 
-{
-  if (.Platform$r_arch=="x64")   
-   {julia_init("c:/julia/bin",F,T)}
-  else 
-   {julia_init("c:/julia32/bin",F,T)}  
- }
 
+julia_init()
 
-f=function(n){
- for (i in 1:n)
- {   
-  #pass R double vector to Julia
-  x<-array(1.01:18.01,c(3,3,2))
-  r2j(x,"tt")
-  y<-j2r("tt")
-  cat("MD array:","\n")
-  print(y)
-  cat("run times is:",i,"\n")
- }
+f <- function(n) {
+    stopifnot( n >= 1)
+    for (i in 1:n) {
+	## pass R array to Julia
+	x <- array(1.01:18.01, c(3,3,2))
+
+	st <- system.time({
+	    ## pass R matrix to Julia
+	    r2j(x,"tt")
+	    ## and get it passed back from Julia
+	    y <- j2r("tt")
+	})
+	cat("MD array (rank 3) passed to julia and back: ")
+	stopifnot(identical(y, x))
+	cat(sprintf("[Ok].  Elapsed system.time(): %g\n", st[["elapsed"]]))
+    }
 }
+
 f(1)
 f(10)
-xdd<-f(10000)
+xdd <- f(10000)
 
 
