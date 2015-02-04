@@ -3,7 +3,7 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 {
   ## Check Julia exists on the system. If it doesn't, stop immediately.
   juliabindir <- if (nchar(juliahome) > 0) juliahome else {
-       gsub("\"", "", system('julia -E JULIA_HOME', intern=TRUE))
+    gsub("\"", "", system('julia -E JULIA_HOME', intern=TRUE))
   }
   ## Otherwise, initialise Julia using the provided home directory.
   .Call("initJulia", juliabindir, disablegc, PACKAGE = "rjulia")
@@ -24,11 +24,11 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
   }
 }
 
-julia_eval <- function(expression) {
+isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")
 
-  ## Check if Julia is running. Obviously if it's not, stop.
-  if (!.Call("Julia_is_running", PACKAGE="rjulia"))
-    stop("Julia is not running. Call julia_init() to start it.")
+j2r <- julia_eval <- function(expression)
+{
+  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
 
   ## Otherwise, evaluate the expression and return the results of that evaluation. If it's appropriate
   ## to provide it to the user as a vector, do so - otherwise provide it raw.
@@ -42,87 +42,47 @@ julia_eval <- function(expression) {
 
 julia_void_eval <- function(expression)
 {
-  ## Check if Julia is running. Obviously if it's not, stop.
-  if (!.Call("Julia_is_running", PACKAGE="rjulia")) {
-    stop("Julia is not running. Call julia_init() to start it.")
-  }
+  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
 
-  invisible(.Call("jl_void_eval",expression,PACKAGE="rjulia"))
+  invisible(.Call("jl_void_eval",expression, PACKAGE="rjulia"))
 }
 
-r_julia <- function(x,y)
+r2j <- r_julia <- function(x,y)
 {
-  ## Check if Julia is running. Obviously if it's not, stop.
-  if (!.Call("Julia_is_running", PACKAGE="rjulia")) {
-    stop("Julia is not running. Call julia_init() to start it.")
-  }
+  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
 
- if (is.vector(x)||is.factor(x)||is.matrix(x)||is.array(x)||is.data.frame(x))
- {
-  if (is.data.frame(x))
-   {
-    invisible(.Call("R_Julia_NA_DataFrame",x,y,PACKAGE="rjulia"))
-   }
+  if (is.vector(x) || is.factor(x) || is.matrix(x) || is.array(x) || is.data.frame(x)) {
+    proc <-
+      if (is.data.frame(x)) "R_Julia_NA_DataFrame"
+      else if (!anyNA(x) && !is.factor(x)) "R_Julia"
+      else if(is.factor(x)) "R_Julia_NA_Factor"
+      else "R_Julia_NA"
+
+    invisible(.Call(proc, x,y, PACKAGE="rjulia"))
+  }
   else
-  {
-   if (!anyNA(x)&&!is.factor(x))
-    {
-     invisible(.Call("R_Julia",x,y,PACKAGE="rjulia"))
-    }
-   else
-   {
-    if(is.factor(x))
-    invisible(.Call("R_Julia_NA_Factor",x,y,PACKAGE="rjulia"))
-    else
-    ## r_julia_na(x,y)
-    invisible(.Call("R_Julia_NA",x,y,PACKAGE="rjulia"))
-   }
-  }
- }
- else
-  warning("only support vector,matrix ,array,list(contain no NA values),factor and data frame which data type must be string int float boolean")
+    warning("only support vector, matrix, array, list(withoug NAs), factor and
+ data frames (with simple string, int, float, logical)")
 }
 
-julia_DataArrayFrameInited <- function()
+jdfinited <- julia_DataArrayFrameInited <- function()
 {
-  y <- .Call("Julia_DataArrayFrameInited",PACKAGE="rjulia")
-  return (y)
+  .Call("Julia_DataArrayFrameInited", PACKAGE="rjulia")
+
 }
 
-julia_LoadDataArrayFrame <- function()
+jloaddf <- julia_LoadDataArrayFrame <- function()
 {
-  ## Check if Julia is running. Obviously if it's not, stop.
-  if (!.Call("Julia_is_running", PACKAGE="rjulia")) {
-    stop("Julia is not running. Call julia_init() to start it.")
-  }
+  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
 
- invisible(.Call("Julia_LoadDataArrayFrame",PACKAGE="rjulia"))
- if (!julia_DataArrayFrameInited())
- {
-  warning("DataArray and DataFrame not load,please install or check dir")
- }
-}
-## short and precise name for object type mapping
-r2j <- function(x,y)
-{
-  r_julia(x,y)
+  invisible(.Call("Julia_LoadDataArrayFrame", PACKAGE="rjulia"))
+  if (!julia_DataArrayFrameInited()) warning(
+ "DataArray and DataFrame Julia packages have not been loaded.
+  Please install or check installation directory.")
 }
 
-j2r <- function(expression)
-{
-  julia_eval(expression)
-}
-
-jdfinited <- function()
-{
-  julia_DataArrayFrameInited()
-}
-jloaddf <- function()
-{
-  julia_LoadDataArrayFrame()
-}
 
 julia_BigintToDouble <- function(mode = FALSE)
 {
-  invisible(.Call("Julia_BigintToDouble",mode,PACKAGE="rjulia"))
+  invisible(.Call("Julia_BigintToDouble", mode, PACKAGE="rjulia"))
 }
