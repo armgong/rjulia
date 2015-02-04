@@ -21,6 +21,7 @@ julia_init(juliahome = "", disablegc = FALSE, parallel = TRUE)
 %% %%  ~~ If necessary, more details than the description above ~~
 %% }
 \value{
+  \code{\link{NULL}} if successful.
 }
 \seealso{
   \code{\link{r2j}}, \code{\link{j2r}}, \code{\link{julia_eval}}.

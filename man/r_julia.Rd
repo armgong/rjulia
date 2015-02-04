@@ -27,5 +27,9 @@ r_julia(x, y)
   \code{\link{j2r}} aka \code{\link{julia_eval}} for the reverse of this.
 }
 \examples{
+julia_init()
+r2j(pi, "Rpi")
+j2r("Rpi - pi") #
+j2r("(Rpi - pi)/pi")
 }
 \keyword{interface}
