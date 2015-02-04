@@ -12,6 +12,8 @@
  ## print(pkgname)
  ## print(libname)
     dyn.load(.ldjulia, local = FALSE)
+
+    ## or via ../NAMESPACE  useDynlib()
     library.dynam("rjulia", pkgname, libname, local = FALSE)
 }
 
