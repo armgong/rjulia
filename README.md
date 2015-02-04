@@ -1,4 +1,4 @@
-nRJulia / rjulia
+RJulia / rjulia
 ===============
 
 RJulia (`rjulia` is the name of the R package, `RJulia` the github
@@ -36,12 +36,16 @@ julia_eval("1+1")
 Demo
 -------------
 
-please see the `*.R` files in the `demo/` directory
+please see the `*.R` files in the `demo/` directory, or use
+```
+	demo(package = "rjulia")
+```
 
 
 Doc
 -------------
-to be done
+Help files are now done, mostly with examples.
+
 
 **Important Information**
 -------------
