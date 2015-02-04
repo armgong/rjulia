@@ -1,3 +1,4 @@
+#				Emacs: treat me as -*- Makefile -*-
 #julia -E find include file
 myjuliahome="abspath(JULIA_HOME)"
 juliabinpath=$(shell julia -E $(myjuliahome))
