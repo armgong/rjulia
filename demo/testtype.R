@@ -1,7 +1,6 @@
 library(rjulia)
 
-julia_init(parallel = FALSE)
-
+julia_init()
 ## uint 8
 y <- j2r("x=convert(Uint8,1)")
 y

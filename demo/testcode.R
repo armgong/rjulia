@@ -1,6 +1,6 @@
 library(rjulia)
 
-julia_init(parallel = FALSE)
+julia_init()
 
 f <- function(n) {
  stopifnot( n >= 1 )
@@ -66,5 +66,5 @@ f <- function(n) {
 }
 
 f(1)
-f(10)
-xdd <- f(10000)
+#f(10)
+#xdd <- f(10000)

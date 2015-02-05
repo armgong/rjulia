@@ -15,7 +15,7 @@ julia_init(juliahome = "", disablegc = FALSE, parallel = TRUE)
     % ....
     disabled.}
   \item{parallel}{logical indicating if Julia should be initialized to
-    run several parallel threads.}
+    run several parallel processes.}
 }
 %% \details{
 %% %%  ~~ If necessary, more details than the description above ~~

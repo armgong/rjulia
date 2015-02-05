@@ -28,7 +28,7 @@ SEXP initJulia(SEXP julia_home, SEXP DisableGC)
   else
     jl_init((char *)s);
 
-  //v0.3 have this,and v0.4 delete this
+  //v0.3 have this,but v0.4 delete it
   #ifdef JL_SET_STACK_BASE
    JL_SET_STACK_BASE;
   #endif

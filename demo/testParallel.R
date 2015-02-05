@@ -1,6 +1,6 @@
 library(rjulia)
 
-julia_init(parallel=TRUE)
+julia_init()
 ## warning don't add too much procs in test
 ## otherwise it will crash on low end machine
 julia_eval("addprocs(1)")

@@ -28,4 +28,3 @@ zz <- list(x,x1,z, arr1d2vec(y))
 r2j(zz,"tupletst2")
 yy <- j2r("tupletst2")
 stopifnot(identical(zz, arr1d2vec(yy)))
-

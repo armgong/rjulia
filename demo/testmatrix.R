@@ -1,5 +1,5 @@
 library(rjulia)
-
+julia_init()
 f <- function(n) {
  stopifnot(n >= 1)
  for (i in 1:n) {
@@ -21,5 +21,5 @@ f <- function(n) {
 }
 
 f(1)
-f(10)
-xdd <- f(10000)
+#f(10)
+#xdd <- f(10000)
