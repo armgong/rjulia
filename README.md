@@ -9,12 +9,15 @@ It currently supports use on Linux and Windows from the console, but build on Wi
 Install
 -------------
 
-1. Install julia v0.35 or the current master branch; R version >=3.1.0.
+1. Install julia v0.33 or the current master branch; R version >=3.1.0.
 
   **WARNING: due to https://github.com/JuliaLang/julia/issues/9117 and other API change:**
 
-  **1). if you upgrade installed julia to v0.35, you need to recompile and
-    reinstall rjulia.**
+  **1). if you upgrade or change  julia version, you need to recompile and reinstall rjulia.**
+  
+   **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, parallel code can't run through julia API**
+
+  **1). if you want use parallel feature in julia, please use julia 0.33 or 0.4 .**
 
 2. add <juliainstalldir>/bin to your system PATH variable if needed.
 
