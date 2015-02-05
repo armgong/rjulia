@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 by Yu Gong
+Copyright (C) 2014, 2015 by Yu Gong
 */
 #include <stdio.h>
 #include <stdbool.h>
@@ -66,7 +66,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 
    if ((LENGTH(Var))==0)
      return (jl_value_t *) jl_nothing;
-    
+
    jl_array_t *ret =NULL;
    jl_tuple_t *dims=RDims_JuliaTuple(Var);
    JL_GC_PUSH2(&ret,&dims);
@@ -132,7 +132,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     default:
     {
       ret=(jl_value_t *)jl_nothing;
-      break; 
+      break;
     }
    }
   JL_GC_POP();
@@ -142,7 +142,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 //first pass creat array then convert it to DataArray
 //second pass assign NA to element
 static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, const char *VarName)
-{ 
+{
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t *)mArray);
   jl_set_global(jl_main_module, jl_symbol("TransVarNamebool"), (jl_value_t *)mboolArray);
@@ -171,14 +171,14 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
  jl_array_t *ret1 =NULL;
  jl_value_t *ans=NULL;
  JL_GC_PUSH4(&ret, &ret1,&dims,&ans);
- 
+
  switch (TYPEOF(Var))
    {
     case LGLSXP:
     {
       ret = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
       ret1 = CreateArray(jl_bool_type, jl_tuple_len(dims), dims);
-      
+
       char *retData = (char *)jl_array_data(ret);
       bool *retData1 = (bool *)jl_array_data(ret1);
       for (size_t i = 0; i < jl_array_len(ret); i++)
@@ -316,25 +316,25 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
 {
   if ((LENGTH(Var))== 0)
    return jl_nothing;
-  SEXP levels = getAttrib(Var, R_LevelsSymbol); 
+  SEXP levels = getAttrib(Var, R_LevelsSymbol);
   if (levels == R_NilValue)
     return jl_nothing;
 
   //create string array for levels in julia
   jl_value_t *ans=NULL;
   jl_array_t *ret=NULL;
-  jl_array_t *ret1=NULL; 
+  jl_array_t *ret1=NULL;
   bool ascii=ISASCII(levels);
-  if (ascii) 
+  if (ascii)
    ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_ascii_string_type,1), LENGTH(levels));
   else
-   ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_utf8_string_type,1),LENGTH(levels));	  
+   ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_utf8_string_type,1),LENGTH(levels));
 
   jl_value_t **retData1 = jl_array_data(ret1);
   JL_GC_PUSH3(&ret, &ret1,&ans);
 
   for (size_t i = 0; i < jl_array_len(ret1); i++)
-   { 
+   {
     if (!ascii)
      retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
     else
@@ -396,7 +396,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
     else
       snprintf(evalcmd, evalsize, "%s[symbol(\"%s\")]=%s", VarName, onename, eltcmd);
     jl_eval_string(evalcmd);
-    
+
     //clear
     snprintf(eltcmd, eltsize, "%sdfelt%d=0;", VarName, i + 1);
     jl_eval_string(eltcmd);

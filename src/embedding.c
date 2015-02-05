@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 by Yu Gong
+Copyright (C) 2014, 2015 by Yu Gong
 */
 #include <R.h>
 #include <Rinternals.h>
@@ -15,28 +15,24 @@ extern "C" {
 static int jlrunning = 0;
 SEXP Julia_is_running()
 {
-  SEXP ans;
-  PROTECT(ans = allocVector(LGLSXP, 1));
-  LOGICAL(ans)[0] = jlrunning;
-  UNPROTECT(1);
-  return ans;
+  return ScalarLogical(jlrunning);
 }
 
 SEXP initJulia(SEXP julia_home, SEXP DisableGC)
 {
   if (jl_is_initialized())
     return R_NilValue;
-  const char *s = CHAR(STRING_ELT(julia_home, 0));
+  const char *s = CHAR(asChar(julia_home));
   if (strlen((char *)s) == 0)
     jl_init(NULL);
   else
     jl_init((char *)s);
- 
+
   //v0.3 have this,and v0.4 delete this
   #ifdef JL_SET_STACK_BASE
    JL_SET_STACK_BASE;
   #endif
-  
+
   jlrunning = 1;
   if (jl_exception_occurred())
   {
@@ -44,7 +40,7 @@ SEXP initJulia(SEXP julia_home, SEXP DisableGC)
     jlrunning = 0;
     return R_NilValue;
   }
-  if (LOGICAL(DisableGC)[0])
+  if (asLogical(DisableGC))
     jl_gc_disable();
   return R_NilValue;
 }
@@ -52,7 +48,7 @@ SEXP initJulia(SEXP julia_home, SEXP DisableGC)
 //eval but not return val
 SEXP jl_void_eval(SEXP cmd)
 {
-  const char *s = CHAR(STRING_ELT(cmd, 0));
+  const char *s = CHAR(asChar(cmd));
   jl_eval_string((char *)s);
   if (jl_exception_occurred())
   {
@@ -66,7 +62,7 @@ SEXP jl_void_eval(SEXP cmd)
 //eval julia script and return
 SEXP jl_eval(SEXP cmd)
 {
-  const char *s = CHAR(STRING_ELT(cmd, 0));
+  const char *s = CHAR(asChar(cmd));
   jl_value_t *ret = jl_eval_string((char *)s);
   if (jl_exception_occurred())
   {
@@ -77,6 +73,7 @@ SEXP jl_eval(SEXP cmd)
   }
   return Julia_R(ret);
 }
+
 #ifdef __cplusplus
 }
 #endif

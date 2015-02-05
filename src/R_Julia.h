@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 by Yu Gong
+Copyright (C) 2014, 2015 by Yu Gong
 */
 #ifndef JULIA_R_H
 #define JULIA_R_H
@@ -10,6 +10,7 @@ extern "C" {
 
 #include <R.h>
 #include <julia.h>
+
 //Convert R Type To Julia,which not contain NA
 SEXP R_Julia(SEXP Var, SEXP VarNam);
 //Convert R Type To Julia,which contain NA

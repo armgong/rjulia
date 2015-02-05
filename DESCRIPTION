@@ -1,9 +1,11 @@
 Package: rjulia
 Type: Package
-Title: an R package which integrating R and Julia
-Version: 0.9
-Date: 2014-06-22
+Title: Integrating R and Julia -- Calling Julia from R
+Version: 0.9-1
+Date: 2015-03-02
 Author: Yu Gong
-Maintainer: <armgong@yahoo.com>
-Description: RJula provides an interface between R and Julia. It allows to run script in julia from R,and object type mapping between R and Julia.
-License: GPLV2
+Maintainer: Yu Gong <armgong@yahoo.com>
+Description: RJulia provides an interface between R and Julia.  It
+ allows to run a script in julia from R, i.e., call Julia on R objects,
+ and provides object type mapping between R and Julia.
+License: GPL-2

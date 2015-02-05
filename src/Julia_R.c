@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 by Yu Gong
+Copyright (C) 2014, 2015 by Yu Gong
 */
 #include <stdio.h>
 #include <stdbool.h>
@@ -12,15 +12,19 @@ Copyright (C) 2014 by Yu Gong
 #include "dataframe.h"
 #include "Julia_R.h"
 #define pkgdebug
-//macro for julia type to r,for shorter code
+
+// Macros for julia type to r, for shorter code
+
 #define jlint_to_r              PROTECT(ans = allocArray(INTSXP, dims));\
     for (size_t i = 0; i < len; i++)\
       INTEGER(ans)[i] = p[i];\
     UNPROTECT(1);
+
 #define jlfloat_to_r          PROTECT(ans = allocArray(REALSXP, dims));\
     for (size_t i = 0; i < len; i++)\
       REAL(ans)[i] = p[i];\
-    UNPROTECT(1);    
+    UNPROTECT(1);
+
 #define jlbigint_to_r       bool isInt32=true;\
     for (size_t ii=0;ii<len;ii++)\
     {\
@@ -44,7 +48,8 @@ Copyright (C) 2014 by Yu Gong
       REAL(ans)[i] = p[i];\
       UNPROTECT(1);\
     }
-//macro for julia type which include NA to r,for shorter code
+
+// Macros for julia type which includes NA to R, for shorter code
 #define jlint_to_r_na           PROTECT(ans = allocArray(INTSXP, dims));\
     for (size_t i = 0; i < len; i++)\
     {\
@@ -53,7 +58,8 @@ Copyright (C) 2014 by Yu Gong
       else\
         INTEGER(ans)[i] = p[i];\
     }\
-    UNPROTECT(1);    
+    UNPROTECT(1);
+
 #define jlfloat_to_r_na        PROTECT(ans = allocArray(REALSXP, dims));\
     for (size_t i = 0; i < len; i++)\
     {\
@@ -62,7 +68,8 @@ Copyright (C) 2014 by Yu Gong
       else\
         REAL(ans)[i] = p[i];\
     }\
-    UNPROTECT(1);    
+    UNPROTECT(1);
+
 #define jlbigint_to_r_na    bool isInt32=true;\
   for (size_t ii=0;ii<len;ii++)\
   {\
@@ -97,7 +104,8 @@ Copyright (C) 2014 by Yu Gong
     }\
     UNPROTECT(1);\
   }
-//macro for julia type which include factor to r,for shorter code
+
+// macro for julia type which includes factor to r, for shorter code
 #define jlint_to_r_md          PROTECT(ans = allocVector(INTSXP, len));\
     for (size_t i = 0; i < len; i++)\
     {\
@@ -107,6 +115,7 @@ Copyright (C) 2014 by Yu Gong
         INTEGER(ans)[i] = p[i];\
     }\
     UNPROTECT(1);
+
 static bool biginttodouble=false;
 SEXP Julia_BigintToDouble(SEXP Var)
 {
@@ -306,7 +315,7 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     if (biginttodouble)
      {jlfloat_to_r;}
     else
-     {jlbigint_to_r;}  
+     {jlbigint_to_r;}
   }
   //more integer type
   else if (jl_int8_type==vartype)
@@ -518,7 +527,7 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
   SEXP ans = R_NilValue;
 
   int len = jl_array_len(Var);
-  if (len == 0) 
+  if (len == 0)
   {
    return ans;
   }
@@ -584,7 +593,7 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
   //second setAttrib R levels and class
   SEXP levels = Julia_R_MD(retlevels);
   JL_GC_POP();
-  jl_eval_string("Varname0tmp=0");  
+  jl_eval_string("Varname0tmp=0");
   setAttrib(ans, R_LevelsSymbol, levels);
   setAttrib(ans, R_ClassSymbol, mkString("factor"));
   UNPROTECT(1);
@@ -604,7 +613,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   jl_value_t *eachcolvector=NULL;
   jl_value_t *ret=NULL;
   JL_GC_PUSH2(&eachcolvector,&ret);
-  
+
   int collen = jl_unbox_long(jl_eval_string(evalcmd));
   //Create SEXP for Each Column and assign
   PROTECT(ans = allocVector(VECSXP, collen));
@@ -676,7 +685,7 @@ SEXP Julia_R(jl_value_t *Var)
     else if (jl_is_DataArray(Var))
       ans = Julia_R_MD_NA(Var);
     else if (jl_is_PooledDataArray(Var))
-      ans = Julia_R_MD_NA_Factor(Var);    
+      ans = Julia_R_MD_NA_Factor(Var);
   }
   else if (jl_is_tuple(Var))
   {

@@ -1,0 +1,11 @@
+alltesetcase		All Tests(?) -- typo in file name ???
+testNAtype		test NA type
+testNAtypeMatrix	test NA type matrix
+testParallel		test parallel
+testcode		test code
+testdataframe		test data frame
+testmatrix		test matrix
+testmdarray		test "md"array
+testtuple		test tuple
+testtype		test type
+
