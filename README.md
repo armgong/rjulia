@@ -15,9 +15,7 @@ Install
 
   ** every time you upgrade or downgrade julia, you need to recompile and reinstall rjulia.**
   
-   **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, parallel code can't run on julia 0.35 through rjulia**
-
-  ** if you want use julia's parallel feature in rjulia, please install julia 0.33 or 0.4 .**
+   **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, rjulia not stable on julia 0.34 0.35 or 0.3 head branch, please install 0.33 or 0.4-dev.**
 
 2. add <juliainstalldir>/bin to your system PATH variable if needed.
 
