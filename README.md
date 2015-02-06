@@ -11,13 +11,13 @@ Install
 
 1. Install julia v0.33 or the current master branch; R version >=3.1.0.
 
-  **WARNING: due to https://github.com/JuliaLang/julia/issues/9117 and other API change:**
+  **WARNING: due to julia api rapidly change between releases**
 
-  **1). if you upgrade or change  julia version, you need to recompile and reinstall rjulia.**
+  ** every time you upgrade or downgrade julia, you need to recompile and reinstall rjulia.**
   
-   **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, parallel code can't run through julia API**
+   **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, parallel code can't run on julia 0.35 through rjulia**
 
-  **1). if you want use parallel feature in julia, please use julia 0.33 or 0.4 .**
+  ** if you want use julia's parallel feature in rjulia, please install julia 0.33 or 0.4 .**
 
 2. add <juliainstalldir>/bin to your system PATH variable if needed.
 
