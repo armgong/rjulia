@@ -11,9 +11,7 @@ Install
 
 1. Install julia v0.33 or the current master branch; R version >=3.1.0.
 
-  **WARNING: due to julia api rapidly change between releases**
-
-  ** every time you upgrade or downgrade julia, you need to recompile and reinstall rjulia.**
+  **WARNING: due to julia api rapidly change between releases, each time you upgrade or downgrade julia, you need to recompile and reinstall rjulia.**
   
    **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, rjulia not stable on julia 0.34 0.35 or 0.3 head branch, please install 0.33 or 0.4-dev.**
 
