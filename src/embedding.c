@@ -21,8 +21,8 @@ SEXP Julia_is_running()
   {
    ans = allocVector(LGLSXP, 1);
    R_PreserveObject(ans);
-   LOGICAL(ans)[0] = jlrunning;
   }
+  LOGICAL(ans)[0] = jlrunning;
   return ans;
 }
 
