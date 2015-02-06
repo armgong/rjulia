@@ -13,9 +13,14 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 
   ## If the intent is for a parallelised session, initialise that.
   if (parallel) {
-
-    julia_void_eval("Sys.init_sysinfo()")
-    julia_void_eval('if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV)) ENV["OPENBLAS_NUM_THREADS"] = 8 end')
+    
+    #this two line unneeded 
+    #julia_void_eval("Sys.init_sysinfo()")
+    #julia_void_eval('if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV)) ENV["OPENBLAS_NUM_THREADS"] = 8 end')
+    
+    ##this two line still need by julia 0.3, but don't needed by julia v0.4 
+    ##in future when julia 0.4 become stable release and we don't want support julia 0.3
+    ##they will also be commented out
     ## init_parallel
     julia_void_eval("Base.init_parallel()")
     ## init_bind_addr(ARGS)
