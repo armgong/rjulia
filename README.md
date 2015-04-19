@@ -13,7 +13,7 @@ Install
 
   **WARNING: due to julia api rapidly change between releases, each time you upgrade or downgrade julia, rjulia need to be recompiled and reinstalled.**
   
-  **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, rjulia crash when run certain (testparallel etc.) julia code on julia 0.35 or 0.3 head branch,but most demo run ok.**
+  **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, rjulia may crash when run certain (testparallel etc.) julia code on julia 0.35 or 0.3 head branch,but most demo run ok.**
    
    **WARNING: due to julia 0.4-dev branch change C API and internal frequently and significantly , rjulia now only support 0.3 branch, rjulia support julia 0.4 will available in next few weeks.**
 
