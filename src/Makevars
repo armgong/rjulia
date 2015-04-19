@@ -20,7 +20,7 @@ PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia
 
 
 #use julia -E find libjulia.so path
-Libjulia="abspath(dirname(Libdl.dlpath(\"libjulia\")))"
+Libjulia="abspath(dirname(Sys.dlpath(\"libjulia\")))"
 libjuliapath=$(shell julia -E $(Libjulia))
 libjuliapath:=$(strip $(libjuliapath))
 # libjuliapath = `julia -E $(Libjulia)`
