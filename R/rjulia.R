@@ -12,7 +12,7 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
   julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
 
   ## If the intent is for a parallelised session, initialise that.
-  if (parallel) {
+  #if (parallel) {
     
     #this two line unneeded 
     #julia_void_eval("Sys.init_sysinfo()")
@@ -22,11 +22,11 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
     ##in future when julia 0.4 become stable release and we don't want support julia 0.3
     ##they will also be commented out
     ## init_parallel
-    julia_void_eval("Base.init_parallel()")
+   # julia_void_eval("Base.init_parallel()")
     ## init_bind_addr(ARGS)
-    julia_void_eval("Base.init_bind_addr(ARGS)")
+    #julia_void_eval("Base.init_bind_addr(ARGS)")
 
-  }
+  #}
 }
 
 isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")

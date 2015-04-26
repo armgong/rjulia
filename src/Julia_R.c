@@ -661,7 +661,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
 SEXP Julia_R(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  if (jl_is_nothing(Var) || jl_is_null(Var))
+  if (jl_is_nothing(Var))
     return ans;
 
   //Array To Vector
@@ -687,11 +687,11 @@ SEXP Julia_R(jl_value_t *Var)
     else if (jl_is_PooledDataArray(Var))
       ans = Julia_R_MD_NA_Factor(Var);
   }
-  else if (jl_is_tuple(Var))
+  else if (jl_is_svec(Var))
   {
-      PROTECT(ans = allocVector(VECSXP, jl_tuple_len(Var)));
-      for (int i = 0; i < jl_tuple_len(Var); i++)
-        SET_ELEMENT(ans, i, Julia_R(jl_tupleref(Var, i)));
+      PROTECT(ans = allocVector(VECSXP, jl_svec_len(Var)));
+      for (int i = 0; i < jl_svec_len(Var); i++)
+        SET_ELEMENT(ans, i, Julia_R(jl_svecref(Var, i)));
       UNPROTECT(1);
   }
   else
