@@ -9,22 +9,23 @@ It currently supports use on Linux and Windows from the console, but build on Wi
 Install
 -------------
 
-1. Install julia v0.3x ; R version >=3.1.0.
-
-  **WARNING: due to julia api rapidly change between releases, each time you upgrade or downgrade julia, rjulia need to be recompiled and reinstalled.**
-  
-  **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, rjulia may crash when run certain (testparallel etc.) julia code on julia 0.35 or 0.3 head branch,but most demo run ok.**
-   
-   **WARNING: due to julia 0.4-dev branch change C API and internal frequently and significantly , rjulia now only support 0.3 branch, rjulia support julia 0.4 will available in next few weeks.**
-
+1. Install julia v0.3x or julia v0.4 and R version >=3.1.0.
+ 
 2. add <juliainstalldir>/bin to your system PATH variable if needed.
 
-3. "Compile" RJulia.
+3. Choose rjulia branch and get source code
 
-4. If you want to be able to use R or Julia objects that contain NA values
-   or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
+  **rjulia now have two branchs,user need select which branch to use**
+  
+    *   master branch support julia v0.3x.
+  
+    *   0.4 branch support julia dev 0.4.
 
-5. Windows user please download built binary package from https://github.com/armgong/rjulia/releases  **(Caution: use master branch build first, nextgen branch build not stable)**
+4. "Compile" RJulia.
+
+5. If you want to be able to use R or Julia objects that contain NA values or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
+
+6. Windows user please download built binary package from https://github.com/armgong/rjulia/releases 
 
 Simple Run it
 -------------
@@ -48,12 +49,8 @@ Doc
 Help files are now done, mostly with examples.
 
 
-**Important Information**
+**Know Problem**
 -------------
-We now develop on two branches. The `master` branch is the stable version,
-the `nextgen` branch is the development version. The `nextgen` branch uses
-the pure julia C API to call a julia function, don't mix julia script and c code,
-**so it is faster than the master branch and uses less memory, but it is less stable**.
+   **julia api rapidly change between releases, each time you upgrade or downgrade julia, rjulia need to be recompiled and reinstalled.**
 
-If you want to use the `nextgen` branch, please ensure `DataFrames` (julia) package
-version >= 0.60.
+   **due to https://github.com/JuliaLang/julia/issues/10085, rjulia  master branch may crash when run certain (testparallel etc.) julia code on julia 0.35 or 0.3 head branch,but most demo run ok.**
