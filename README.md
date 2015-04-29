@@ -6,51 +6,50 @@ repository name) provides an interface between R and Julia. It allows a user to 
 
 It currently supports use on Linux and Windows from the console, but build on Windows only for advance users.
 
-Install
+Installing
 -------------
 
 1. Install julia v0.3x or julia v0.4 and R version >=3.1.0.
  
-2. add <juliainstalldir>/bin to your system PATH variable if needed.
+2. Add `<juliainstalldir>/bin` to your system PATH variable if needed.
 
-3. Choose rjulia branch and get source code
+3. Install the rjulia package. If you're using the v0.3x branch of julia, use the "master" branch of rjulia.  If you're using the v0.4 development branch of julia, use the "0.4" branch of rjulia.
 
-  **rjulia now have two branchs,user need select which branch to use**
-  
-    *   master branch support julia v0.3x.
-  
-    *   0.4 branch support julia dev 0.4.
+    You can install rjulia using the devtools package:
 
-4. "Compile" RJulia.
+    ```r
+    install.packages("devtools") #if not already installed
+    devtools::install_github("armgong/RJulia", ref="master")# or ref="0.4" if using Julia v0.4
+    ```
+    Or you can install manually by downloading the source and building the package. Windows users can download built binary packages from https://github.com/armgong/rjulia/releases.
 
-5. If you want to be able to use R or Julia objects that contain NA values or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
+4. If you want to be able to use R or Julia objects that contain NA values or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
 
-6. Windows user please download built binary package from https://github.com/armgong/rjulia/releases 
-
-Simple Run it
+Simple example 
 -------------
+
+```r
 library(rjulia)
-
 julia_init() #**(will auto find your julia home)**
-
 julia_eval("1+1")
+```
 
 Demo
 -------------
 
-please see the `*.R` files in the `demo/` directory, or use
-```
+Please see the `*.R` files in the `demo/` directory, or use
+```r
 	demo(package = "rjulia")
 ```
 
 
-Doc
+Docs
 -------------
 Help files are now done, mostly with examples.
 
 
-**Know Problem**
+Know Problems
 -------------
-   **julia api rapidly change between releases, each time you upgrade or downgrade julia, rjulia need to be recompiled and reinstalled.**
+   * The Julia api rapidly changes between releases. Each time you upgrade or downgrade Julia, rjulia needs to be recompiled and reinstalled, e.g. with `devtools::install_github`. 
 
-   **due to https://github.com/JuliaLang/julia/issues/10085, rjulia  master branch may crash when run certain (testparallel etc.) julia code on julia 0.35 or 0.3 head branch,but most demo run ok.**
+   * Due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when running certain (testparallel etc.) Julia code on Julia 0.3.5 or the release-0.3 branch. Most demos run ok.
