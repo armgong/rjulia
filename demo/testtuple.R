@@ -2,6 +2,7 @@ library(rjulia)
 
 julia_init()
 
+# R List to Julia SimpleVector
 x <- 1:3
 x1 <- c("hello","world")
 y <- matrix(1:12,c(3,4))
@@ -28,3 +29,8 @@ zz <- list(x,x1,z, arr1d2vec(y))
 r2j(zz,"tupletst2")
 yy <- j2r("tupletst2")
 stopifnot(identical(zz, arr1d2vec(yy)))
+
+#Julia Tuple to R list
+julia_eval("(3,)")
+julia_eval("(3,5)")
+
