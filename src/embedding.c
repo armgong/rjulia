@@ -44,7 +44,7 @@ SEXP initJulia(SEXP julia_home, SEXP DisableGC)
     return R_NilValue;
   }
   if (asLogical(DisableGC))
-    jl_gc_disable();
+    jl_gc_enable(0);
   return R_NilValue;
 }
 
