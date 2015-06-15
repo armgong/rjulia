@@ -56,6 +56,6 @@ Know Problems
    
    *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when use RStudio and rjulia,there are two choices:
 
-       1 when use julia 0.39 and rjulia, please stay at RStudio-0.98.1103
+       1 when use julia 0.39 and rjulia, please stay on RStudio-0.98.1103 1 when use julia 0.39 and rjulia, please stay on RStudio-0.98.1103 http://download1.rstudio.org/RStudio-0.98.1103.zip
     
        2 when use RStudio 0.99.442 , need julia 0.4 and rjulia 0.4 branch
