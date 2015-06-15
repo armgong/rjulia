@@ -53,3 +53,9 @@ Know Problems
    * The Julia api rapidly changes between releases. Each time you upgrade or downgrade Julia, rjulia needs to be recompiled and reinstalled, e.g. with `devtools::install_github`. 
 
    * Due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when running certain (testparallel etc.) Julia code on Julia 0.3.5 or the release-0.3 branch. Most demos run ok.
+   
+   *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when use RStudio and rjulia,there are two choices:
+
+       1 when use julia 0.39 and rjulia, please stay at RStudio-0.98.1103
+    
+       2 when use RStudio 0.99.442 , need julia 0.4 and rjulia 0.4 branch
