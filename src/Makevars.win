@@ -1,0 +1,32 @@
+#				Emacs: treat me as -*- Makefile -*-
+#  CRAN checks want non-GNU Makefiles
+#  but MM cannot see a direct way -- we would need  Makevars.in
+
+#julia -E find include file
+myjuliahome="abspath(JULIA_HOME)"
+## Fails: it is not expanded at all when passed to gcc !
+# juliabinpath=`julia -E $(myjuliahome)`
+# juliabinpath ::= $(juliabinpath)
+juliabinpath=$(shell julia -E $(myjuliahome))
+juliabinpath:=$(strip $(juliabinpath))
+
+
+#dev julia
+PKG_CPPFLAGS= -I$(juliabinpath)/../../src
+PKG_CPPFLAGS+= -I$(juliabinpath)/../../src/support
+#release julia
+PKG_CPPFLAGS+= -I$(juliabinpath)/../include
+PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia
+#define SWRLOCK
+PKG_CPPFLAGS+= -D_WIN32_WINNT=0x0600
+
+
+#use julia -E find libjulia.so path
+Libjulia="abspath(dirname(Libdl.dlpath(\"libjulia\")))"
+libjuliapath=$(shell julia -E $(Libjulia))
+libjuliapath:=$(strip $(libjuliapath))
+# libjuliapath = `julia -E $(Libjulia)`
+# libjuliapath ::= $(libjuliapath)
+#
+PKG_LIBS=-ljulia -L$(libjuliapath)
+
