@@ -54,4 +54,4 @@ Know Problems
 
    * Due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when running certain (testparallel etc.) Julia code on Julia 0.3.5 or the release-0.3 branch. Most demos run ok.
    
-   *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when using rjulia  RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .
+   *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when using rjulia, RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .
