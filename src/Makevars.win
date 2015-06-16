@@ -28,5 +28,5 @@ libjuliapath:=$(strip $(libjuliapath))
 # libjuliapath = `julia -E $(Libjulia)`
 # libjuliapath ::= $(libjuliapath)
 #
-PKG_LIBS=-ljulia -L$(libjuliapath)
+PKG_LIBS=-L$(libjuliapath) -ljulia
 
