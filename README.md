@@ -25,7 +25,7 @@ Installing
 
     ```r
     install.packages("devtools") #if not already installed
-    devtools::install_github("armgong/RJulia", args = "--no-multiarch")# or ref="0.4" if using Julia v0.4
+    devtools::install_github("armgong/RJulia", ref="master", args = "--no-multiarch")# or ref="0.4" if using Julia v0.4
     ```
 
 4. If you want to be able to use R or Julia objects that contain NA values or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
