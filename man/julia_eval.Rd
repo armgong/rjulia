@@ -1,7 +1,8 @@
 \name{julia_eval}
 \title{Evaluate Julia Code or Get a Julia Variable}
-\alias{julia_eval}
 \alias{j2r}
+\alias{julia_eval}
+\alias{jDo}
 \alias{julia_void_eval}
 \description{
   Evaluate Julia code from \R, or simply get a Julia variable into \R.
@@ -12,9 +13,10 @@
   process \emph{without} returning a value.
 }
 \usage{
-j2r        (expression)
+j2r        (expression) # short for
 julia_eval (expression)
 
+jDo            (expression) # short for
 julia_void_eval(expression)
 }
 \arguments{

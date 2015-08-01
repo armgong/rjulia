@@ -40,6 +40,9 @@ all.equal(cc, cos(pi * seq(0,4, by=0.5))) # TRUE indeed
 
 j2r("float(1//2 + 2//3)") # Julia knows rationals numbers, i.e., ratios of integers
 
+## Julia has builtin "Bigfloat" data type with 256 bits precision:
+(pi. <- j2r("string(big(pi))"))
+
 ## if you really have problems getting R to call Julia, try ...
 
  if(is(T1 <- tryCatch(julia_init(), error=function(e)e), "error")) {

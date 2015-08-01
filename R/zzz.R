@@ -1,7 +1,6 @@
 .juliaLib <- function()
-    gsub(pattern="\"", replacement="",
-         system('julia -E "abspath(Sys.dlpath(\\\"libjulia\\\"))"',
-                intern = TRUE))
+    gsub("\"", "",
+         system('julia -E "abspath(Sys.dlpath(\\\"libjulia\\\"))"', intern = TRUE))
 
 .onLoad <- function(libname, pkgname)
 {

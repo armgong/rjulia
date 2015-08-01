@@ -7,7 +7,7 @@
   object, and store that as \code{y}.
 }
 \usage{
-r_julia(x, y)  # or short
+r_julia(x, y)  # or shorter
     r2j(x, y)
 }
 \arguments{
