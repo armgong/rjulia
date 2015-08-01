@@ -1,3 +1,4 @@
+
 ## Initialise Julia
 julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 {
@@ -26,11 +27,19 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 
 isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")
 
+.julia_init_if_necessary <- function() {
+  if (!isJuliaOk()) {
+    message("Julia not yet running. Calling julia_init() ...")
+    julia_init()
+    if (!isJuliaOk())
+      stop("Julia *still* not running. Giving up.")
+  }
+}
+
 j2r <- julia_eval <- function(expression)
 {
-  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
-
-  ## Otherwise, evaluate the expression and return the results of that evaluation. If it's appropriate
+  .julia_init_if_necessary()
+  ## Evaluate the expression and return the results of that evaluation. If it's appropriate
   ## to provide it to the user as a vector, do so - otherwise provide it raw.
   eval_result <- .Call("jl_eval", expression, PACKAGE="rjulia")
   if((length(dim(eval_result)) == 1)||(length(eval_result) == 1)) {
@@ -40,16 +49,15 @@ j2r <- julia_eval <- function(expression)
   }
 }
 
-julia_void_eval <- function(expression)
+jDo <- julia_void_eval <- function(expression)
 {
-  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
-
+  .julia_init_if_necessary()
   invisible(.Call("jl_void_eval",expression, PACKAGE="rjulia"))
 }
 
 r2j <- r_julia <- function(x,y)
 {
-  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
+  .julia_init_if_necessary()
 
   if (is.vector(x) || is.factor(x) || is.matrix(x) || is.array(x) || is.data.frame(x)) {
     proc <-
@@ -68,12 +76,11 @@ r2j <- r_julia <- function(x,y)
 jdfinited <- julia_DataArrayFrameInited <- function()
 {
   .Call("Julia_DataArrayFrameInited", PACKAGE="rjulia")
-
 }
 
 jloaddf <- julia_LoadDataArrayFrame <- function()
 {
-  if (!isJuliaOk()) stop("Julia is not running. Call julia_init() to start it.")
+  .julia_init_if_necessary()
 
   invisible(.Call("Julia_LoadDataArrayFrame", PACKAGE="rjulia"))
   if (!julia_DataArrayFrameInited()) warning(
@@ -86,3 +93,9 @@ julia_BigintToDouble <- function(mode = FALSE)
 {
   invisible(.Call("Julia_BigintToDouble", mode, PACKAGE="rjulia"))
 }
+
+###  MM: (ess-set-style 'DEFAULT)  ==> only indent by 2
+## Local Variables:
+## eval: (ess-set-style 'DEFAULT 'quiet)
+## delete-old-versions: never
+## End:
