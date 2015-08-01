@@ -28,15 +28,24 @@ r_julia(x, y)  # or shorter
 \examples{
 ## assign R's pi to Julia, as "Rpi"
 r2j(pi, "Rpi")
+<<<<<<< Updated upstream
 j2r("pi") # Julia's builtin pi
 ## is there a difference
 j2r("Rpi - pi") # typically 0
+=======
+j2r("Rpi - pi") #
+j2r("(Rpi - pi)/pi")
+>>>>>>> Stashed changes
 
 ## integer vector:
 r2j(1:10, "i10")
 j2r("i10") ; stopifnot(identical(1:10, j2r("i10")))
 
+<<<<<<< Updated upstream
 ## matrix, passed to Julia and got back
+=======
+## matrix:
+>>>>>>> Stashed changes
 m <- matrix(exp(-5:6), 3,4)
 r2j(m, "m")
 stopifnot(identical(m, j2r("m")))
