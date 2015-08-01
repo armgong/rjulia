@@ -1,8 +1,8 @@
 \name{julia_eval}
+\title{Evaluate Julia Code or Get a Julia Variable}
 \alias{julia_eval}
 \alias{j2r}
 \alias{julia_void_eval}
-\title{Evaluate Julia Code, or simply get a Julia Variable}
 \description{
   Evaluate Julia code from \R, or simply get a Julia variable into \R.
 
@@ -29,13 +29,14 @@ julia_void_eval(expression)
 }
 %% \references{
 %% }
-%% \note{
-%% }
 \seealso{
-  \code{\link{r2j}} to \dQuote{send} \R objects to Julia.
+  \code{\link{r2j}()} to \dQuote{send} \R objects to Julia.
 }
 \examples{
-julia_init()
-j2r("rand(2,3)")
+j2r("cos(pi * (1:7))")
+
+j2r("map(x -> x^2, (7,17,47))") # tuple in Julia ==>  list (with no names!) in R
+
+j2r("rand(2,3)")# or rather use R's RNG
 }
 \keyword{interface}

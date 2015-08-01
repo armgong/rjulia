@@ -27,6 +27,6 @@ julia_init(juliahome = "", disablegc = FALSE, parallel = TRUE)
   \code{\link{r2j}}, \code{\link{j2r}}, \code{\link{julia_eval}}.
 }
 \examples{
-try( julia_init() ) # should work if julia is properly installed
+ julia_init() # should work if julia is properly installed
 }
 \keyword{interface}
