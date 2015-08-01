@@ -1,6 +1,6 @@
 ## useDynLib(rjulia) -- still in R/zzz.R  (why ?)
 
-exportPattern(julia_init,
+exportPattern(julia_init, isJuliaOk,
               ## short, long :
               j2r, julia_eval,
               jDo, julia_void_eval,
