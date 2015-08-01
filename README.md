@@ -6,56 +6,57 @@ repository name) provides an interface between R and Julia. It allows a user to 
 
 It currently supports use on Linux and Windows from the console, but build on Windows only for advance users.
 
-Install
+Installing
 -------------
 
-1. Install julia v0.33 or the current master branch; R version >=3.1.0.
+1. Install julia v0.3x or julia v0.4 and R version >=3.1.0.
+ 
+2. Add `<juliainstalldir>/bin` to your system PATH variable if needed.
 
-  **WARNING: due to https://github.com/JuliaLang/julia/issues/9117 and other API change:**
+3. Install the rjulia package. If you're using the v0.3x branch of julia, use the "master" branch of rjulia.  If you're using the v0.4 development branch of julia, use the "0.4" branch of rjulia.
 
-  **1). if you upgrade or change  julia version, you need to recompile and reinstall rjulia.**
-  
-   **WARNING: due to https://github.com/JuliaLang/julia/issues/10085, parallel code can't run through julia API**
+    You can install rjulia on Linux using the devtools package:
 
-  **1). if you want use parallel feature in julia, please use julia 0.33 or 0.4 .**
+    ```r
+    install.packages("devtools") #if not already installed
+    devtools::install_github("armgong/RJulia", ref="master")# or ref="0.4" if using Julia v0.4
+    ```
+    You can install rjulia on Windows using the Rtools and devtools package :
 
-2. add <juliainstalldir>/bin to your system PATH variable if needed.
+    ```r
+    install.packages("devtools") #if not already installed
+    devtools::install_github("armgong/RJulia", ref="master", args = "--no-multiarch")# or ref="0.4" if using Julia v0.4
+    ```
+    
+4. If you want to be able to use R or Julia objects that contain NA values or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
 
-3. "Compile" RJulia.
-
-4. If you want to be able to use R or Julia objects that contain NA values
-   or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
-
-5. Windows user please download built binary package from https://github.com/armgong/rjulia/releases  **(Caution: use master branch build first, nextgen branch build not stable)**
-
-Simple Run it
+Simple example 
 -------------
+
+```r
 library(rjulia)
-
 julia_init() #**(will auto find your julia home)**
-
 julia_eval("1+1")
+```
 
 Demo
 -------------
 
-please see the `*.R` files in the `demo/` directory, or use
-```
+Please see the `*.R` files in the `demo/` directory, or use
+```r
 	demo(package = "rjulia")
 ```
 
 
-Doc
+Docs
 -------------
 Help files are now done, mostly with examples.
 
 
-**Important Information**
+Know Problems
 -------------
-We now develop on two branches. The `master` branch is the stable version,
-the `nextgen` branch is the development version. The `nextgen` branch uses
-the pure julia C API to call a julia function, don't mix julia script and c code,
-**so it is faster than the master branch and uses less memory, but it is less stable**.
+   * The Julia api rapidly changes between releases. Each time you upgrade or downgrade Julia, rjulia needs to be recompiled and reinstalled, e.g. with `devtools::install_github`. 
 
-If you want to use the `nextgen` branch, please ensure `DataFrames` (julia) package
-version >= 0.60.
+   * Due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when running certain (testparallel etc.) Julia code on Julia 0.3.5 or the release-0.3 branch. Most demos run ok.
+   
+   *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when using rjulia, RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .

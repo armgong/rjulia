@@ -18,6 +18,9 @@ PKG_CPPFLAGS+= -I$(juliabinpath)/../../src/support
 PKG_CPPFLAGS+= -I$(juliabinpath)/../include
 PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia
 
+#define SWRLOCK
+PKG_CPPFLAGS+= -D_WIN32_WINNT=0x0600
+
 
 #use julia -E find libjulia.so path
 Libjulia="abspath(dirname(Sys.dlpath(\"libjulia\")))"

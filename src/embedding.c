@@ -13,9 +13,17 @@ extern "C" {
 #endif
 
 static int jlrunning = 0;
+//use static to avoid create many small object
 SEXP Julia_is_running()
 {
-  return ScalarLogical(jlrunning);
+  static SEXP ans;
+  if (ans==NULL)
+  {
+   ans = allocVector(LGLSXP, 1);
+   R_PreserveObject(ans);
+  }
+  LOGICAL(ans)[0] = jlrunning;
+  return ans;
 }
 
 SEXP initJulia(SEXP julia_home, SEXP DisableGC)
