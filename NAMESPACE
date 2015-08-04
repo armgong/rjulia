@@ -5,5 +5,4 @@ exportPattern(julia_init,
               r2j, r_julia,
               julia_LoadDataArrayFrame,		jloaddf,
               julia_DataArrayFrameInited,	jdfinited,
-              ## : need to export ?
               julia_BigintToDouble)
