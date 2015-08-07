@@ -1,7 +1,5 @@
 library(rjulia)
 
-julia_init()
-
 x <- 1:3
 x1 <- c("hello","world")
 y <- matrix(1:12,c(3,4))
@@ -12,6 +10,7 @@ y <- j2r("tupletest")
 y
 if(FALSE) ## FAILS, as y has  1d-arrays instead of vectors
 stopifnot(identical(y, z))
+
 arr1d2vec <- function(a) {
     if(is.atomic(a)) {
         if(length(dim(a)) == 1)
@@ -28,3 +27,9 @@ zz <- list(x,x1,z, arr1d2vec(y))
 r2j(zz,"tupletst2")
 yy <- j2r("tupletst2")
 stopifnot(identical(zz, arr1d2vec(yy)))
+
+### List with *names*
+str(nz <- list(x=x, x1=x1, m = matrix(1:12, 3,4), A = array(1:24, dim=2:4)))
+r2j(nz, jnm <- "nmd_tupletst")
+nz2 <- j2r(jnm)
+str(nz2) ## list names are lost -- FIXME

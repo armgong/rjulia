@@ -36,9 +36,10 @@ jdfinited()
   \code{\link{julia_init}}
 }
 \examples{
-try( julia_LoadDataArrayFrame() )
-## will fail if it is not installed in Julia
-
 julia_DataArrayFrameInited() # TRUE or FALSE in any case
+
+if(julia_DataArrayFrameInited())
+   julia_LoadDataArrayFrame()
+## ^^^^^^^^^^^^^^^^^^^^^^^^^^  fails if  not installed in Julia
 }
 \keyword{interface}

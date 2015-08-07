@@ -1,24 +1,30 @@
 \name{julia_BigintToDouble}
 \alias{julia_BigintToDouble}
-\title{Options How to convert julia uin32 int64 uint64 type to R}
+\title{Option for Converting Julia Types Uint32, Int64, and Uint64 to R}
 \description{
- we need pay some attention to mapping types of UInt32, Int64 and UInt64 from Julia to R. this is because Integer type in R is signed 32 bit, while the above three types’ value may be out of signed 32 bit integer's range. To deal with this, the julia_BigintToDouble function is created.
+  We need to pay attention on the julia types \code{UInt32}, \code{Int64}
+  and \code{UInt64} are mapped to \R.  As the \code{\link{integer}} type
+  in \R is (only) signed 32 bit, the above three types contain values out
+  of \R's integer range.
+  \code{julia_BigintToDouble()} allows to determine what happens when
+  such variables are converted to \R objects.
 }
 \usage{
 julia_BigintToDouble(mode = FALSE)
 }
 \arguments{
-  \item{mode}{logical indicating how to convert uint32 int64 and Uint64 julia object to r. if mode is TRUE then convert to dobule type. if mode is FALSE, julia object will be converted to integer or double, which depends on the object's value. if all value in the object within signed int32 range, then the object will be converted to integer type, otherwise it will be converted to double type. default value of mode is FALSE.}
+  \item{mode}{\code{\link{logical}} indicating how to convert Uint32,
+    Int64 and Uint64 julia objects to \R.  If \code{mode} is true, convert to
+    double.  If it is false, the julia object will be converted to
+    integer or double depending on the object's value.  If all values of
+    the object stay within the range of signed int32, then the object will be
+    converted to integer, otherwise to double.  The default \code{mode}
+    is \code{FALSE}.}
 }
 %% \details{
 %% %%  ~~ If necessary, more details than the description above ~~
 %% }
 %% \value{
-%% %%  ~Describe the value returned
-%% %%  If it is a LIST, use
-%% %%  \item{comp1 }{Description of 'comp1'}
-%% %%  \item{comp2 }{Description of 'comp2'}
-%% %% ...
 %% }
 %% \references{
 %% %% ~put references to the literature/web site here ~
@@ -29,18 +35,21 @@ julia_BigintToDouble(mode = FALSE)
 }
 \examples{
 julia_BigintToDouble(TRUE)
-y<-j2r("jvar=convert(Uint64,1)")
-julia_void_eval("println(typeof(jvar))")
-typeof(y)
+y <- j2r("jvar=convert(Uint64, 12)")
+julia_void_eval("println(typeof(jvar))") # UInt64
+str(y) # num 12 -- double ("TRUE" above)
 
 julia_BigintToDouble(FALSE)
-y<-j2r("jvar=convert(Uint64,1)")
-julia_void_eval("println(typeof(jvar))")
-typeof(y)
+y <- j2r("jvar=convert(Uint64, 31)")
+julia_void_eval("println(typeof(jvar))") # UInt64
+str(y) # int 31 -- integer, not double  ("FALSE" above)
 
-y<-j2r("jvar=convert(Uint64,typemax(Uint64))")
-julia_void_eval("println(typeof(jvar))")
-Uint64
-typeof(y)
+## Show maximal values of the 64-bit integer types:
+y[1] <- j2r("jvar= convert(Uint64, typemax(Uint64))")
+y[2] <- j2r("jv2 = convert(Int64,  typemax( Int64))")
+julia_void_eval("println(typeof(jvar),' ', typeof(jv2))")
+str(y) # num 1.84e+19 9.22e+18
+## they are 2^64 and 2^63  respectively:
+stopifnot(log2(y) == 64:63)
 }
 \keyword{interface}

@@ -76,8 +76,8 @@ f <- function(n)
     }
 }
 f(1)
-#f(10)
-#xdd <- f(10000)
+f(10)
+xdd <- f(10000)
 
 f2 <- function(n)
 {
@@ -103,9 +103,9 @@ f2 <- function(n)
 } ## end{f2}
 
 f2(1)
-#f2(10)
+f2(10)
 ## !!!! If I interrupt the following,  R is taken down !!! BUG !!!
-#xdd <- f2(10000)
+xdd <- f2(10000)
 
 f3 <- function(n) {
   stopifnot(n >= 1)
@@ -121,8 +121,8 @@ f3 <- function(n) {
   }
 }
 f3(1)
-#f3(10)
-#xdd <- f3(10000)
+f3(10)
+xdd <- f3(10000)
 cat("clear R Object begin\n")
 rm(list = ls())
 cat("clear R Object Finish\n")
@@ -300,15 +300,15 @@ for (i in 1:1)
 
 ## warning don't add too much procs in test
 ## otherwise it will crash on low end machine
+## warning due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when calling julia parallel functions on Julia 0.3.x. 
+
 julia_void_eval("addprocs(1)")
 
-for (i in 1:2) {
-  julia_void_eval(paste("r=remotecall(",i,", rand, 2, 2)",sep = ""))
-  y <- j2r(" fetch(r)")
-  cat("\n")
-  cat(paste("process ",i," get value:\n",sep = ""))
+julia_void_eval(paste("r=remotecall(",2,", rand, 2, 2)",sep = ""))
+y <- j2r(" fetch(r)")
+cat("\n")
+cat(paste("process ",2," get value:\n",sep = ""))
+print(y)
 
-  print(y)
-}
 julia_void_eval("rmprocs(workers())")
 
