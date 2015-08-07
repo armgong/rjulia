@@ -35,3 +35,6 @@ julia_void_eval('println(typeof(z))')
 julia_void_eval('y=convert(Array{Float64},z);')
 y2<-j2r('y')
 y2
+
+#close workers
+julia_void_eval("rmprocs(workers())")
