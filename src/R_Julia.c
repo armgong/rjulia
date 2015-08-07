@@ -147,7 +147,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
-    case VECSXP:
+    /*case VECSXP:
     {
       char eltcmd[eltsize];
       ret =(jl_value_t *) jl_alloc_svec(length(Var));
@@ -161,7 +161,43 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       }
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
+    }*/
+    case VECSXP:
+    {
+      char eltcmd[eltsize];
+	  char evalcmd[evalsize];
+	  
+	  //get VECSXP elements in julia object array
+	  jl_value_t **elts;
+	  JL_GC_PUSHARGS(elts,length(Var));
+      for (int i = 0; i < length(Var); i++)
+      {
+        snprintf(eltcmd, eltsize, "%selt%d", VarName, i);
+        elts[i]=R_Julia_MD(VECTOR_ELT(Var,i),eltcmd);
+      }
+	  
+	  //create tuple use julia scripts, no API can create Tuple now
+	  snprintf(evalcmd, evalsize, "%s","(");
+	  for (size_t i = 0; i <length(Var); i++)
+      {
+       snprintf(eltcmd, eltsize, "%selt%d,", VarName, i);
+	   strcat(evalcmd,eltcmd);
+      }
+      strcat(evalcmd,")");
+	  ret=jl_eval_string(evalcmd);
+	  jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
+      
+      //clear tmp variable value
+	  for (size_t i = 0; i <length(Var); i++)
+      {
+       snprintf(eltcmd, eltsize, "%selt%d=0", VarName, i);
+	   jl_eval_string(eltcmd);
+      }
+	  
+      JL_GC_POP();
+	  break;
     }
+
     default:
     {
       ret=(jl_value_t *)jl_nothing;

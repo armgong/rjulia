@@ -2,8 +2,6 @@ library(rjulia)
 
 julia_init()
 
-## julia 0.4 redesign tuple type so temporarily mapping R list to Julia SimpleVector
-## will change this in the future
 x <- 1:3
 x1 <- c("hello","world")
 y <- matrix(1:12,c(3,4))
