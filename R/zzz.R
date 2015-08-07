@@ -1,5 +1,5 @@
 .juliaLib <- function()
-    gsub(pattern="\"", replacement="",
+    gsub("\"", "",
          system('julia -E "abspath(Libdl.dlpath(\\\"libjulia\\\"))"',
                 intern = TRUE))
 

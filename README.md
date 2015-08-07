@@ -15,7 +15,7 @@ Installing
 
 3. Install the rjulia package. If you're using the v0.3x branch of julia, use the "master" branch of rjulia.  If you're using the v0.4 development branch of julia, use the "0.4" branch of rjulia.
 
-     You can install rjulia on Linux using the devtools package:
+    You can install rjulia on Linux using the devtools package:
 
     ```r
     install.packages("devtools") #if not already installed
@@ -27,7 +27,7 @@ Installing
     install.packages("devtools") #if not already installed
     devtools::install_github("armgong/RJulia", ref="master", args = "--no-multiarch")# or ref="0.4" if using Julia v0.4
     ```
-
+    
 4. If you want to be able to use R or Julia objects that contain NA values or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
 
 Simple example 
@@ -59,4 +59,4 @@ Know Problems
 
    * Due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when running certain (testparallel etc.) Julia code on Julia 0.3.5 or the release-0.3 branch. Most demos run ok.
    
-   *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when using rjulia, RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .
+   * Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when using rjulia on Windows, RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .

@@ -17,6 +17,7 @@ PKG_CPPFLAGS+= -I$(juliabinpath)/../../src/support
 #release julia
 PKG_CPPFLAGS+= -I$(juliabinpath)/../include
 PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia
+
 #define SWRLOCK
 PKG_CPPFLAGS+= -D_WIN32_WINNT=0x0600
 
