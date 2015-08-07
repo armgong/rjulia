@@ -8,7 +8,10 @@ Copyright (C) 2014, 2015 by Yu Gong
 
 #include "dataframe.h"
 
+//whether DataArrays and DataFrames packages loaded
 static int DataArrayFrameInited = 0;
+
+//try load julia DataArrays and DataFrames packages
 SEXP Julia_LoadDataArrayFrame()
 {
   jl_eval_string("using DataArrays,DataFrames");
@@ -23,11 +26,13 @@ SEXP Julia_LoadDataArrayFrame()
   return R_NilValue;
 }
 
+//whether DataArrays and DataFrames packages loaded
 SEXP Julia_DataArrayFrameInited()
 {
     return ScalarLogical(DataArrayFrameInited);
 }
 
+//real function for load julia DataArrays and DataFrames packages
 bool LoadDF()
 {
   if (DataArrayFrameInited)
