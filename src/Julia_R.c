@@ -601,9 +601,8 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
 //Convert Julia Type To R,Real interface
 SEXP Julia_R(jl_value_t *Var)
 {
-  SEXP ans = R_NilValue;
   if (jl_is_nothing(Var))
-    return ans;
+    return R_NilValue;
 
   // Array To Vector
   SEXP ans = R_NilValue;
