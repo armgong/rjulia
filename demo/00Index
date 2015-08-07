@@ -1,3 +1,4 @@
+alltesetcase		all together (deprecated; will not be kept!)
 testNAtype		test NA type
 testNAtypeMatrix	test NA type matrix
 testParallel		test parallel

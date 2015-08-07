@@ -25,12 +25,9 @@ SEXP Julia_LoadDataArrayFrame()
 
 SEXP Julia_DataArrayFrameInited()
 {
-  SEXP ans;
-  PROTECT(ans = allocVector(LGLSXP, 1));
-  LOGICAL(ans)[0] = DataArrayFrameInited;
-  UNPROTECT(1);
-  return ans;
+    return ScalarLogical(DataArrayFrameInited);
 }
+
 bool LoadDF()
 {
   if (DataArrayFrameInited)
@@ -39,7 +36,7 @@ bool LoadDF()
   Julia_LoadDataArrayFrame();
   if (!DataArrayFrameInited)
   {
-    error("DataArrays and DataFrames can't be load,please check this\n");
+    error("DataArrays and DataFrames can't be loaded correctly into Julia, please check this");
     return false;
   }
   return true;
