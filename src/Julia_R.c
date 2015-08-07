@@ -1,6 +1,8 @@
 /*
 Copyright (C) 2014, 2015 by Yu Gong
 */
+
+//this file is for convert julia object to R
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
@@ -104,7 +106,8 @@ Copyright (C) 2014, 2015 by Yu Gong
 	res[i] = (p[i] == 0) ? NA_INTEGER : p[i]
 
 
-
+//function for control convert rules of Uint32, Uint64,Int64 to R
+//if it is ture, will convert to double, otherwise double or integer depend on value
 static bool biginttodouble=false;
 SEXP Julia_BigintToDouble(SEXP Var)
 {
@@ -112,11 +115,13 @@ SEXP Julia_BigintToDouble(SEXP Var)
  return R_NilValue;
 }
 
+//double value whether in value range of int32
 static bool inInt32Range(double val)
 {
   return (INT32_MIN <= val && val <= INT32_MAX) ? true : false;
 }
 
+//julia object whether is NA, NAtype defined in DataArrays package
 static bool jl_is_NAtype(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "NAtype") == 0)
@@ -125,6 +130,7 @@ static bool jl_is_NAtype(jl_value_t *Var)
     return false;
 }
 
+//julia object whether is DataArray
 static bool jl_is_DataArray(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "DataArray") == 0 ||
@@ -135,6 +141,7 @@ static bool jl_is_DataArray(jl_value_t *Var)
     return false;
 }
 
+//julia object whether is PooledDataArray
 static bool jl_is_PooledDataArray(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "PooledDataArray") == 0 ||
@@ -144,6 +151,8 @@ static bool jl_is_PooledDataArray(jl_value_t *Var)
   else
     return false;
 }
+
+//julia object whether is DataFrame, DataFrame defined in DataFrames packages
 static bool jl_is_DataFrame(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "DataFrame") == 0)
@@ -152,6 +161,7 @@ static bool jl_is_DataFrame(jl_value_t *Var)
     return false;
 }
 
+//julia object whether is DataArray or PooledDataArray or DataFrame
 static bool jl_is_DataArrayFrame(jl_value_t *Var)
 {
   if (strcmp(jl_typeof_str(Var), "DataArray") == 0 ||
@@ -167,6 +177,7 @@ static bool jl_is_DataArrayFrame(jl_value_t *Var)
     return false;
 }
 
+//convert R scalar object to Julia object
 static SEXP Julia_R_Scalar(jl_value_t *Var)
 {
   // most common type is here
@@ -213,6 +224,7 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
   return R_NilValue;
 }
 
+//convert julia multi-dimension object to R
 static SEXP Julia_R_MD(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
@@ -314,11 +326,13 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   return ans;
 }
 
+//convert Julia NA to R
 static SEXP Julia_R_Scalar_NA(jl_value_t *Var)
 {
   return ScalarInteger(NA_INTEGER);
 }
 
+//convert julia multi-dimsion object cantain NA to R
 static SEXP Julia_R_MD_NA(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
@@ -442,6 +456,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   return ans;
 }
 
+//convert julia PooledDataArray's refs to R factor's integer value
 //this function is for factor convert it maybe not safe
 //because PooledDataArray.refs is Uint32 or bigger
 //but in pratice it should be ok
@@ -500,6 +515,7 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
   return ans;
 }
 
+//convert julia PooledDataArray to R factor
 static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
   char *strData = "Varname0tmp.refs";
@@ -522,6 +538,7 @@ static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
   return ans;
 }
 
+//convert julia DataFrame to R DataFrame
 static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
 {
   SEXP ans, names, rownames;
