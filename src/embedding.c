@@ -1,6 +1,7 @@
 /*
 Copyright (C) 2014, 2015 by Yu Gong
 */
+//this file is for embeded julia to R
 #include <R.h>
 #include <Rinternals.h>
 #include <julia.h>
@@ -13,6 +14,8 @@ extern "C" {
 #endif
 
 static int jlrunning = 0;
+
+//function about whether embeded Julia is started
 //use static to avoid create many small object
 SEXP Julia_is_running()
 {
@@ -26,6 +29,9 @@ SEXP Julia_is_running()
   return ans;
 }
 
+//function about  init embeded Julia instance
+//julia_home shoud be the directy of julia execute file
+//DisableGC  determine whether the Julia garbage collector is to be enabled or not
 SEXP initJulia(SEXP julia_home, SEXP DisableGC)
 {
   if (jl_is_initialized())
@@ -53,7 +59,7 @@ SEXP initJulia(SEXP julia_home, SEXP DisableGC)
   return R_NilValue;
 }
 
-//eval but not return val
+//eval julia srcipt, but not return val
 SEXP jl_void_eval(SEXP cmd)
 {
   const char *s = CHAR(asChar(cmd));

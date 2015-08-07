@@ -1,6 +1,8 @@
 /*
 Copyright (C) 2014, 2015 by Yu Gong
 */
+
+//this file is for conver R object to julia
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
@@ -13,10 +15,13 @@ Copyright (C) 2014, 2015 by Yu Gong
 #include "R_Julia.h"
 #define pkgdebug
 
+//some defs from R
 #define UTF8_MASK (1<<3)
 #define ASCII_MASK (1<<6)
 #define IS_ASCII(x) ((x)->sxpinfo.gp & ASCII_MASK)
 #define IS_UTF8(x) ((x)->sxpinfo.gp & UTF8_MASK)
+
+//SEXP whether is ASCII encode
 static bool ISASCII(SEXP Var)
 {
  bool result=true;
@@ -32,11 +37,14 @@ static bool ISASCII(SEXP Var)
   }
  return result;
 }
+
+//create an Array in julia
 static jl_array_t *CreateArray(jl_datatype_t *type, size_t ndim, jl_tuple_t *dims)
 {
   return jl_new_array(jl_apply_array_type(type, ndim), dims);;
 }
 
+//convert R SEXP dims to julia tuple
 static jl_tuple_t *RDims_JuliaTuple(SEXP Var)
 {
  jl_tuple_t *d=NULL;
@@ -61,6 +69,9 @@ static jl_tuple_t *RDims_JuliaTuple(SEXP Var)
   return d;
 }
 
+//convert R object to julia object
+//Var is R object
+//VarName in converted Julia object's name
 static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 {
 
@@ -139,6 +150,8 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
   return (jl_value_t *)ret;
 }
 
+//convert julia array to DataArray in DataArray's package
+//this is for R object cantain NA, need two pass to finish
 //first pass creat array then convert it to DataArray
 //second pass assign NA to element
 static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, const char *VarName)
@@ -159,6 +172,7 @@ static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolAr
   return ret;
 }
 
+//convert R object cantain NA value to Julia DataArrays
 static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
 {
   if ((LENGTH(Var)) == 0)
@@ -280,6 +294,8 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
     return ans;
  }
 
+//convert julia Array to PooledDataArray in DataArrays packages
+//this is for convet R factors to Julia PooledDataArray
 //basically factor in R is 1-dim INTSXP and contain levels
 static jl_value_t *TransArrayToPoolDataArray(bool ascii,jl_array_t *mArray, jl_array_t *mpoolArray, size_t len, const char *VarName)
 {
@@ -312,6 +328,7 @@ static jl_value_t *TransArrayToPoolDataArray(bool ascii,jl_array_t *mArray, jl_a
   return ret;
 }
 
+//convert R factor to Julia PooledDataArray
 static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
 {
   if ((LENGTH(Var))== 0)
@@ -370,6 +387,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   return ans;
 }
 
+//convert R DataFrame to Julia DataFrame in DataFrames package
 static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 {
   SEXP names = getAttrib(Var, R_NamesSymbol);
