@@ -634,14 +634,12 @@ SEXP Julia_R(jl_value_t *Var)
       PROTECT(ans = allocVector(VECSXP, jl_svec_len(Var)));
       for (int i = 0; i < jl_svec_len(Var); i++)
         SET_ELEMENT(ans, i, Julia_R(jl_svecref(Var, i)));
-      UNPROTECT(1);
   }
   else if(jl_is_tuple(Var))
   {
       PROTECT(ans = allocVector(VECSXP, jl_nfields(Var)));
       for (int i = 0; i < jl_nfields(Var); i++)
         SET_ELEMENT(ans, i, Julia_R(jl_fieldref(Var, i)));
-      UNPROTECT(1);
   }
   else
       PROTECT(ans = Julia_R_Scalar(Var));
