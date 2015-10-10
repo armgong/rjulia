@@ -1,8 +1,7 @@
 RJulia / rjulia
 ===============
 
-RJulia (`rjulia` is the name of the R package, `RJulia` the github
-repository name) provides an interface between R and Julia. It allows a user to run a script in Julia from R, and maps objects between the two languages.
+rjulia provides an interface between R and Julia. It allows a user to run a script in Julia from R, and maps objects between the two languages.
 
 It currently supports use on Linux and Windows (both R and RGUI), but build on Windows only for advance users.
 
