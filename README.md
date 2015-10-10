@@ -1,4 +1,4 @@
-RJulia / rjulia
+rjulia
 ===============
 
 rjulia provides an interface between R and Julia. It allows a user to run a script in Julia from R, and maps objects between the two languages.
