@@ -18,7 +18,7 @@ Installing
 
     ```r
     install.packages("devtools") #if not already installed
-    devtools::install_github("armgong/rjulia", ref="master")# or ref="0.4" if using Julia v0.3
+    devtools::install_github("armgong/rjulia", ref="master")# or ref="0.3" if using Julia v0.3
     ```
     You can install rjulia on Windows using the Rtools and devtools package :
 
