@@ -9,7 +9,7 @@ It currently supports use on Linux and Windows from the console, but build on Wi
 Installing
 -------------
 
-1. Install julia v0.3x or julia v0.4 and R version >=3.1.0.
+1. Install julia v0.3x and R version >=3.1.0.
  
 2. Add `<juliainstalldir>/bin` to your system PATH variable if needed.
 
@@ -19,13 +19,13 @@ Installing
 
     ```r
     install.packages("devtools") #if not already installed
-    devtools::install_github("armgong/RJulia", ref="master")# or ref="0.4" if using Julia v0.4
+    devtools::install_github("armgong/RJulia", ref="0.3")
     ```
     You can install rjulia on Windows using the Rtools and devtools package :
 
     ```r
     install.packages("devtools") #if not already installed
-    devtools::install_github("armgong/RJulia", ref="master", args = "--no-multiarch")# or ref="0.4" if using Julia v0.4
+    devtools::install_github("armgong/RJulia", ref="master", args = "--no-multiarch")
     ```
     
 4. If you want to be able to use R or Julia objects that contain NA values or factors or data frames, the Julia packages `DataArrays` and `DataFrames` must be installed.
@@ -57,6 +57,6 @@ Know Problems
 -------------
    * The Julia api rapidly changes between releases. Each time you upgrade or downgrade Julia, rjulia needs to be recompiled and reinstalled, e.g. with `devtools::install_github`. 
 
-   * Due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when running certain (testparallel etc.) Julia code on Julia 0.3.5 or the release-0.3 branch. Most demos run ok.
+   * Due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when running certain (testparallel etc.) Julia code on Julia 0.3.x. Most demos run ok.
    
-   *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when using rjulia on Windows, RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .
+   *Due to RStudio issue (https://github.com/armgong/RJulia/issues/16), when using rjulia on Windows 64bit, RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .
