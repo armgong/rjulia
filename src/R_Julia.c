@@ -361,9 +361,9 @@ static jl_value_t *TransArrayToPoolDataArray(bool ascii,jl_array_t *mArray, jl_a
   jl_set_global(jl_main_module, jl_symbol("varpools"), (jl_value_t *)mpoolArray);
   jl_set_global(jl_main_module, jl_symbol("varrefs"), (jl_value_t *)mArray);
   if (ascii)
-   snprintf(evalcmd, evalsize, "%s=PooledDataArray(ASCIIString,Uint32,%d)", VarName, len);
+   snprintf(evalcmd, evalsize, "%s=PooledDataArray(ASCIIString,UInt32,%d)", VarName, len);
   else
-   snprintf(evalcmd, evalsize, "%s=PooledDataArray(UTF8String,Uint32,%d)" , VarName, len);
+   snprintf(evalcmd, evalsize, "%s=PooledDataArray(UTF8String,UInt32,%d)" , VarName, len);
   jl_value_t *ret1=NULL;
   jl_value_t *ret2=NULL;
   jl_value_t *ret3=NULL;
