@@ -2,16 +2,16 @@ library(rjulia)
 
 julia_init()
 ## uint 8
-y <- j2r("x=convert(Uint8,1)")
+y <- j2r("x=convert(UInt8,1)")
 y
 ## uint 16
-y <- j2r("x=convert(Uint16,1)")
+y <- j2r("x=convert(UInt16,1)")
 y
 ## uint 32
-y <- j2r("x=convert(Uint32,1)")
+y <- j2r("x=convert(UInt32,1)")
 y
 ## uint 64
-y <- j2r("x=convert(Uint64,1)")
+y <- j2r("x=convert(UInt64,1)")
 y
 ## int 8
 y <- j2r("x=convert(Int8,1)")

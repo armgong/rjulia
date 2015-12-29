@@ -29,9 +29,9 @@ SEXP Julia_is_running()
   return ans;
 }
 
-//function about  init embeded Julia instance
-//julia_home shoud be the directy of julia execute file
-//DisableGC  determine whether the Julia garbage collector is to be enabled or not
+//function about init embeded Julia instance
+//julia_home shoud be the directory of julia's executable file
+//DisableGC determine whether the Julia garbage collector is to be enabled or not
 SEXP initJulia(SEXP julia_home, SEXP DisableGC)
 {
   if (jl_is_initialized())
