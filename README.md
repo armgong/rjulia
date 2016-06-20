@@ -57,7 +57,7 @@ Know Problems
    * The Julia api rapidly changes between releases. Each time you upgrade or downgrade Julia, rjulia needs to be recompiled and reinstalled, e.g. with `devtools::install_github`. 
 
    * Due to RStudio issue (https://github.com/armgong/rjulia/issues/16), when using rjulia on Windows 64bit, RStudio-0.98.1103 is recommended http://download1.rstudio.org/RStudio-0.98.1103.zip .
-   * Due to gcc toolchain issue , when using rjulia on Windows, it will crash R, to slove this, download unoffical build julia from  https://github.com/armgong/julia-64-build-with-mingw-builds-for-R .
+   * Due to gcc toolchain issue , when using rjulia on Windows, it will crash R, to solve this, download unoffical build julia from  https://github.com/armgong/julia-64-build-with-mingw-builds-for-R .
    
    
    
