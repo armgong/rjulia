@@ -1,3 +1,4 @@
+
 ## Initialise Julia
 julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 {
@@ -43,7 +44,7 @@ jDo <- julia_void_eval <- function(expression)
   invisible(.Call("jl_void_eval",expression, PACKAGE="rjulia"))
 }
 
-r2j <- function(x,y)
+r2j <- r_julia <- function(x,y)
 {
   .julia_init_if_necessary()
 
