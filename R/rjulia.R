@@ -1,4 +1,3 @@
-
 ## Initialise Julia
 julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 {
@@ -61,8 +60,7 @@ r2j <- function(x,y)
   } else {
     warning("rjulia supports only vector, matrix, array, list(withoug NAs), factor and data frames (with simple string, int, float, logical) classes")
   }
-  .Call("R_Julia", x,y, PACKAGE="rjulia")
-#  invisible(.Call(proc, x,y, PACKAGE="rjulia"))
+  invisible(.Call(proc, x,y, PACKAGE="rjulia"))
 }
 
 jdfinited <- julia_DataArrayFrameInited <- function()
