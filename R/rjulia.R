@@ -3,7 +3,7 @@
 julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 {
   ## Check Julia exists on the system. If it doesn't, stop immediately.
-  juliabindir <- if (nchar(juliahome) > 0) juliahome else {
+  juliabindir <- if (nzchar(juliahome)) juliahome else {
     gsub("\"", "", system('julia -E JULIA_HOME', intern=TRUE))
   }
   ## Otherwise, initialise Julia using the provided home directory.
@@ -48,18 +48,20 @@ r2j <- r_julia <- function(x,y)
 {
   .julia_init_if_necessary()
 
-  if (is.vector(x) || is.factor(x) || is.matrix(x) || is.array(x) || is.data.frame(x)) {
-    proc <-
-      if (is.data.frame(x)) "R_Julia_NA_DataFrame"
-      else if (!anyNA(x) && !is.factor(x)) "R_Julia"
-      else if(is.factor(x)) "R_Julia_NA_Factor"
-      else "R_Julia_NA"
-
-    invisible(.Call(proc, x,y, PACKAGE="rjulia"))
+  proc <- if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
+    if (anyNA(x)) {
+      "R_Julia_NA"
+    } else {
+      "R_Julia"
+    }
+  } else if (is.data.frame(x)) {
+    "R_Julia_NA_DataFrame"
+  } else if (is.factor(x)) {
+    "R_Julia_NA_Factor"
+  } else {
+    warning("rjulia supports only vector, matrix, array, list(withoug NAs), factor and data frames (with simple string, int, float, logical) classes")
   }
-  else
-    warning("only support vector, matrix, array, list(withoug NAs), factor and
- data frames (with simple string, int, float, logical)")
+  invisible(.Call(proc, x,y, PACKAGE="rjulia"))
 }
 
 jdfinited <- julia_DataArrayFrameInited <- function()
