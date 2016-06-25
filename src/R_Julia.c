@@ -38,11 +38,6 @@ static bool ISASCII(SEXP Var)
  return result;
 }
 
-//create an Array in julia
-static jl_array_t* CreateArray(jl_datatype_t *type, size_t ndim, jl_value_t *dims)
-{
-  return jl_new_array(jl_apply_array_type(type, ndim), dims);;
-}
 
 //convert R SEXP dims to julia tuple
 static jl_value_t *RDims_JuliaTuple(SEXP Var)
@@ -96,6 +91,57 @@ static jl_value_t *RDims_JuliaTuple(SEXP Var)
 
 }
 
+//create an Array in julia
+static jl_array_t* CreateArray(jl_datatype_t *type, size_t ndim, jl_value_t *dims)
+{
+  return jl_new_array(jl_apply_array_type(type, ndim), dims);;
+}
+
+// Alternate array creator starting from R SEXP
+static jl_array_t* NewArray(SEXP Var) {
+  // Pick type for array element
+  jl_datatype_t *atype = jl_any_type;
+   switch (TYPEOF(Var))
+   {
+    case LGLSXP:
+    {
+      atype = jl_bool_type;
+      break;
+    };
+    case INTSXP:
+    {
+      atype = jl_int32_type;
+      break;
+    }
+    case REALSXP:
+    {
+      atype = jl_float64_type;
+      break;
+    }
+    case STRSXP:
+    {
+      if (!ISASCII(Var))
+	atype = jl_utf8_string_type;
+      else
+        atype = jl_ascii_string_type;
+      break;
+    }
+   }
+   // Make array
+   jl_array_t *ret = NULL;
+   if (isVector(Var)) {
+     jl_value_t* array_type = jl_apply_array_type(atype, 1);
+     ret = jl_alloc_array_1d(array_type, LENGTH(Var));
+   } else if (isMatrix(Var)) {
+     jl_value_t* array_type = jl_apply_array_type(atype, 2);
+     ret = jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
+   } else {
+     jl_value_t *dims=RDims_JuliaTuple(Var);  // Or, call function to return jl_value_t of array here, doing dims tuple trick only if ndim > 1 (or maybe 2 or 3)
+     ret = CreateArray(jl_bool_type, jl_nfields(dims), dims);
+   }
+   return(ret);
+}
+
 //convert R object to julia object
 //Var is R object
 //VarName in converted Julia object's name
@@ -106,13 +152,12 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
      return (jl_value_t *) jl_nothing;
 
    jl_array_t *ret =NULL;
-   jl_value_t *dims=RDims_JuliaTuple(Var);
-   JL_GC_PUSH2(&ret,&dims);
+   JL_GC_PUSH(&ret);
    switch (TYPEOF(Var))
    {
     case LGLSXP:
     {
-      ret = CreateArray(jl_bool_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       char *retData = (char *)jl_array_data(ret);
       int *var_p = LOGICAL(Var);
       for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast from int32 to int8
@@ -122,7 +167,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     };
     case INTSXP:
     {
-      ret = CreateArray(jl_int32_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       int *retData = (int *)jl_array_data(ret);
       memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
@@ -130,7 +175,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     }
     case REALSXP:
     {
-      ret = CreateArray(jl_float64_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       double *retData = (double *)jl_array_data(ret);
       memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
@@ -138,10 +183,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     }
     case STRSXP:
     {
-      if (!ISASCII(Var))
-        ret = CreateArray(jl_utf8_string_type, jl_nfields(dims), dims);
-      else
-        ret = CreateArray(jl_ascii_string_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       jl_value_t **retData = jl_array_data(ret);
       if (!ISASCII(Var)) {
 	for (size_t i = 0; i < jl_array_len(ret); i++)
