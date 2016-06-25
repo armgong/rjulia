@@ -109,8 +109,9 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     {
       ret = CreateArray(jl_bool_type, jl_nfields(dims), dims);
       char *retData = (char *)jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        retData[i] = LOGICAL(Var)[i];
+      int *var_p = LOGICAL(Var);
+      for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast
+        retData[i] = var_p[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     };
@@ -118,8 +119,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     {
       ret = CreateArray(jl_int32_type, jl_nfields(dims), dims);
       int *retData = (int *)jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        retData[i] = INTEGER(Var)[i];
+      memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
@@ -127,8 +127,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     {
       ret = CreateArray(jl_float64_type, jl_nfields(dims), dims);
       double *retData = (double *)jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        retData[i] = REAL(Var)[i];
+      memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
