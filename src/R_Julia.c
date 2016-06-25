@@ -47,9 +47,11 @@ static jl_array_t* CreateArray(jl_datatype_t *type, size_t ndim, jl_value_t *dim
 //convert R SEXP dims to julia tuple
 static jl_value_t *RDims_JuliaTuple(SEXP Var)
 {
- /*jl_value_t*d=NULL;
+  /*
+ jl_value_t *d = NULL;
  JL_GC_PUSH1(&d);
  SEXP dims = getAttrib(Var, R_DimSymbol);
+
   //array or matrix
   if (dims != R_NilValue)
   {
@@ -65,9 +67,11 @@ static jl_value_t *RDims_JuliaTuple(SEXP Var)
     d = jl_alloc_svec(1);
     jl_svecset(d, 0, jl_box_long(LENGTH(Var)));
   }
+  jl_value_t* newd = (jl_value_t*)jl_apply_tuple_type(d);
   JL_GC_POP();
-  return d;
- */
+  return newd;
+  */
+
   SEXP dims = getAttrib(Var, R_DimSymbol);
   char evalcmd[evalsize];
   char eltcmd[eltsize];
@@ -89,6 +93,7 @@ static jl_value_t *RDims_JuliaTuple(SEXP Var)
   }
 
   return jl_eval_string(evalcmd);
+
 }
 
 //convert R object to julia object
@@ -110,7 +115,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       ret = CreateArray(jl_bool_type, jl_nfields(dims), dims);
       char *retData = (char *)jl_array_data(ret);
       int *var_p = LOGICAL(Var);
-      for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast
+      for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast from int32 to int8
         retData[i] = var_p[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
@@ -138,11 +143,13 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       else
         ret = CreateArray(jl_ascii_string_type, jl_nfields(dims), dims);
       jl_value_t **retData = jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        if (!ISASCII(Var))
+      if (!ISASCII(Var)) {
+	for (size_t i = 0; i < jl_array_len(ret); i++)
           retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
-        else
+      } else {
+	for (size_t i = 0; i < jl_array_len(ret); i++)
           retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
+      }
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
