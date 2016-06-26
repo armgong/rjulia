@@ -38,18 +38,15 @@ static bool ISASCII(SEXP Var)
  return result;
 }
 
-//create an Array in julia
-static jl_array_t* CreateArray(jl_datatype_t *type, size_t ndim, jl_value_t *dims)
-{
-  return jl_new_array(jl_apply_array_type(type, ndim), dims);;
-}
 
 //convert R SEXP dims to julia tuple
 static jl_value_t *RDims_JuliaTuple(SEXP Var)
 {
- /*jl_value_t*d=NULL;
+  /*
+ jl_value_t *d = NULL;
  JL_GC_PUSH1(&d);
  SEXP dims = getAttrib(Var, R_DimSymbol);
+
   //array or matrix
   if (dims != R_NilValue)
   {
@@ -65,9 +62,11 @@ static jl_value_t *RDims_JuliaTuple(SEXP Var)
     d = jl_alloc_svec(1);
     jl_svecset(d, 0, jl_box_long(LENGTH(Var)));
   }
+  jl_value_t* newd = (jl_value_t*)jl_apply_tuple_type(d);
   JL_GC_POP();
-  return d;
- */
+  return newd;
+  */
+
   SEXP dims = getAttrib(Var, R_DimSymbol);
   char evalcmd[evalsize];
   char eltcmd[eltsize];
@@ -89,6 +88,58 @@ static jl_value_t *RDims_JuliaTuple(SEXP Var)
   }
 
   return jl_eval_string(evalcmd);
+
+}
+
+//create an Array in julia
+static jl_array_t* CreateArray(jl_datatype_t *type, size_t ndim, jl_value_t *dims)
+{
+  return jl_new_array(jl_apply_array_type(type, ndim), dims);;
+}
+
+// Alternate array creator starting from R SEXP
+static jl_array_t* NewArray(SEXP Var) {
+  // Pick type for array element
+  jl_datatype_t *atype = jl_any_type;
+   switch (TYPEOF(Var))
+   {
+    case LGLSXP:
+    {
+      atype = jl_bool_type;
+      break;
+    };
+    case INTSXP:
+    {
+      atype = jl_int32_type;
+      break;
+    }
+    case REALSXP:
+    {
+      atype = jl_float64_type;
+      break;
+    }
+    case STRSXP:
+    {
+      if (!ISASCII(Var))
+	atype = jl_utf8_string_type;
+      else
+        atype = jl_ascii_string_type;
+      break;
+    }
+   }
+   // Make array
+   jl_array_t *ret = NULL;
+   if (isVector(Var)) {
+     jl_value_t* array_type = jl_apply_array_type(atype, 1);
+     ret = jl_alloc_array_1d(array_type, LENGTH(Var));
+   } else if (isMatrix(Var)) {
+     jl_value_t* array_type = jl_apply_array_type(atype, 2);
+     ret = jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
+   } else {
+     jl_value_t *dims=RDims_JuliaTuple(Var);  // Or, call function to return jl_value_t of array here, doing dims tuple trick only if ndim > 1 (or maybe 2 or 3)
+     ret = CreateArray(jl_bool_type, jl_nfields(dims), dims);
+   }
+   return(ret);
 }
 
 //convert R object to julia object
@@ -101,49 +152,46 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
      return (jl_value_t *) jl_nothing;
 
    jl_array_t *ret =NULL;
-   jl_value_t *dims=RDims_JuliaTuple(Var);
-   JL_GC_PUSH2(&ret,&dims);
+   JL_GC_PUSH(&ret);
    switch (TYPEOF(Var))
    {
     case LGLSXP:
     {
-      ret = CreateArray(jl_bool_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       char *retData = (char *)jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        retData[i] = LOGICAL(Var)[i];
+      int *var_p = LOGICAL(Var);
+      for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast from int32 to int8
+        retData[i] = var_p[i];
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     };
     case INTSXP:
     {
-      ret = CreateArray(jl_int32_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       int *retData = (int *)jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        retData[i] = INTEGER(Var)[i];
+      memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
     case REALSXP:
     {
-      ret = CreateArray(jl_float64_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       double *retData = (double *)jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        retData[i] = REAL(Var)[i];
+      memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
     case STRSXP:
     {
-      if (!ISASCII(Var))
-        ret = CreateArray(jl_utf8_string_type, jl_nfields(dims), dims);
-      else
-        ret = CreateArray(jl_ascii_string_type, jl_nfields(dims), dims);
+      ret = NewArray(Var);
       jl_value_t **retData = jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-        if (!ISASCII(Var))
+      if (!ISASCII(Var)) {
+	for (size_t i = 0; i < jl_array_len(ret); i++)
           retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
-        else
+      } else {
+	for (size_t i = 0; i < jl_array_len(ret); i++)
           retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
+      }
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
