@@ -152,7 +152,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     {
       ret = NewArray(Var);
       int *retData = (int *)jl_array_data(ret);
-      memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
+      memcpy(retData, INTEGER(Var), jl_array_len(ret) * sizeof(retData));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
@@ -244,6 +244,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 //first pass creat array then convert it to DataArray
 //second pass assign NA to element
 static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, const char *VarName)
+
 {
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t *)mArray);
