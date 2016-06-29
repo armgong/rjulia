@@ -173,6 +173,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     case VECSXP:
     {
       jl_value_t **retData = jl_array_data(ret);
+      // Does putting these pointers in this Vector{Any} require a GC write barrier?
       for (int i = 0; i < jl_array_len(ret); i++)
       {
 	retData[i] = R_Julia_MD(VECTOR_ELT(Var,i),"foo");
