@@ -11,3 +11,5 @@ Description: An interface between R and Julia.  It allows to run a script
 SystemRequirements: Julia (including C headers [pkgs julia-dev (deb) / julia-devel (rpm)]),
  GNU make
 License: GPL-2
+Suggests:
+  RUnit

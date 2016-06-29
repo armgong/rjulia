@@ -152,7 +152,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     {
       ret = NewArray(Var);
       int *retData = (int *)jl_array_data(ret);
-      memcpy(retData, INTEGER(Var), jl_array_len(ret) * sizeof(retData));
+      memcpy(retData, INTEGER(Var), jl_array_len(ret) * sizeof(int));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
@@ -160,7 +160,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     {
       ret = NewArray(Var);
       double *retData = (double *)jl_array_data(ret);
-      memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(retData));
+      memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(double));
       jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
