@@ -321,6 +321,12 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     PROTECT(ans = allocArray(STRSXP, dims)); nprot++;
     for (size_t i = 0; i < len; i++)
       SET_STRING_ELT(ans, i, mkChar(jl_string_data(jl_cellref(Var, i))));
+  } else if (jl_any_type==vartype) {
+    PROTECT(ans = allocArray(VECSXP, dims)); nprot++;
+    jl_value_t **p = (jl_value_t **) jl_array_data(Var);
+    for (size_t i = 0; i < len; i++)
+      //      SET_VECTOR_ELT(ans, i, R_NilValue);
+      SET_VECTOR_ELT(ans, i, Julia_R_MD(p[i]));
   }
   UNPROTECT(nprot);
   return ans;
