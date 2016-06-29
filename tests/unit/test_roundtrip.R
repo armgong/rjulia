@@ -2,6 +2,7 @@
 
 library(RUnit)
 library(rjulia)
+rjulia:::.julia_init_if_necessary()
 
 ## Send data of each atomic type to julia and back again
 ##  With and without NAs
@@ -13,7 +14,9 @@ test_roundtrip <- function() {
         c = array( c(0:8), dim=c(2, 2, 2)), 
         d = c(NA_integer_, 0:4), 
         e = matrix(c(0:4, NA_integer_), ncol=2), 
-        f = array( c(0:7, NA_integer_), dim=c(2, 2, 2))
+        f = array( c(0:7, NA_integer_), dim=c(2, 2, 2)),
+        h = list( 1:5, letters ),
+        j = list( c(NA, 2:5), letters )
     )
 
     types = c("integer", "logical", "numeric", "character")
