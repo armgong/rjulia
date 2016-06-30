@@ -17,7 +17,7 @@ Copyright (C) 2014, 2015 by Yu Gong
 
 
 // Translate julia eltype to R type
-SEXP juliaTypeToSEXP(jl_value_t *Var) {
+SEXP juliaArrayToSEXP(jl_value_t *Var) {
   int nprot = 0;
   SEXP type = R_NilValue;
   SEXP ans = R_NilValue;
@@ -74,14 +74,12 @@ SEXP juliaTypeToSEXP(jl_value_t *Var) {
     }								\
     if (isInt32)						\
     {								\
-      PROTECT(ans = allocArray(INTSXP, dims)); nprot++;		\
       int *res = INTEGER(ans);					\
       for (size_t i = 0; i < len; i++)				\
 	  res[i] = p[i];					\
     }								\
     else							\
     {								\
-      PROTECT(ans = allocArray(REALSXP, dims)); nprot++;	\
       double *res = REAL(ans);					\
       for (size_t i = 0; i < len; i++)				\
 	  res[i] = p[i];					\
@@ -89,14 +87,12 @@ SEXP juliaTypeToSEXP(jl_value_t *Var) {
 
 // Macros for julia type which includes NA to R, for shorter code
 #define jlint_to_r_na					\
-    PROTECT(ans = allocArray(INTSXP, dims)); nprot++;	\
     int *res = INTEGER(ans);				\
     for (size_t i = 0; i < len; i++)			\
 	res[i] = pNA[i] ? NA_INTEGER : p[i]
 
 
 #define jlfloat_to_r_na					\
-    PROTECT(ans = allocArray(REALSXP, dims)); nprot++;	\
     double *res = REAL(ans);				\
     for (size_t i = 0; i < len; i++)			\
 	res[i] = pNA[i] ? NA_REAL : p[i]
@@ -115,14 +111,12 @@ SEXP juliaTypeToSEXP(jl_value_t *Var) {
   }							\
   if (isInt32)						\
   {							\
-    PROTECT(ans = allocArray(INTSXP, dims)); nprot++;	\
     int *res = INTEGER(ans);				\
     for (size_t i = 0; i < len; i++)			\
 	res[i] = pNA[i] ? NA_INTEGER : p[i];		\
   }							\
   else							\
   {							\
-    PROTECT(ans = allocArray(REALSXP, dims)); nprot++;	\
     double *res = REAL(ans);				\
     for (size_t i = 0; i < len; i++)			\
 	res[i] = pNA[i] ? NA_REAL : p[i];		\
@@ -131,7 +125,6 @@ SEXP juliaTypeToSEXP(jl_value_t *Var) {
 
 // macro for julia type which includes factor to r, for shorter code
 #define jlint_to_r_md					\
-    PROTECT(ans = allocVector(INTSXP, len));		\
     int *res = INTEGER(ans);				\
     for (size_t i = 0; i < len; i++)			\
 	res[i] = (p[i] == 0) ? NA_INTEGER : p[i]
@@ -263,10 +256,10 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   int len = jl_array_len(Var);
   if (len == 0)
     return ans;
-  PROTECT(ans = juliaTypeToSEXP(Var)); nprot++;
+
+  PROTECT(ans = juliaArrayToSEXP(Var)); nprot++;
   
   jl_datatype_t *vartype=jl_array_eltype(Var);
-  SEXP dims = R_NilValue;
 
   if (jl_bool_type==vartype)
   {
@@ -366,13 +359,13 @@ static SEXP Julia_R_Scalar_NA(jl_value_t *Var)
 static SEXP Julia_R_MD_NA(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
+  int nprot = 0;
   char *strData = "Varname0tmp.data";
   char *strNA = "bitunpack(Varname0tmp.na)";
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
   jl_value_t *retData = jl_eval_string(strData);
   jl_value_t *retNA = jl_eval_string(strNA);
   JL_GC_PUSH2(&retData,&retNA);
-
 
   int len = jl_array_len(retData);
   if (len == 0)
@@ -381,12 +374,9 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
     return ans;
   }
 
+  PROTECT(ans = juliaArrayToSEXP(retData)); nprot++;
+  
   jl_datatype_t *vartype = jl_array_eltype(retData);
-  int ndims = jl_array_ndims(retData),
-      nprot = 1; // 'dims'
-  SEXP dims = PROTECT(allocVector(INTSXP, ndims));
-  for (size_t i = 0; i < ndims; i++)
-    INTEGER(dims)[i] = jl_array_dim(retData, i);
 
   //bool array
   char *pNA = (char *) jl_array_data(retNA);
@@ -394,7 +384,6 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   if (jl_bool_type==vartype)
   {
     char *p = (char *) jl_array_data(retData);
-    PROTECT(ans = allocArray(LGLSXP, dims)); nprot++;
     int *res = LOGICAL(ans);
     for (size_t i = 0; i < len; i++)
 	res[i] = pNA[i] ? NA_LOGICAL : p[i];
@@ -464,7 +453,6 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   //convert string array to STRSXP
   else if (jl_utf8_string_type==vartype)
   {
-    PROTECT(ans = allocArray(STRSXP, dims)); nprot++;
     for (size_t i = 0; i < len; i++)
       if (pNA[i])
         SET_STRING_ELT(ans, i, NA_STRING);
@@ -473,7 +461,6 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   }
   else if (jl_ascii_string_type==vartype)
   {
-    PROTECT(ans = allocArray(STRSXP, dims)); nprot++;
     for (size_t i = 0; i < len; i++)
       if (pNA[i])
         SET_STRING_ELT(ans, i, NA_STRING);
