@@ -15,9 +15,7 @@ test_roundtrip <- function() {
         c = array( c(0:8), dim=c(2, 2, 2)), 
         d = c(NA_integer_, 0:4), 
         e = matrix(c(0:4, NA_integer_), ncol=2), 
-        f = array( c(0:7, NA_integer_), dim=c(2, 2, 2)),
-        h = list( 1:5, letters ),
-        j = list( c(NA, 2:5), letters )
+        f = array( c(0:7, NA_integer_), dim=c(2, 2, 2))
     )
 
     types = c("integer", "logical", "numeric", "character")
@@ -34,6 +32,16 @@ test_roundtrip <- function() {
                     checkIdentical( v, j2r(k) )
                 })
         })
+
+    lists = list(
+        h = list( 1:5, letters ),
+        j = list( c(NA, 2:5), letters )
+    )
+    mapply(names(lists), lists,
+           FUN=function(k, v) {
+               r2j(v, k)
+               checkIdentical( v, j2r(k) )
+           })
 }
 
 ## Repeated run r2j and j2r, can detect 'random' segfaults
