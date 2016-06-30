@@ -26,7 +26,7 @@ test_roundtrip <- function() {
             lapply(
                 types,
                 function(x) {
-                    message(x)
+                    message(x, ": ", k)
                     v = as(v, x)
                     r2j(v, k)
                     checkIdentical( v, j2r(k) )
@@ -42,6 +42,7 @@ test_roundtrip <- function() {
                r2j(v, k)
                checkIdentical( v, j2r(k) )
            })
+
 }
 
 ## Repeated run r2j and j2r, can detect 'random' segfaults

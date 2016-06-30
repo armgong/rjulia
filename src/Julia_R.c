@@ -15,18 +15,49 @@ Copyright (C) 2014, 2015 by Yu Gong
 #include "Julia_R.h"
 #define pkgdebug
 
+
+// Translate julia eltype to R type
+SEXP juliaTypeToSEXP(jl_value_t *Var) {
+  int nprot = 0;
+  SEXP type = R_NilValue;
+  SEXP ans = R_NilValue;
+  jl_datatype_t *vartype = jl_array_eltype(Var);
+  if (vartype == jl_utf8_string_type || vartype == jl_ascii_string_type)
+    type = STRSXP;
+  else if (vartype == jl_bool_type)
+    type = LGLSXP;
+  else if (vartype == jl_any_type)
+    type = VECSXP;
+  else if (vartype == jl_float64_type || vartype == jl_float32_type || vartype == jl_int64_type || vartype == jl_uint64_type)
+    type = REALSXP;
+  else if (vartype == jl_int32_type || vartype == jl_uint32_type || vartype == jl_int16_type || vartype == jl_uint16_type || vartype == jl_int8_type || vartype == jl_uint8_type)
+    type = INTSXP;
+  int rank = jl_array_rank(Var);
+  if (rank > 1) {
+    //get Julia dims and set R array Dims
+    int ndims = jl_array_ndims(Var);
+    SEXP dims = PROTECT(allocVector(INTSXP, ndims)); nprot++;
+    int *p = INTEGER(dims);
+    for (size_t i = 0; i < ndims; i++)
+      p[i] = jl_array_dim(Var, i);
+    PROTECT(ans = allocArray(type, dims)); nprot++;
+  } else {
+    PROTECT(ans = allocVector(type, jl_array_len(Var))); nprot++;
+  }
+  UNPROTECT(nprot);
+  return(ans);
+}
+
 // Macros for julia type to r, for shorter code
 // NOTE: You must UNPROTECT at the very end !!
 
 #define jlint_to_r					\
-    PROTECT(ans = allocArray(INTSXP, dims)); nprot++;	\
     int *res = INTEGER(ans);				\
     for (size_t i = 0; i < len; i++)			\
 	res[i] = p[i]
 
 
 #define jlfloat_to_r					\
-    PROTECT(ans = allocArray(REALSXP, dims)); nprot++;	\
     double *res = REAL(ans);				\
     for (size_t i = 0; i < len; i++)			\
 	res[i] = p[i]
@@ -228,21 +259,18 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
 static SEXP Julia_R_MD(jl_value_t *Var)
 {
   SEXP ans = R_NilValue;
-  //get Julia dims and set R array Dims
+  int nprot = 0;
   int len = jl_array_len(Var);
   if (len == 0)
     return ans;
-
+  PROTECT(ans = juliaTypeToSEXP(Var)); nprot++;
+  
   jl_datatype_t *vartype=jl_array_eltype(Var);
-  int ndims = jl_array_ndims(Var), nprot = 1; // 'dims'
-  SEXP dims = PROTECT(allocVector(INTSXP, ndims));
-  for (size_t i = 0; i < ndims; i++)
-    INTEGER(dims)[i] = jl_array_dim(Var, i);
+  SEXP dims = R_NilValue;
 
   if (jl_bool_type==vartype)
   {
     char *p = (char *) jl_array_data(Var);
-    PROTECT(ans = allocArray(LGLSXP, dims)); nprot++;
     int *res = LOGICAL(ans);
     for (size_t i = 0; i < len; i++)
       res[i] = p[i];
@@ -312,20 +340,16 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   // convert string array to STRSXP, but not sure it is correct ?
   else if (jl_utf8_string_type==vartype)
   {
-    PROTECT(ans = allocArray(STRSXP, dims)); nprot++;
     for (size_t i = 0; i < len; i++)
       SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(Var, i)), CE_UTF8));
   }
   else if (jl_ascii_string_type==vartype)
   {
-    PROTECT(ans = allocArray(STRSXP, dims)); nprot++;
     for (size_t i = 0; i < len; i++)
       SET_STRING_ELT(ans, i, mkChar(jl_string_data(jl_cellref(Var, i))));
   } else if (jl_any_type==vartype) {
-    PROTECT(ans = allocVector(VECSXP, len)); nprot++;
     jl_value_t **p = (jl_value_t **) jl_array_data(Var);
     for (size_t i = 0; i < len; i++)
-      //      SET_VECTOR_ELT(ans, i, R_NilValue);
       SET_VECTOR_ELT(ans, i, Julia_R_MD(p[i]));
   }
   UNPROTECT(nprot);
