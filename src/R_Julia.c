@@ -15,30 +15,6 @@ Copyright (C) 2014, 2015 by Yu Gong
 #include "R_Julia.h"
 #define pkgdebug
 
-//some defs from R
-#define UTF8_MASK (1<<3)
-//#define ASCII_MASK (1<<6)
-//#define IS_ASCII(x) ((x)->sxpinfo.gp & ASCII_MASK)
-#define IS_UTF8(x) ((x)->sxpinfo.gp & UTF8_MASK)
-
-//SEXP whether is ASCII encode
-//static bool ISASCII(SEXP Var)
-//{
-// bool result=true;
-// for (size_t i=0;i<LENGTH(Var);i++ )
-//  {
-//   if (STRING_ELT(Var, i) == NA_STRING)
-//     continue;
-//   if(!IS_ASCII(STRING_ELT(Var, i)))
-//   {
-//     result=false;
-//     break;
-//   }
-//  }
-// return result;
-//}
-
-
 //convert R SEXP dims to julia tuple
 static jl_value_t *RDims_JuliaTuple(SEXP Var)
 {
@@ -99,11 +75,6 @@ static jl_datatype_t* ElementType(SEXP Var) {
     case STRSXP:
     {
       eltype = jl_string_type;
-      //      if (!ISASCII(Var))
-      //	eltype = jl_utf8_string_type;
-      //      else
-      //      eltype = jl_ascii_string_type;
-	//      break;
     }
    }
   return(eltype);
@@ -131,12 +102,8 @@ static jl_array_t* NewArray(SEXP Var) {
 //VarName in converted Julia object's name
 static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 {
-
-   if ((LENGTH(Var))==0)
-     return (jl_value_t *) jl_nothing;
-
    jl_array_t *ret = NewArray(Var);
-   JL_GC_PUSH(&ret);
+   JL_GC_PUSH1(&ret);
    switch (TYPEOF(Var))
    {
     case LGLSXP:
@@ -162,13 +129,8 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     case STRSXP:
     {
       jl_value_t **retData = jl_array_data(ret);
-      //      if (!ISASCII(Var)) {
 	for (size_t i = 0; i < jl_array_len(ret); i++)
           retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
-	//      } else {
-	//	for (size_t i = 0; i < jl_array_len(ret); i++)
-	//          retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
-	//      }
       break;
     }
     case VECSXP:
@@ -314,20 +276,16 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
         }
         else
         {
-	  //          if (!ISASCII(Var))
             retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
-	    //          else
-	    //            retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
-	    //          retData1[i] = false;
         }
       }
-      ans= TransArrayToDataArray(ret, ret1, VarName);
+      ans = TransArrayToDataArray(ret, ret1, VarName);
       break;
     }
     default:
       ans=(jl_value_t *) jl_nothing;
       break;
-    }//case end
+    } // case end
     JL_GC_POP();
     return ans;
  }
@@ -461,7 +419,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 SEXP R_Julia(SEXP Var, SEXP VarName)
 {
   jl_value_t *ret = R_Julia_MD(Var, CHAR(STRING_ELT(VarName, 0)));
-  JL_GC_PUSH(&ret);  
+  JL_GC_PUSH1(&ret);  
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ret);
   JL_GC_POP();
   return R_NilValue;
