@@ -145,8 +145,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
     }
     default:
     {
-      ret=(jl_value_t *)jl_nothing;
-      break;
+      return (jl_value_t *)jl_nothing;
     }
    }
   JL_GC_POP();
