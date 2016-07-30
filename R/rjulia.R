@@ -28,14 +28,8 @@ isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")
 j2r <- julia_eval <- function(expression)
 {
   .julia_init_if_necessary()
-  ## Evaluate the expression and return the results of that evaluation. If it's appropriate
-  ## to provide it to the user as a vector, do so - otherwise provide it raw.
-  eval_result <- .Call("jl_eval", expression, PACKAGE="rjulia")
-  if((length(dim(eval_result)) == 1)||(length(eval_result) == 1)) {
-    as.vector(eval_result)
-  } else {
-    eval_result
-  }
+  ## Evaluate the expression and return the results of that evaluation.
+  .Call("jl_eval", expression, PACKAGE="rjulia")
 }
 
 jDo <- julia_void_eval <- function(expression)

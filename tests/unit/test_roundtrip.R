@@ -1,7 +1,9 @@
+
 ### Test sending data from R to julia and back again
 
 library(RUnit)
 library(rjulia)
+rjulia:::.julia_init_if_necessary()
 
 ## Send data of each atomic type to julia and back again
 ##  With and without NAs
@@ -24,12 +26,23 @@ test_roundtrip <- function() {
             lapply(
                 types,
                 function(x) {
-                    message(x)
+                    message(x, ": ", k)
                     v = as(v, x)
                     r2j(v, k)
                     checkIdentical( v, j2r(k) )
                 })
         })
+
+    lists = list(
+        h = list( 1:5, letters ),
+        j = list( c(NA, 2:5), letters )
+    )
+    mapply(names(lists), lists,
+           FUN=function(k, v) {
+               r2j(v, k)
+               checkIdentical( v, j2r(k) )
+           })
+
 }
 
 ## Repeated run r2j and j2r, can detect 'random' segfaults

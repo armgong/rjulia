@@ -134,39 +134,32 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
    if ((LENGTH(Var))==0)
      return (jl_value_t *) jl_nothing;
 
-   jl_array_t *ret =NULL;
+   jl_array_t *ret = NewArray(Var);
    JL_GC_PUSH(&ret);
    switch (TYPEOF(Var))
    {
     case LGLSXP:
     {
-      ret = NewArray(Var);
       char *retData = (char *)jl_array_data(ret);
       int *var_p = LOGICAL(Var);
       for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast from int32 to int8
         retData[i] = var_p[i];
-      jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     };
     case INTSXP:
     {
-      ret = NewArray(Var);
       int *retData = (int *)jl_array_data(ret);
       memcpy(retData, INTEGER(Var), jl_array_len(ret) * sizeof(int));
-      jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
     case REALSXP:
     {
-      ret = NewArray(Var);
       double *retData = (double *)jl_array_data(ret);
       memcpy(retData, REAL(Var), jl_array_len(ret) * sizeof(double));
-      jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
     case STRSXP:
     {
-      ret = NewArray(Var);
       jl_value_t **retData = jl_array_data(ret);
       if (!ISASCII(Var)) {
 	for (size_t i = 0; i < jl_array_len(ret); i++)
@@ -175,60 +168,18 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 	for (size_t i = 0; i < jl_array_len(ret); i++)
           retData[i] = jl_cstr_to_string(CHAR(STRING_ELT(Var, i)));
       }
-      jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
       break;
     }
-    /*case VECSXP:
-    {
-      char eltcmd[eltsize];
-      ret =(jl_value_t *) jl_alloc_svec(length(Var));
-      for (int i = 0; i < length(Var); i++)
-      {
-        snprintf(eltcmd, eltsize, "%selement%d", VarName, i);
-        jl_svecset((jl_value_t*)ret, i, R_Julia_MD(VECTOR_ELT(Var, i), eltcmd));
-        //clear
-        snprintf(eltcmd, eltsize, "%selement%d=0;", VarName, i);
-        jl_eval_string(eltcmd);
-      }
-      jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      break;
-    }*/
     case VECSXP:
     {
-      char eltcmd[eltsize];
-      char evalcmd[evalsize];
-	  
-      //get VECSXP elements in julia object array
-      jl_value_t **elts;
-      JL_GC_PUSHARGS(elts,length(Var));
-      for (int i = 0; i < length(Var); i++)
+      jl_value_t **retData = jl_array_data(ret);
+      // Does putting these pointers in this Vector{Any} require a GC write barrier?
+      for (int i = 0; i < jl_array_len(ret); i++)
       {
-        snprintf(eltcmd, eltsize, "%selt%d", VarName, i);
-        elts[i]=R_Julia_MD(VECTOR_ELT(Var,i),eltcmd);
+	retData[i] = R_Julia_MD(VECTOR_ELT(Var,i),"foo");
       }
-	  
-      //create tuple use julia scripts, no API can create Tuple now
-      snprintf(evalcmd, evalsize, "%s","(");
-      for (size_t i = 0; i <length(Var); i++)
-      {
-       snprintf(eltcmd, eltsize, "%selt%d,", VarName, i);
-       strcat(evalcmd,eltcmd);
-      }
-      strcat(evalcmd,")");
-      ret=jl_eval_string(evalcmd);
-      jl_set_global(jl_main_module, jl_symbol(VarName), (jl_value_t *)ret);
-      
-      //clear tmp variable value
-      for (size_t i = 0; i <length(Var); i++)
-      {
-       snprintf(eltcmd, eltsize, "%selt%d=0", VarName, i);
-       jl_eval_string(eltcmd);
-      }
-	  
-      JL_GC_POP();
       break;
     }
-
     default:
     {
       ret=(jl_value_t *)jl_nothing;
@@ -244,7 +195,6 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 //first pass creat array then convert it to DataArray
 //second pass assign NA to element
 static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, const char *VarName)
-
 {
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t *)mArray);
@@ -518,34 +468,33 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 }
 
 //Convert R Type To Julia,which not contain NA
-SEXP R_Julia(SEXP Var, SEXP VarNam)
+SEXP R_Julia(SEXP Var, SEXP VarName)
 {
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD(Var, VarName);
+  jl_value_t *ret = R_Julia_MD(Var, CHAR(STRING_ELT(VarName, 0)));
+  JL_GC_PUSH(&ret);  
+  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ret);
+  JL_GC_POP();
   return R_NilValue;
 }
 
 //Convert R Type To Julia,which contain NA
-SEXP R_Julia_NA(SEXP Var, SEXP VarNam)
+SEXP R_Julia_NA(SEXP Var, SEXP VarName)
 {
   LoadDF();
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD_NA(Var, VarName);
+  R_Julia_MD_NA(Var, CHAR(STRING_ELT(VarName, 0)));
   return R_NilValue;
 }
 //Convert R factor To Julia,which contain NA
-SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarNam)
+SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarName)
 {
   LoadDF();
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD_NA_Factor(Var, VarName);
+  R_Julia_MD_NA_Factor(Var, CHAR(STRING_ELT(VarName, 0)));
   return R_NilValue;
 }
 //Convert R data frame To Julia
-SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP VarNam)
+SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP VarName)
 {
   LoadDF();
-  const char *VarName = CHAR(STRING_ELT(VarNam, 0));
-  R_Julia_MD_NA_DataFrame(Var, VarName);
+  R_Julia_MD_NA_DataFrame(Var, CHAR(STRING_ELT(VarName, 0)));
   return R_NilValue;
 }
