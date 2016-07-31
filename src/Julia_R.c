@@ -19,7 +19,7 @@ Copyright (C) 2014, 2015 by Yu Gong
 // Translate julia eltype to R type
 SEXP juliaArrayToSEXP(jl_value_t *Var) {
   int nprot = 0;
-  SEXP type = R_NilValue;
+  SEXPTYPE type;
   SEXP ans = R_NilValue;
   jl_datatype_t *vartype = jl_array_eltype(Var);
   if (vartype == jl_utf8_string_type || vartype == jl_ascii_string_type)
