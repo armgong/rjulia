@@ -28,9 +28,9 @@ SEXP juliaArrayToSEXP(jl_value_t *Var) {
     type = LGLSXP;
   else if (vartype == jl_any_type)
     type = VECSXP;
-  else if (vartype == jl_float64_type || vartype == jl_float32_type || vartype == jl_int64_type || vartype == jl_uint64_type)
+  else if (vartype == jl_float64_type || vartype == jl_float32_type || vartype == jl_int64_type || vartype == jl_uint64_type || vartype== jl_uint32_type)
     type = REALSXP;
-  else if (vartype == jl_int32_type || vartype == jl_uint32_type || vartype == jl_int16_type || vartype == jl_uint16_type || vartype == jl_int8_type || vartype == jl_uint8_type)
+  else if (vartype == jl_int32_type || vartype == jl_int16_type || vartype == jl_uint16_type || vartype == jl_int8_type || vartype == jl_uint8_type)
     type = INTSXP;
   int rank = jl_array_rank(Var);
   if (rank > 1) {
