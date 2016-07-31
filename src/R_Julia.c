@@ -139,12 +139,13 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       // Does putting these pointers in this Vector{Any} require a GC write barrier?
       for (int i = 0; i < jl_array_len(ret); i++)
       {
-	retData[i] = R_Julia_MD(VECTOR_ELT(Var,i),"foo");
+	     retData[i] = R_Julia_MD(VECTOR_ELT(Var,i),"foo");
       }
       break;
     }
     default:
     {
+      JL_GC_POP();
       return (jl_value_t *)jl_nothing;
     }
    }
