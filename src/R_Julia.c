@@ -261,7 +261,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
    } // case end
   // Create DataArray and check for exception
   jl_function_t *func = jl_get_function(jl_base_module, "DataArray");
-  ans = jl_call2(func, ret1, ret2);
+  ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);
   if (jl_exception_occurred())
     {
       jl_show(jl_stderr_obj(), jl_exception_occurred());
