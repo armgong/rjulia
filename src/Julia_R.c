@@ -333,8 +333,9 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   // convert string array to STRSXP, but not sure it is correct ?
   else if (jl_string_type==vartype)
   {
+    jl_value_t **retData = jl_array_data(Var);
     for (size_t i = 0; i < len; i++)
-      SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(Var, i)), CE_UTF8));
+      SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(retData[i]), CE_UTF8));
   }
   else if (jl_any_type==vartype) {
     jl_value_t **p = (jl_value_t **) jl_array_data(Var);
@@ -449,11 +450,12 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   //convert string array to STRSXP
   else if (jl_string_type==vartype)
   {
+    jl_value_t **retData = jl_array_data(Var);
     for (size_t i = 0; i < len; i++)
       if (pNA[i])
         SET_STRING_ELT(ans, i, NA_STRING);
       else
-        SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(retData, i)), CE_UTF8));
+        SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(retData[i]), CE_UTF8));
   }
   JL_GC_POP();
   jl_eval_string("Varname0tmp=0;");
