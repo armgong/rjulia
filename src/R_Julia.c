@@ -177,14 +177,12 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 //convert R factor to Julia PooledDataArray
 static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
 {
-  if ((LENGTH(Var))== 0)
-   return jl_nothing;
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
-  if (levels == R_NilValue)
-    return jl_nothing;
+  if ((LENGTH(Var))== 0 || TYPEOF(Var) != INTSXP || levels == R_NilValue)
+   return jl_nothing;
 
   //create string array for levels in julia
-  jl_value_t *ans=NULL;
+  jl_value_t *ans=(jl_value_t *) jl_nothing;
   jl_array_t *ret=NULL;
   jl_array_t *ret1=NULL;
   ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_string_type,1), LENGTH(levels));
@@ -192,43 +190,29 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
   JL_GC_PUSH3(&ret, &ret1,&ans);
 
   for (size_t i = 0; i < jl_array_len(ret1); i++)
-   {
      retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
-   }
 
-  switch (TYPEOF(Var))
-   {
-    case INTSXP:
+  ret = jl_alloc_array_1d(jl_apply_array_type(jl_uint32_type, 1), LENGTH(Var));
+  int *retData = (int *)jl_array_data(ret);
+  for (size_t i = 0; i < jl_array_len(ret); i++)
     {
-      ret = jl_alloc_array_1d(jl_apply_array_type(jl_uint32_type, 1), LENGTH(Var));
-      int *retData = (int *)jl_array_data(ret);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-      {
-        if (INTEGER(Var)[i] == NA_INTEGER)
-        {
-          //NA in poolarray is 0
-          retData[i] = 0;
-        }
-        else
-        {
-          retData[i] = INTEGER(Var)[i];
-        }
-      }
-      jl_function_t *func = jl_get_function(jl_base_module, "PooledDataArray");
-      ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);
-      if (jl_exception_occurred())
-	{
-	  jl_show(jl_stderr_obj(), jl_exception_occurred());
-	  Rprintf("\n");
-	  jl_exception_clear();
-	  return (jl_value_t *) jl_nothing;
-	}
-      break;
+      if (INTEGER(Var)[i] == NA_INTEGER)
+	retData[i] = 0; //NA in poolarray is 0
+      else
+	retData[i] = INTEGER(Var)[i];
     }
-    default:
-     ans=(jl_value_t *) jl_nothing;
-      break;
-    }//case end
+  jl_function_t *func = jl_get_function(jl_base_module, "PooledDataArray");
+  
+  if (jl_exception_occurred())
+    {
+      jl_show(jl_stderr_obj(), jl_exception_occurred());
+      Rprintf("\n");
+      jl_exception_clear();
+      ans =  (jl_value_t *) jl_nothing;
+    }
+  else
+      ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);
+
   JL_GC_POP();
   return ans;
 }
