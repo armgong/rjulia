@@ -418,31 +418,43 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 //Convert R Type To Julia,which not contain NA
 SEXP R_Julia(SEXP Var, SEXP VarName)
 {
-  jl_value_t *ret = R_Julia_MD(Var, CHAR(STRING_ELT(VarName, 0)));
-  JL_GC_PUSH1(&ret);  
-  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ret);
+  jl_value_t *ans;
+  JL_GC_PUSH(&ans);
+  ans = R_Julia_MD(Var);
+  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
   JL_GC_POP();
   return R_NilValue;
 }
 
 //Convert R Type To Julia,which contain NA
-SEXP R_Julia_NA(SEXP Var, SEXP VarName)
+SEXP R_JuliaNA(SEXP Var, SEXP na, SEXP VarName)
 {
-  LoadDF();
-  R_Julia_MD_NA(Var, CHAR(STRING_ELT(VarName, 0)));
+  jl_value_t *ans;
+  JL_GC_PUSH1(&ans);
+  ans = R_Julia_MD_NA(Var, na);
+  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
+  JL_GC_POP();
   return R_NilValue;
 }
-//Convert R factor To Julia,which contain NA
-SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarName)
+//Convert R factor To Julia, which contain NA
+SEXP R_Julia_NA_Factor(SEXP Var, SEXP na, SEXP VarName)
 {
   LoadDF();
-  R_Julia_MD_NA_Factor(Var, CHAR(STRING_ELT(VarName, 0)));
+  jl_value_t *ans;
+  JL_GC_PUSH1(&ans);
+  ans = R_Julia_MD_NA_Factor(Var, na);
+  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
+  JL_GC_POP();
   return R_NilValue;
 }
 //Convert R data frame To Julia
-SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP VarName)
+SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP na, SEXP VarName)
 {
   LoadDF();
-  R_Julia_MD_NA_DataFrame(Var, CHAR(STRING_ELT(VarName, 0)));
+  jl_value_t *ans;
+  JL_GC_PUSH1(&ans);
+  ans = R_Julia_MD_NA_DataFrame(Var, na);
+  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
+  JL_GC_POP();
   return R_NilValue;
 }

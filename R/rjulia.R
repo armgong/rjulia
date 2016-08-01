@@ -42,20 +42,22 @@ r2j <- r_julia <- function(x,y)
 {
   .julia_init_if_necessary()
 
-  proc <- if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
-    if (anyNA(x)) {
-      "R_Julia_NA"
+  if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
+    na = is.na(x)
+    if (any(na)) {
+      invisible(.Call("R_Julia_NA", x, na, y, PACKAGE="rjulia"))
     } else {
-      "R_Julia"
+      invisible(.Call("R_Julia", x, y, PACKAGE="rjulia"))
     }
   } else if (is.data.frame(x)) {
-    "R_Julia_NA_DataFrame"
+    na = lapply(x, is.na)
+    invisible(.Call("R_Julia_NA_DataFrame", x, na, y, PACKAGE="rjulia"))
   } else if (is.factor(x)) {
-    "R_Julia_NA_Factor"
+    na = is.na(x)
+    invisible(.Call("R_Julia_NA_Factor", x, na, y, PACKAGE="rjulia"))
   } else {
     warning("rjulia supports only vector, matrix, array, list(withoug NAs), factor and data frames (with simple string, int, float, logical) classes")
   }
-  invisible(.Call(proc, x,y, PACKAGE="rjulia"))
 }
 
 jdfinited <- julia_DataArrayFrameInited <- function()
