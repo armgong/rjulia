@@ -168,7 +168,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
     jl_show(jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
-    return (jl_value_t *) jl_nothing;
+    ans = (jl_value_t *) jl_nothing;
   }
   JL_GC_POP();
   return ans;
@@ -179,7 +179,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
 {
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
   if ((LENGTH(Var))== 0 || TYPEOF(Var) != INTSXP || levels == R_NilValue)
-   return jl_nothing;
+    return (jl_value_t *) jl_nothing;
 
   //create string array for levels in julia
   jl_value_t *ans=(jl_value_t *) jl_nothing;
