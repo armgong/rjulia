@@ -99,8 +99,7 @@ static jl_array_t* NewArray(SEXP Var) {
 
 //convert R object to julia object
 //Var is R object
-//VarName in converted Julia object's name
-static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD(SEXP Var)
 {
    jl_array_t *ret = NewArray(Var);
    JL_GC_PUSH1(&ret);
@@ -139,7 +138,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       // Does putting these pointers in this Vector{Any} require a GC write barrier?
       for (int i = 0; i < jl_array_len(ret); i++)
       {
-	     retData[i] = R_Julia_MD(VECTOR_ELT(Var,i),"foo");
+	     retData[i] = R_Julia_MD(VECTOR_ELT(Var,i));
       }
       break;
     }
@@ -157,7 +156,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 //this is for R object contain NA, need two pass to finish
 //first pass creat array then convert it to DataArray
 //second pass assign NA to element
-static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray, const char *VarName)
+static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray)
 {
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t *)mArray);
@@ -176,7 +175,7 @@ static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolAr
 }
 
 //convert R object contain NA value to Julia DataArrays
-static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 {
 
   if ((LENGTH(Var)) == 0)
@@ -220,7 +219,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
-      ans=TransArrayToDataArray(ret, ret1, VarName);
+      ans=TransArrayToDataArray(ret, ret1);
       break;
     };
     case INTSXP:
@@ -240,7 +239,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
-      ans= TransArrayToDataArray(ret, ret1, VarName);
+      ans= TransArrayToDataArray(ret, ret1);
       break;
     }
     case REALSXP:
@@ -260,7 +259,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
           retData1[i] = false;
         }
       }
-      ans= TransArrayToDataArray(ret, ret1, VarName);
+      ans = TransArrayToDataArray(ret, ret1);
       break;
     }
     case STRSXP:
@@ -279,7 +278,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
             retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
         }
       }
-      ans = TransArrayToDataArray(ret, ret1, VarName);
+      ans = TransArrayToDataArray(ret, ret1);
       break;
     }
     default:
@@ -293,7 +292,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
 //convert julia Array to PooledDataArray in DataArrays packages
 //this is for convet R factors to Julia PooledDataArray
 //basically factor in R is 1-dim INTSXP and contain levels
-static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray, size_t len, const char *VarName)
+static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray, size_t len)
 {
   char evalcmd[evalsize];
   jl_set_global(jl_main_module, jl_symbol("varpools"), (jl_value_t *)mpoolArray);
@@ -322,7 +321,7 @@ static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpo
 }
 
 //convert R factor to Julia PooledDataArray
-static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
 {
   if ((LENGTH(Var))== 0)
    return jl_nothing;
@@ -361,7 +360,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
           retData[i] = INTEGER(Var)[i];
         }
       }
-      ans=TransArrayToPoolDataArray(ret, ret1, LENGTH(Var), VarName);
+      ans=TransArrayToPoolDataArray(ret, ret1, LENGTH(Var));
       break;
     }
     default:
@@ -373,53 +372,48 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
 }
 
 //convert R DataFrame to Julia DataFrame in DataFrames package
-static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
+static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
 {
   SEXP names = getAttrib(Var, R_NamesSymbol);
   size_t len = LENGTH(Var);
   if (TYPEOF(Var) != VECSXP || len == 0 || names == R_NilValue)
     return (jl_value_t *) jl_nothing;
-  char evalcmd[evalsize];
-  char eltcmd[eltsize];
-  const char *onename;
-  SEXP elt;
-  for (size_t i = 0; i < len; i++)
-  {
-    snprintf(eltcmd, eltsize, "%sdfelt%lu", VarName, i + 1);
-    elt = VECTOR_ELT(Var, i);
-    //vector is factor or not
-    if (getAttrib(elt, R_LevelsSymbol) != R_NilValue)
-      R_Julia_MD_NA_Factor(elt, eltcmd);
+
+  jl_array_t *col_names;
+  jl_array_t *col_list;
+  JL_GC_PUSH2(&col_list, &col_names);
+  col_list = jl_alloc_array_1d(jl_array_any_type, len);  // Vector{Any} to hold df columns
+  col_names = jl_alloc_array_1d(jl_array_symbol_type, len); // Vector{Symbol} to hold df names
+  
+  // Does putting these pointers in this Vector{Any} require a GC write barrier?
+  jl_value_t **colsData = jl_array_data(col_list);
+  for (int i = 0; i < len; i++) {
+    jl_arrayset(col_names, (jl_value_t *)jl_symbol( CHAR(STRING_ELT(names,i)) ), i);
+    SEXP data_elt = VECTOR_ELT(col_list,i);
+    if (getAttrib(data_elt, R_LevelsSymbol) != R_NilValue)
+      colsData[i] = R_Julia_MD_NA_Factor(data_elt, VECTOR_ELT(na,i));
     else
-      R_Julia_MD_NA(elt, eltcmd);
-
-    onename = CHAR(STRING_ELT(names, i));
-    if (i == 0)
-      snprintf(evalcmd, evalsize, "%s=DataFrame(%s =%s)", VarName, onename, eltcmd);
-    else
-      snprintf(evalcmd, evalsize, "%s[symbol(\"%s\")]=%s", VarName, onename, eltcmd);
-    jl_eval_string(evalcmd);
-
-    //clear
-    snprintf(eltcmd, eltsize, "%sdfelt%lu=0;", VarName, i + 1);
-    jl_eval_string(eltcmd);
-
-    if (jl_exception_occurred())
+      colsData[i] = R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i));
+  }
+  
+  jl_function_t *func = jl_get_function(jl_base_module, "DataFrame");
+  jl_value_t *ret = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
+  JL_GC_POP();
+  if (jl_exception_occurred())
     {
       jl_show(jl_stderr_obj(), jl_exception_occurred());
       Rprintf("\n");
       jl_exception_clear();
-      return (jl_value_t *) jl_nothing;
+      return (jl_value_t *)jl_nothing;
     }
-  }
-  return (jl_value_t *) jl_nothing;;
+  return ret;
 }
 
 //Convert R Type To Julia,which not contain NA
 SEXP R_Julia(SEXP Var, SEXP VarName)
 {
   jl_value_t *ans;
-  JL_GC_PUSH(&ans);
+  JL_GC_PUSH1(&ans);
   ans = R_Julia_MD(Var);
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
   JL_GC_POP();
