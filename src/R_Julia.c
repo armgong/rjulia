@@ -152,28 +152,6 @@ static jl_value_t *R_Julia_MD(SEXP Var)
   return (jl_value_t *)ret;
 }
 
-//convert julia array to DataArray in DataArray's package
-//this is for R object contain NA, need two pass to finish
-//first pass creat array then convert it to DataArray
-//second pass assign NA to element
-static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolArray)
-{
-  char evalcmd[evalsize];
-  jl_set_global(jl_main_module, jl_symbol("TransVarName"), (jl_value_t *)mArray);
-  jl_set_global(jl_main_module, jl_symbol("TransVarNamebool"), (jl_value_t *)mboolArray);
-  snprintf(evalcmd, evalsize, "%s=DataArray(TransVarName,TransVarNamebool)", VarName);
-  jl_value_t *ret = jl_eval_string(evalcmd);
-  jl_eval_string("TransVarName=0;TransVarNamebool=0;");
-  if (jl_exception_occurred())
-  {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
-    Rprintf("\n");
-    jl_exception_clear();
-    return (jl_value_t *) jl_nothing;
-  }
-  return ret;
-}
-
 //convert R object contain NA value to Julia DataArrays
 static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 {
@@ -219,7 +197,6 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
           retData1[i] = false;
         }
       }
-      ans=TransArrayToDataArray(ret, ret1);
       break;
     };
     case INTSXP:
@@ -239,7 +216,6 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
           retData1[i] = false;
         }
       }
-      ans= TransArrayToDataArray(ret, ret1);
       break;
     }
     case REALSXP:
@@ -259,7 +235,6 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
           retData1[i] = false;
         }
       }
-      ans = TransArrayToDataArray(ret, ret1);
       break;
     }
     case STRSXP:
@@ -278,15 +253,24 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
             retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
         }
       }
-      ans = TransArrayToDataArray(ret, ret1);
       break;
     }
     default:
       ans=(jl_value_t *) jl_nothing;
       break;
-    } // case end
-    JL_GC_POP();
-    return ans;
+   } // case end
+  // Create DataArray and check for exception
+  jl_function_t *func = jl_get_function(jl_base_module, "DataArray");
+  ans = jl_call2(func, ret1, ret2);
+  if (jl_exception_occurred())
+    {
+      jl_show(jl_stderr_obj(), jl_exception_occurred());
+      Rprintf("\n");
+      jl_exception_clear();
+      return (jl_value_t *) jl_nothing;
+    }
+  JL_GC_POP();
+  return ans;
  }
 
 //convert julia Array to PooledDataArray in DataArrays packages
