@@ -155,120 +155,21 @@ static jl_value_t *R_Julia_MD(SEXP Var)
 //convert R object contain NA value to Julia DataArrays
 static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 {
-
-  if ((LENGTH(Var)) == 0)
-  {
-    return (jl_value_t *) jl_nothing;
-  }//if length !=0
-  
-  jl_array_t *ret =NULL;
-  jl_array_t *ret1 =NULL;
-  jl_value_t *ans=NULL;
-
-  JL_GC_PUSH3(&ret, &ret1, &ans);
-  ret = NewArray(Var);
-  int rank = jl_array_ndims(ret);
-  jl_value_t* array_type = jl_apply_array_type(jl_bool_type, rank);
-  if (rank == 1) {
-    ret1 = jl_alloc_array_1d(array_type, LENGTH(Var));
-  } else if (rank == 2) {
-    ret1 = jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
-  } else {
-    jl_value_t *dims = RDims_JuliaTuple(Var);
-    ret1 = jl_new_array(array_type, dims);
-  }
-  
-  switch (TYPEOF(Var))
-   {
-    case LGLSXP:
-    {
-      char *retData = (char *)jl_array_data(ret);
-      bool *retData1 = (bool *)jl_array_data(ret1);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-      {
-        if (LOGICAL(Var)[i] == NA_LOGICAL)
-        {
-          retData[i] = 1;
-          retData1[i] = true;
-        }
-        else
-        {
-          retData[i] = LOGICAL(Var)[i];
-          retData1[i] = false;
-        }
-      }
-      break;
-    };
-    case INTSXP:
-    {
-      int *retData = (int *)jl_array_data(ret);
-      bool *retData1 = (bool *)jl_array_data(ret1);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-      {
-        if (INTEGER(Var)[i] == NA_INTEGER)
-        {
-          retData[i] = 999;
-          retData1[i] = true;
-        }
-        else
-        {
-          retData[i] = INTEGER(Var)[i];
-          retData1[i] = false;
-        }
-      }
-      break;
-    }
-    case REALSXP:
-    {
-      double *retData = (double *)jl_array_data(ret);
-      bool *retData1 = (bool *)jl_array_data(ret1);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-      {
-        if (ISNAN(REAL(Var)[i]))
-        {
-          retData[i] = 999.01;
-          retData1[i] = true;
-        }
-        else
-        {
-          retData[i] = REAL(Var)[i];
-          retData1[i] = false;
-        }
-      }
-      break;
-    }
-    case STRSXP:
-    {
-      jl_value_t **retData = jl_array_data(ret);
-      bool *retData1 = (bool *)jl_array_data(ret1);
-      for (size_t i = 0; i < jl_array_len(ret); i++)
-      {
-        if (STRING_ELT(Var, i) == NA_STRING)
-        {
-          retData[i] = jl_cstr_to_string("999");
-          retData1[i] = true;
-        }
-        else
-        {
-            retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
-        }
-      }
-      break;
-    }
-    default:
-      ans=(jl_value_t *) jl_nothing;
-      break;
-   } // case end
-  // Create DataArray and check for exception
   jl_function_t *func = jl_get_function(jl_base_module, "DataArray");
-  ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);
+  jl_value_t *ret1  = NULL;
+  jl_value_t *ret2 = NULL;
+  jl_value_t *ans  = NULL;
+  JL_GC_PUSH3(&ret1, &ret2, &ans);
+  ret1  = (jl_value_t *)NewArray(Var);
+  ret2 = (jl_value_t *)NewArray(na);
+  ans = jl_call2(func, ret1, ret2);
   if (jl_exception_occurred())
-    {
-      jl_show(jl_stderr_obj(), jl_exception_occurred());
-      Rprintf("\n");
-      jl_exception_clear();
-      return (jl_value_t *) jl_nothing;
-    }
+  {
+    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    Rprintf("\n");
+    jl_exception_clear();
+    return (jl_value_t *) jl_nothing;
+  }
   JL_GC_POP();
   return ans;
  }
