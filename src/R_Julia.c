@@ -268,7 +268,7 @@ SEXP R_Julia(SEXP Var, SEXP VarName)
 }
 
 //Convert R Type To Julia,which contain NA
-SEXP R_JuliaNA(SEXP Var, SEXP na, SEXP VarName)
+SEXP R_Julia_NA(SEXP Var, SEXP na, SEXP VarName)
 {
   jl_value_t *ans;
   JL_GC_PUSH1(&ans);
