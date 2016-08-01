@@ -174,37 +174,6 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
   return ans;
  }
 
-//convert julia Array to PooledDataArray in DataArrays packages
-//this is for convet R factors to Julia PooledDataArray
-//basically factor in R is 1-dim INTSXP and contain levels
-static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpoolArray, size_t len)
-{
-  char evalcmd[evalsize];
-  jl_set_global(jl_main_module, jl_symbol("varpools"), (jl_value_t *)mpoolArray);
-  jl_set_global(jl_main_module, jl_symbol("varrefs"), (jl_value_t *)mArray);
-  snprintf(evalcmd, evalsize, "%s=PooledDataArray(String,Uint32,%zu)" , VarName, len);
-  jl_value_t *ret1=NULL;
-  jl_value_t *ret2=NULL;
-  jl_value_t *ret3=NULL;
-  JL_GC_PUSH3(&ret1,&ret2,&ret3);
-  ret1=jl_eval_string(evalcmd);
-  snprintf(evalcmd, evalsize, "%s.pool=%s", VarName, "varpools");
-  ret2=jl_eval_string(evalcmd);
-  snprintf(evalcmd, evalsize, "%s.refs=%s", VarName, "varrefs");
-  ret3=jl_eval_string(evalcmd);
-  jl_value_t *ret = jl_eval_string((char *)VarName);
-  JL_GC_POP();
-  jl_eval_string("varpools=0;varrefs=0;");
-  if (jl_exception_occurred())
-  {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
-    Rprintf("\n");
-    jl_exception_clear();
-    return (jl_value_t *) jl_nothing;
-  }
-  return ret;
-}
-
 //convert R factor to Julia PooledDataArray
 static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
 {
@@ -245,7 +214,15 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
           retData[i] = INTEGER(Var)[i];
         }
       }
-      ans=TransArrayToPoolDataArray(ret, ret1, LENGTH(Var));
+      jl_function_t *func = jl_get_function(jl_base_module, "PooledDataArray");
+      ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);
+      if (jl_exception_occurred())
+	{
+	  jl_show(jl_stderr_obj(), jl_exception_occurred());
+	  Rprintf("\n");
+	  jl_exception_clear();
+	  return (jl_value_t *) jl_nothing;
+	}
       break;
     }
     default:
