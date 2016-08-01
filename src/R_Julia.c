@@ -204,6 +204,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
   jl_function_t *func = jl_get_function(jl_base_module, "PooledDataArray");
   ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);  
 
+  
   if (jl_exception_occurred())
     {
       jl_show(jl_stderr_obj(), jl_exception_occurred());
@@ -243,14 +244,16 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
   
   jl_function_t *func = jl_get_function(jl_base_module, "DataFrame");
   jl_value_t *ret = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
-  JL_GC_POP();
+
   if (jl_exception_occurred())
     {
       jl_show(jl_stderr_obj(), jl_exception_occurred());
       Rprintf("\n");
       jl_exception_clear();
-      return (jl_value_t *)jl_nothing;
+      ret = (jl_value_t *)jl_nothing;
     }
+  
+  JL_GC_POP();  
   return ret;
 }
 
