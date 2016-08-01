@@ -15,6 +15,19 @@ Copyright (C) 2014, 2015 by Yu Gong
 #include "R_Julia.h"
 #define pkgdebug
 
+// Handle and report exception
+static int rjulia_exception_occurred() {
+  if (jl_exception_occurred()) {
+    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    Rprintf("\n");
+    jl_exception_clear();
+    return(1);
+  } else {
+    return(0);
+  }
+}
+
+
 //convert R SEXP dims to julia tuple
 static jl_value_t *RDims_JuliaTuple(SEXP Var)
 {
@@ -163,13 +176,10 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
   ret1  = (jl_value_t *)NewArray(Var);
   ret2 = (jl_value_t *)NewArray(na);
   ans = jl_call2(func, ret1, ret2);
-  if (jl_exception_occurred())
-  {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
-    Rprintf("\n");
-    jl_exception_clear();
-    ans = (jl_value_t *) jl_nothing;
-  }
+
+  if (rjulia_exception_occurred())
+    ans=  (jl_value_t *) jl_nothing;
+
   JL_GC_POP();
   return ans;
  }
@@ -204,14 +214,8 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
   jl_function_t *func = jl_get_function(jl_base_module, "PooledDataArray");
   ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);  
 
-  
-  if (jl_exception_occurred())
-    {
-      jl_show(jl_stderr_obj(), jl_exception_occurred());
-      Rprintf("\n");
-      jl_exception_clear();
-      ans =  (jl_value_t *) jl_nothing;
-    }
+  if (rjulia_exception_occurred())
+    ans =  (jl_value_t *) jl_nothing;
 
   JL_GC_POP();
   return ans;
@@ -245,13 +249,8 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
   jl_function_t *func = jl_get_function(jl_base_module, "DataFrame");
   jl_value_t *ret = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
 
-  if (jl_exception_occurred())
-    {
-      jl_show(jl_stderr_obj(), jl_exception_occurred());
-      Rprintf("\n");
-      jl_exception_clear();
-      ret = (jl_value_t *)jl_nothing;
-    }
+  if (rjulia_exception_occurred())
+    ret =  (jl_value_t *) jl_nothing;
   
   JL_GC_POP();  
   return ret;
