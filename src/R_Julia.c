@@ -202,7 +202,8 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
 	retData[i] = INTEGER(Var)[i];
     }
   jl_function_t *func = jl_get_function(jl_base_module, "PooledDataArray");
-  
+  ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);  
+
   if (jl_exception_occurred())
     {
       jl_show(jl_stderr_obj(), jl_exception_occurred());
@@ -210,8 +211,6 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
       jl_exception_clear();
       ans =  (jl_value_t *) jl_nothing;
     }
-  else
-      ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);
 
   JL_GC_POP();
   return ans;
