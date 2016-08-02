@@ -57,8 +57,7 @@ r2j <- r_julia <- function(x,y)
     na = lapply(x, is.na)
     invisible(.Call("R_Julia_NA_DataFrame", x, na, y, PACKAGE="rjulia"))
   } else if (is.factor(x)) {
-    na = is.na(x)
-    invisible(.Call("R_Julia_NA_Factor", x, na, y, PACKAGE="rjulia"))
+    invisible(.Call("R_Julia_NA_Factor", x, y, PACKAGE="rjulia"))
   } else {
     warning("rjulia supports only vector, matrix, array, list(withoug NAs), factor and data frames (with simple string, int, float, logical) classes")
   }

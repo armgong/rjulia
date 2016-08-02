@@ -170,7 +170,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
  }
 
 //convert R factor to Julia PooledDataArray
-static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
+static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
 {
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
   int nlevels = LENGTH(levels);
@@ -191,7 +191,6 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
   for (size_t i = 0; i < nlevels; i++)
      retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
 
-
   // Collect string vector
   na_vec = jl_alloc_array_1d( jl_apply_array_type(jl_bool_type,1), LENGTH(Var));
   char *na_data = (char *)jl_array_data(na_vec);
@@ -209,9 +208,11 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
       }
     }
 
+  // Make DataArray
   jl_function_t *func = jl_get_function(jl_main_module, "DataArray");
   ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)na_vec);
 
+  // Make PooledDataArray using DataArray and levels
   func = jl_get_function(jl_main_module, "PooledDataArray");
   ans = jl_call2(func, (jl_value_t *)ans, (jl_value_t *)new_levels);  
 
@@ -238,14 +239,14 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
   col_names = jl_alloc_array_1d(jl_array_symbol_type, len); // Vector{Symbol} to hold df names
 
   // Does putting these pointers in this Vector{Any} require a GC write barrier?
-  jl_value_t **colsData = jl_array_data(col_list);
   for (int i = 0; i < len; i++) {
     jl_arrayset(col_names, (jl_value_t *)jl_symbol( CHAR(STRING_ELT(names,i)) ), i);
     SEXP data_elt = VECTOR_ELT(Var,i);
     if (isFactor(data_elt)) {
-      colsData[i] = R_Julia_MD_NA_Factor(data_elt, VECTOR_ELT(na,i));
+      jl_arrayset(col_list, R_Julia_MD_NA_Factor(data_elt), i);
     } else  {
-      colsData[i] = R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i));
+      //      jl_arrayset(col_list, R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i)), i);
+      jl_arrayset(col_list, R_Julia_MD(data_elt), i);
     }
   }
   jl_function_t *func = jl_get_function(jl_main_module, "DataFrame");
@@ -280,12 +281,12 @@ SEXP R_Julia_NA(SEXP Var, SEXP na, SEXP VarName)
   return R_NilValue;
 }
 //Convert R factor To Julia, which contain NA
-SEXP R_Julia_NA_Factor(SEXP Var, SEXP na, SEXP VarName)
+SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarName)
 {
   LoadDF();
   jl_value_t *ans;
   JL_GC_PUSH1(&ans);
-  ans = R_Julia_MD_NA_Factor(Var, na);
+  ans = R_Julia_MD_NA_Factor(Var);
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
   JL_GC_POP();
   return R_NilValue;
