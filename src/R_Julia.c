@@ -27,7 +27,6 @@ static int rjulia_exception_occurred() {
   }
 }
 
-
 //convert R SEXP dims to julia tuple
 static jl_value_t *RDims_JuliaTuple(SEXP Var)
 {
@@ -159,8 +158,8 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
   jl_value_t *ret2 = NULL;
   jl_value_t *ans  = NULL;
   JL_GC_PUSH3(&ret1, &ret2, &ans);
-  ret1  = (jl_value_t *)NewArray(Var);
-  ret2 = (jl_value_t *)NewArray(na);
+  ret1  = R_Julia_MD(Var);
+  ret2  = R_Julia_MD(na);
 
   ans = jl_call2(func, ret1, ret2);
   if (rjulia_exception_occurred())
@@ -245,8 +244,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
     if (isFactor(data_elt)) {
       jl_arrayset(col_list, R_Julia_MD_NA_Factor(data_elt), i);
     } else  {
-      //      jl_arrayset(col_list, R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i)), i);
-      jl_arrayset(col_list, R_Julia_MD(data_elt), i);
+      jl_arrayset(col_list, R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i)), i);
     }
   }
   jl_function_t *func = jl_get_function(jl_main_module, "DataFrame");
