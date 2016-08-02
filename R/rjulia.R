@@ -45,14 +45,17 @@ r2j <- r_julia <- function(x,y)
   if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
     na = is.na(x)
     if (any(na)) {
+      jloaddf()
       invisible(.Call("R_Julia_NA", x, na, y, PACKAGE="rjulia"))
     } else {
       invisible(.Call("R_Julia", x, y, PACKAGE="rjulia"))
     }
   } else if (is.data.frame(x)) {
+    jloaddf()
     na = lapply(x, is.na)
     invisible(.Call("R_Julia_NA_DataFrame", x, na, y, PACKAGE="rjulia"))
   } else if (is.factor(x)) {
+    jloaddf()
     na = is.na(x)
     invisible(.Call("R_Julia_NA_Factor", x, na, y, PACKAGE="rjulia"))
   } else {
