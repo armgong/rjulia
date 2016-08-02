@@ -168,18 +168,17 @@ static jl_value_t *R_Julia_MD(SEXP Var)
 //convert R object contain NA value to Julia DataArrays
 static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 {
-  jl_function_t *func = jl_get_function(jl_base_module, "DataArray");
+  jl_function_t *func = jl_get_function(jl_main_module, "DataArray");
   jl_value_t *ret1  = NULL;
   jl_value_t *ret2 = NULL;
   jl_value_t *ans  = NULL;
   JL_GC_PUSH3(&ret1, &ret2, &ans);
   ret1  = (jl_value_t *)NewArray(Var);
   ret2 = (jl_value_t *)NewArray(na);
-  ans = jl_call2(func, ret1, ret2);
 
+  ans = jl_call2(func, ret1, ret2);
   if (rjulia_exception_occurred())
     ans=  (jl_value_t *) jl_nothing;
-
   JL_GC_POP();
   return ans;
  }
@@ -211,7 +210,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
       else
 	retData[i] = INTEGER(Var)[i];
     }
-  jl_function_t *func = jl_get_function(jl_base_module, "PooledDataArray");
+  jl_function_t *func = jl_get_function(jl_main_module, "PooledDataArray");
   ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);  
 
   if (rjulia_exception_occurred())
@@ -246,7 +245,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
       colsData[i] = R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i));
   }
   
-  jl_function_t *func = jl_get_function(jl_base_module, "DataFrame");
+  jl_function_t *func = jl_get_function(jl_main_module, "DataFrame");
   jl_value_t *ret = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
 
   if (rjulia_exception_occurred())
