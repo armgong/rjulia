@@ -358,7 +358,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   SEXP ans = R_NilValue;
   int nprot = 0;
   char *strData = "Varname0tmp.data";
-  char *strNA = "bitunpack(Varname0tmp.na)";
+  char *strNA = "Array(Varname0tmp.na)";
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
   jl_value_t *retData = jl_eval_string(strData);
   jl_value_t *retNA = jl_eval_string(strNA);
