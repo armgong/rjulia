@@ -223,8 +223,9 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
 //convert R DataFrame to Julia DataFrame in DataFrames package
 static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
 {
-  SEXP names = getAttrib(Var, R_NamesSymbol);
   size_t len = LENGTH(Var);
+  SEXP names = getAttrib(Var, R_NamesSymbol);
+
   if (TYPEOF(Var) != VECSXP || len == 0 || names == R_NilValue)
     return (jl_value_t *) jl_nothing;
 
@@ -233,21 +234,21 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
   JL_GC_PUSH2(&col_list, &col_names);
   col_list = jl_alloc_array_1d(jl_array_any_type, len);  // Vector{Any} to hold df columns
   col_names = jl_alloc_array_1d(jl_array_symbol_type, len); // Vector{Symbol} to hold df names
-  
+
   // Does putting these pointers in this Vector{Any} require a GC write barrier?
   jl_value_t **colsData = jl_array_data(col_list);
   for (int i = 0; i < len; i++) {
     jl_arrayset(col_names, (jl_value_t *)jl_symbol( CHAR(STRING_ELT(names,i)) ), i);
-    SEXP data_elt = VECTOR_ELT(col_list,i);
-    if (getAttrib(data_elt, R_LevelsSymbol) != R_NilValue)
+    SEXP data_elt = VECTOR_ELT(Var,i);
+    if (isFactor(data_elt)) {
       colsData[i] = R_Julia_MD_NA_Factor(data_elt, VECTOR_ELT(na,i));
-    else
+    } else  {
       colsData[i] = R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i));
+    }
   }
-  
   jl_function_t *func = jl_get_function(jl_main_module, "DataFrame");
   jl_value_t *ret = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
-
+      
   if (rjulia_exception_occurred())
     ret =  (jl_value_t *) jl_nothing;
   
