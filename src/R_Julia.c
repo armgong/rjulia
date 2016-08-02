@@ -31,20 +31,6 @@ static int rjulia_exception_occurred() {
 //convert R SEXP dims to julia tuple
 static jl_value_t *RDims_JuliaTuple(SEXP Var)
 {
-  /*
- jl_value_t *d = NULL;
- JL_GC_PUSH1(&d);
- SEXP dims = getAttrib(Var, R_DimSymbol);
-  //array or matrix
-  int ndims = LENGTH(dims);
-  d = jl_alloc_svec(ndims);
-  for (size_t i = 0; i < ndims; i++)
-  {
-  jl_svecset(d, i, jl_box_long(INTEGER(dims)[i]));
-  }
-  return d;
-  */
-
   SEXP dims = getAttrib(Var, R_DimSymbol);
   char evalcmd[evalsize];
   char eltcmd[eltsize];
@@ -187,31 +173,47 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, SEXP na)
 {
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
+  int nlevels = LENGTH(levels);
   if ((LENGTH(Var))== 0 || TYPEOF(Var) != INTSXP || levels == R_NilValue)
     return (jl_value_t *) jl_nothing;
 
   //create string array for levels in julia
   jl_value_t *ans=(jl_value_t *) jl_nothing;
   jl_array_t *ret=NULL;
-  jl_array_t *ret1=NULL;
-  ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_string_type,1), LENGTH(levels));
-  jl_value_t **retData1 = jl_array_data(ret1);
-  JL_GC_PUSH3(&ret, &ret1,&ans);
+  jl_array_t *new_levels=NULL;
+  jl_array_t *na_vec=NULL;
+  JL_GC_PUSH4(&ret, &new_levels, &ans, &na_vec);
+  ret = jl_alloc_array_1d(jl_apply_array_type(jl_string_type, 1), LENGTH(Var));
+  new_levels = jl_alloc_array_1d(jl_apply_array_type(jl_string_type,1), nlevels);
 
-  for (size_t i = 0; i < jl_array_len(ret1); i++)
+  // Collect levels
+  jl_value_t **retData1 = jl_array_data(new_levels);
+  for (size_t i = 0; i < nlevels; i++)
      retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
 
-  ret = jl_alloc_array_1d(jl_apply_array_type(jl_uint32_type, 1), LENGTH(Var));
-  int *retData = (int *)jl_array_data(ret);
+
+  // Collect string vector
+  na_vec = jl_alloc_array_1d( jl_apply_array_type(jl_bool_type,1), LENGTH(Var));
+  char *na_data = (char *)jl_array_data(na_vec);
+  int level_index;
+
   for (size_t i = 0; i < jl_array_len(ret); i++)
     {
-      if (INTEGER(Var)[i] == NA_INTEGER)
-	retData[i] = 0; //NA in poolarray is 0
-      else
-	retData[i] = INTEGER(Var)[i];
+      level_index = INTEGER(Var)[i];
+      if (INTEGER(Var)[i] == NA_INTEGER) {
+	jl_arrayset(ret, retData1[0], i);  // Will get wiped out by NA
+	na_data[i] = 1;
+      } else {
+	jl_arrayset(ret, retData1[level_index - 1], i);
+	na_data[i] = 0;
+      }
     }
-  jl_function_t *func = jl_get_function(jl_main_module, "PooledDataArray");
-  ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)ret1);  
+
+  jl_function_t *func = jl_get_function(jl_main_module, "DataArray");
+  ans = jl_call2(func, (jl_value_t *)ret, (jl_value_t *)na_vec);
+
+  func = jl_get_function(jl_main_module, "PooledDataArray");
+  ans = jl_call2(func, (jl_value_t *)ans, (jl_value_t *)new_levels);  
 
   if (rjulia_exception_occurred())
     ans =  (jl_value_t *) jl_nothing;
