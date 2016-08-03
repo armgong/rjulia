@@ -82,6 +82,7 @@ static jl_datatype_t* ElementType(SEXP Var) {
 static jl_array_t* NewArray(SEXP Var) {
   jl_datatype_t *eltype = ElementType(Var);
   jl_array_t *ret = NULL;
+  JL_GC_PUSH1(&ret);
   if (isMatrix(Var)) {
     jl_value_t* array_type = jl_apply_array_type(eltype, 2);
     ret = jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
@@ -92,6 +93,7 @@ static jl_array_t* NewArray(SEXP Var) {
      jl_value_t* array_type = jl_apply_array_type(eltype, 1);
      ret = jl_alloc_array_1d(array_type, LENGTH(Var));
   }
+  JL_GC_POP();
   return(ret);
 }
 
@@ -108,7 +110,7 @@ static jl_value_t *R_Julia_MD(SEXP Var)
       char *retData = (char *)jl_array_data(ret);
       int *var_p = LOGICAL(Var);
       for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast from int32 to int8
-        retData[i] = var_p[i];
+	retData[i] = var_p[i];
       break;
     };
     case INTSXP:
@@ -127,7 +129,7 @@ static jl_value_t *R_Julia_MD(SEXP Var)
     {
       jl_value_t **retData = jl_array_data(ret);
 	for (size_t i = 0; i < jl_array_len(ret); i++)
-          retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
+	  retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
       break;
     }
     case VECSXP:
@@ -142,8 +144,7 @@ static jl_value_t *R_Julia_MD(SEXP Var)
     }
     default:
     {
-      JL_GC_POP();
-      return (jl_value_t *)jl_nothing;
+      ret =  (jl_value_t *)jl_nothing;
     }
    }
   JL_GC_POP();
@@ -160,12 +161,11 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
   JL_GC_PUSH3(&ret1, &ret2, &ans);
   ret1  = R_Julia_MD(Var);
   ret2  = R_Julia_MD(na);
-
-  ans = jl_call2(func, ret1, ret2);
+  //  ans = jl_call2(func, ret1, ret2);
   if (rjulia_exception_occurred())
-    ans=  (jl_value_t *) jl_nothing;
+    ans =  (jl_value_t *) jl_nothing;
   JL_GC_POP();
-  return ans;
+  return ret1;
  }
 
 //convert R factor to Julia PooledDataArray
