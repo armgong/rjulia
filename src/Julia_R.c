@@ -463,65 +463,6 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   return ans;
 }
 
-//convert julia PooledDataArray's refs to R factor's integer value
-//this function is for factor convert it maybe not safe
-//because PooledDataArray.refs is Uint32 or bigger
-//but in pratice it should be ok
-static SEXP Julia_R_MD_INT(jl_value_t *Var)
-{
-  SEXP ans = R_NilValue;
-
-  int len = jl_array_len(Var);
-  if (len == 0)
-  {
-   return ans;
-  }
-
-  jl_datatype_t *vartype=jl_array_eltype(Var);
-  if (jl_int32_type==vartype)
-  {
-    int32_t *p = (int32_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_int64_type==vartype)
-  {
-    int64_t *p = (int64_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_int8_type==vartype)
-  {
-    int8_t *p = (int8_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_int16_type==vartype)
-  {
-    int16_t *p = (int16_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint8_type==vartype)
-  {
-    uint8_t *p = (uint8_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint16_type==vartype)
-  {
-    uint16_t *p = (uint16_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint32_type==vartype)
-  {
-    uint32_t *p = (uint32_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint64_type==vartype)
-  {
-    uint64_t *p = (uint64_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  UNPROTECT(1);
-  return ans;
-}
-
 //convert julia PooledDataArray to R factor
 // Assumes incoming PooledDataArray is one dimensional for now although R and julia
 // can both do multidimensional factors
