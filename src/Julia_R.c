@@ -525,24 +525,31 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
 //convert julia PooledDataArray to R factor
 static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
+  jl_value_t *retData;
+  jl_value_t *retLevels;
+  JL_GC_PUSH2(&retData,&retLevels);
+
   char *strData = "Varname0tmp.refs";
-  char *strlevels = "Varname0tmp.pool";
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-  jl_value_t *retData = jl_eval_string(strData);
-  jl_value_t *retlevels = jl_eval_string(strlevels);
-  JL_GC_PUSH2(&retData,&retlevels);
+
+  jl_function_t *func = jl_get_function(jl_main_module, "levels");
+  retData = jl_eval_string(strData);
+  retLevels = jl_call1(func,Var);
+
   //first get refs data,dims=n
   //caution this convert to int32 SEXP,it should be ok in reality,
   //but if have a lot factor may be cause int32 overrun.
-  SEXP ans = PROTECT(Julia_R_MD_INT(retData));
+  //SEXP ans = PROTECT(Julia_R_MD_INT(retData));
   //second setAttrib R levels and class
-  SEXP levels = PROTECT(Julia_R_MD(retlevels));
+  SEXP levels = PROTECT(Julia_R_MD(retLevels));
   JL_GC_POP();
   jl_eval_string("Varname0tmp=0");
-  setAttrib(ans, R_LevelsSymbol, levels);
-  setAttrib(ans, R_ClassSymbol, mkString("factor"));
-  UNPROTECT(2);
-  return ans;
+  //  setAttrib(ans, R_LevelsSymbol, levels);
+  //  setAttrib(ans, R_ClassSymbol, mkString("factor"));
+  //UNPROTECT(2);
+  UNPROTECT(1);
+  //return ans;
+  return levels;
 }
 
 //convert julia DataFrame to R DataFrame
