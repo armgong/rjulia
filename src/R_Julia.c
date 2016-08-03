@@ -161,11 +161,11 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
   JL_GC_PUSH3(&ret1, &ret2, &ans);
   ret1  = R_Julia_MD(Var);
   ret2  = R_Julia_MD(na);
-  //  ans = jl_call2(func, ret1, ret2);
+  ans = jl_call2(func, ret1, ret2);
   if (rjulia_exception_occurred())
     ans =  (jl_value_t *) jl_nothing;
   JL_GC_POP();
-  return ret1;
+  return ans;
  }
 
 //convert R factor to Julia PooledDataArray
