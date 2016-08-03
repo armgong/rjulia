@@ -5,6 +5,9 @@ library(RUnit)
 library(rjulia)
 rjulia:::.julia_init_if_necessary()
 
+## logical, numeric, and character with "e" fails
+## logical or character with "f" fails. Logical or character have loop rather than memcpy in R_Julia_MD.
+
 ## Send data of each atomic type to julia and back again
 ##  With and without NAs
 ##  Test that the roundtrip returns the same value
@@ -20,6 +23,7 @@ test_roundtrip <- function() {
 
     types = c("integer", "logical", "numeric", "character")
 
+    ## Vectors, matrices and arrays
     mapply(
         names(test.list),  test.list,
         FUN=function(k, v) {
@@ -27,20 +31,40 @@ test_roundtrip <- function() {
                 types,
                 function(x) {
                     message(x, ": ", k)
-                    v = as(v, x)
-                    r2j(v, k)
+                    newv = as(v, x)
+                    r2j(newv, k)
                     checkIdentical( v, j2r(k) )
                 })
         })
 
+    ## Factors
+    mapply(
+        names(test.list),  test.list,
+        FUN=function(k, v) {
+                    message("factor: ", k)
+                    newv = as.factor(v)
+                    r2j(newv, k)
+                    checkIdentical( newv, j2r(k) )
+        })
+
+    ## Lists and data.frames
     lists = list(
-        h = list( 1:5, letters ),
-        j = list( c(NA, 2:5), letters )
+        h = list( 1:5, letters[1:5] ),
+        j = list( c(NA, 2:5), letters[1:5] )
     )
     mapply(names(lists), lists,
            FUN=function(k, v) {
+               message("list: ", k)
                r2j(v, k)
                checkIdentical( v, j2r(k) )
+               newv = as.data.frame(v, stringsasFactors=FALSE)
+               message("data.frame w.o. factors: ", k)
+               r2j(newv, k)
+               checkIdentical( newv, j2r(k) )
+               newv = as.data.frame(v, stringsasFactors=TRUE)
+               message("data.frame w. factors: ", k)
+               r2j(newv, k)
+               checkIdentical( newv, j2r(k) )
            })
 
 }
