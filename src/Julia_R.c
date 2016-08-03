@@ -523,33 +523,40 @@ static SEXP Julia_R_MD_INT(jl_value_t *Var)
 }
 
 //convert julia PooledDataArray to R factor
+// Assumes incoming PooledDataArray is one dimensional for now although R and julia
+// can both do multidimensional factors
 static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
+  SEXP ans;
   jl_value_t *retData;
   jl_value_t *retLevels;
   JL_GC_PUSH2(&retData,&retLevels);
-
-  char *strData = "Varname0tmp.refs";
+  
+  // Convert to Int32 vector in julia, let it catch overflows
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-
-  jl_function_t *func = jl_get_function(jl_main_module, "levels");
+  char *strData = "convert(Array{Int32,1},Varname0tmp.refs)";
   retData = jl_eval_string(strData);
-  retLevels = jl_call1(func,Var);
-
-  //first get refs data,dims=n
-  //caution this convert to int32 SEXP,it should be ok in reality,
-  //but if have a lot factor may be cause int32 overrun.
-  //SEXP ans = PROTECT(Julia_R_MD_INT(retData));
-  //second setAttrib R levels and class
-  SEXP levels = PROTECT(Julia_R_MD(retLevels));
-  JL_GC_POP();
   jl_eval_string("Varname0tmp=0");
-  //  setAttrib(ans, R_LevelsSymbol, levels);
-  //  setAttrib(ans, R_ClassSymbol, mkString("factor"));
-  //UNPROTECT(2);
-  UNPROTECT(1);
-  //return ans;
-  return levels;
+
+  // Copy Int32 vector into R, mapping 0 to NA_INTEGER
+  int len = jl_array_len(retData);
+  PROTECT(ans = allocVector(INTSXP, len));
+  int *res = INTEGER(ans);
+  int32_t *p = (int32_t *) jl_array_data(retData);
+
+  for (size_t i = 0; i < len; i++)
+    res[i] = p[i] == 0 ? NA_INTEGER : p[i];
+      
+  // Get and set R levels and class attributes
+  jl_function_t *func = jl_get_function(jl_main_module, "levels");
+  retLevels = jl_call1(func,Var);
+  SEXP levels = PROTECT(Julia_R_MD(retLevels));
+  setAttrib(ans, R_LevelsSymbol, levels);
+  setAttrib(ans, R_ClassSymbol, mkString("factor"));
+
+  JL_GC_POP();
+  UNPROTECT(2);
+  return ans;
 }
 
 //convert julia DataFrame to R DataFrame
