@@ -109,8 +109,8 @@ static jl_value_t *R_Julia_MD(SEXP Var)
     {
       char *retData = (char *)jl_array_data(ret);
       int *var_p = LOGICAL(Var);
-      for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we want the implicit cast from int32 to int8
-	retData[i] = var_p[i];
+      for (size_t i = 0; i < jl_array_len(ret); i++) // Can not be memcpy because we need to cast from int32 to int8
+	retData[i] = (char)var_p[i];  // No write barrier, right?
       break;
     };
     case INTSXP:
@@ -128,17 +128,18 @@ static jl_value_t *R_Julia_MD(SEXP Var)
     case STRSXP:
     {
       jl_value_t **retData = jl_array_data(ret);
-	for (size_t i = 0; i < jl_array_len(ret); i++)
+      for (size_t i = 0; i < jl_array_len(ret); i++) {
 	  retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
+	  jl_gc_wb(retData, retData[i]);
+      }
       break;
     }
     case VECSXP:
     {
       jl_value_t **retData = jl_array_data(ret);
-      // Does putting these pointers in this Vector{Any} require a GC write barrier?
-      for (int i = 0; i < jl_array_len(ret); i++)
-      {
-	     retData[i] = R_Julia_MD(VECTOR_ELT(Var,i));
+      for (int i = 0; i < jl_array_len(ret); i++) {
+	retData[i] = R_Julia_MD(VECTOR_ELT(Var,i));
+	jl_gc_wb(retData, retData[i]);
       }
       break;
     }

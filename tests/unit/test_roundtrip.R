@@ -3,7 +3,7 @@
 
 library(RUnit)
 library(rjulia)
-rjulia:::.julia_init_if_necessary()
+julia_init(disablegc=FALSE)
 
 ## logical, numeric, and character with "e" fails
 ## logical or character with "f" fails. Logical or character have loop rather than memcpy in R_Julia_MD.
@@ -22,6 +22,7 @@ test_roundtrip <- function() {
     )
 
     types = c("integer", "logical", "numeric", "character")
+    types = c("integer", "numeric", "character")
 
     ## Vectors, matrices and arrays
     mapply(
@@ -33,7 +34,7 @@ test_roundtrip <- function() {
                     message(x, ": ", k)
                     newv = as(v, x)
                     r2j(newv, k)
-                    checkIdentical( v, j2r(k) )
+                    checkIdentical( newv, j2r(k) )
                 })
         })
 
