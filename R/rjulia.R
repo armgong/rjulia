@@ -55,6 +55,9 @@ r2j <- r_julia <- function(x,y)
     }
   } else if (is.data.frame(x)) {
     na = lapply(x, is.na)
+    if (is.null(names(x))) {
+      names(x) = as.character(seq_len(length(x)))
+    }
     invisible(.Call("R_Julia_NA_DataFrame", x, na, y, PACKAGE="rjulia"))
   } else if (is.factor(x)) {
     invisible(.Call("R_Julia_NA_Factor", x, y, PACKAGE="rjulia"))
