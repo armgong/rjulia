@@ -360,11 +360,11 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   char *strData = "Varname0tmp.data";
   char *strNA = "Array(Varname0tmp.na)";
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-  jl_value_t *retData = jl_eval_string(strData);
-  jl_value_t *retNA = jl_eval_string(strNA);
-  JL_GC_PUSH2(&retData,&retNA);
+  jl_value_t *retData = jl_eval_string(strData);  // FIXME, needs cast?
+  jl_value_t *retNA = jl_eval_string(strNA);  // FIXME, needs cast?
+  JL_GC_PUSH2(&retData,&retNA);  // FIXME, set to null, push, then get?
 
-  int len = jl_array_len(retData);
+  size_t len = jl_array_len(retData);
   if (len == 0)
   {
     JL_GC_POP();
@@ -450,12 +450,14 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   //convert string array to STRSXP
   else if (jl_string_type==vartype)
   {
-    jl_value_t **retData = jl_array_data(Var);
+    jl_value_t **p = jl_array_data(retData);
     for (size_t i = 0; i < len; i++)
-      if (pNA[i])
+      if (pNA[i]) {
         SET_STRING_ELT(ans, i, NA_STRING);
-      else
-        SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(retData[i]), CE_UTF8));
+      }
+      else {
+	SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(p[i]), CE_UTF8));
+      }
   }
   JL_GC_POP();
   jl_eval_string("Varname0tmp=0;");
@@ -574,7 +576,6 @@ SEXP Julia_R(jl_value_t *Var)
 
   // Array To Vector
   SEXP ans = R_NilValue;
-  JL_GC_PUSH1(&Var);
 
   if (jl_is_array(Var))
   {
@@ -611,7 +612,6 @@ SEXP Julia_R(jl_value_t *Var)
   }
   else
       PROTECT(ans = Julia_R_Scalar(Var));
-  JL_GC_POP();
   UNPROTECT(1);
   return ans;
 }

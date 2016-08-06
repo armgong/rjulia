@@ -33,7 +33,7 @@ test_roundtrip <- function() {
                     message(x, ": ", k)
                     newv = as(v, x)
                     r2j(newv, k)
-#                    checkIdentical( newv, j2r(k) )
+                    checkIdentical( newv, j2r(k) )
                 })
         })
     ## Factors
@@ -43,7 +43,7 @@ test_roundtrip <- function() {
                     message("factor: ", k)
                     newv = as.factor(v)
                     r2j(newv, k)
-#                    checkIdentical( newv, j2r(k) )
+                    checkIdentical( newv, j2r(k) )
         })
 
     ## Lists and data.frames

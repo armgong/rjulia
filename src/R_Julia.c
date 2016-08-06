@@ -237,21 +237,25 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
   if (TYPEOF(Var) != VECSXP || len == 0 || names == R_NilValue)
     return (jl_value_t *) jl_nothing;
 
-  jl_array_t *col_names;
-  jl_array_t *col_list;
+  jl_array_t *col_names = NULL;
+  jl_array_t *col_list = NULL;
   JL_GC_PUSH2(&col_list, &col_names);
   col_list = jl_alloc_array_1d(jl_array_any_type, len);  // Vector{Any} to hold df columns
+  jl_value_t **col_list_data = jl_array_data(col_list);
   col_names = jl_alloc_array_1d(jl_array_symbol_type, len); // Vector{Symbol} to hold df names
-
+  jl_value_t **col_names_data = jl_array_data(col_names);
+  
   // Does putting these pointers in this Vector{Any} require a GC write barrier?
   for (int i = 0; i < len; i++) {
     jl_arrayset(col_names, (jl_value_t *)jl_symbol( CHAR(STRING_ELT(names,i)) ), i);
+    jl_gc_wb(col_names, col_names_data[i]);
     SEXP data_elt = VECTOR_ELT(Var,i);
     if (isFactor(data_elt)) {
       jl_arrayset(col_list, R_Julia_MD_NA_Factor(data_elt), i);
     } else  {
       jl_arrayset(col_list, R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i)), i);
     }
+    jl_gc_wb(col_list, col_list_data[i]);
   }
   jl_function_t *func = jl_get_function(jl_main_module, "DataFrame");
   jl_value_t *ret = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
