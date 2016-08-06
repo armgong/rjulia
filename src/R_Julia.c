@@ -99,7 +99,7 @@ static jl_array_t* NewArray(SEXP Var) {
 
 //convert R object to julia object
 //Var is R object
-static jl_value_t *R_Julia_MD(SEXP Var)
+static jl_array_t *R_Julia_MD(SEXP Var)
 {
    jl_array_t *ret = NewArray(Var);
    JL_GC_PUSH1(&ret);
@@ -129,8 +129,8 @@ static jl_value_t *R_Julia_MD(SEXP Var)
     {
       jl_value_t **retData = jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++) {
-	  retData[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
-	  jl_gc_wb(retData, retData[i]);
+	retData[i] = (jl_value_t *)jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
+	jl_gc_wb(ret, retData[i]);
       }
       break;
     }
@@ -138,31 +138,31 @@ static jl_value_t *R_Julia_MD(SEXP Var)
     {
       jl_value_t **retData = jl_array_data(ret);
       for (int i = 0; i < jl_array_len(ret); i++) {
-	retData[i] = R_Julia_MD(VECTOR_ELT(Var,i));
-	jl_gc_wb(retData, retData[i]);
+	retData[i] = (jl_value_t *)R_Julia_MD(VECTOR_ELT(Var,i));
+	jl_gc_wb(ret, retData[i]);
       }
       break;
     }
     default:
     {
-      ret =  (jl_value_t *)jl_nothing;
+      jl_error("Invalid array type. rjulia supports the array types LGLSXP, INTSXP, REALSXP, STRSXP and VECSXP.\n");
     }
    }
   JL_GC_POP();
-  return (jl_value_t *)ret;
+  return ret;
 }
 
 //convert R object contain NA value to Julia DataArrays
 static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 {
   jl_function_t *func = jl_get_function(jl_main_module, "DataArray");
-  jl_value_t *ret1  = NULL;
-  jl_value_t *ret2 = NULL;
+  jl_array_t *ret1 = NULL;
+  jl_array_t *ret2 = NULL;
   jl_value_t *ans  = NULL;
   JL_GC_PUSH3(&ret1, &ret2, &ans);
-  ret1  = R_Julia_MD(Var);
-  ret2  = R_Julia_MD(na);
-  ans = jl_call2(func, ret1, ret2);
+  ret1 = R_Julia_MD(Var);
+  ret2 = R_Julia_MD(na);
+  ans  = jl_call2(func, (jl_value_t *)ret1, (jl_value_t *)ret2);
   if (rjulia_exception_occurred())
     ans =  (jl_value_t *) jl_nothing;
   JL_GC_POP();
@@ -173,8 +173,9 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
 {
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
-  int nlevels = LENGTH(levels);
-  if ((LENGTH(Var))== 0 || TYPEOF(Var) != INTSXP || levels == R_NilValue)
+  size_t nlevels = LENGTH(levels);
+  size_t len = LENGTH(Var);
+  if (len == 0 || TYPEOF(Var) != INTSXP || levels == R_NilValue)
     return (jl_value_t *) jl_nothing;
 
   //create string array for levels in julia
@@ -183,13 +184,15 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
   jl_array_t *new_levels=NULL;
   jl_array_t *na_vec=NULL;
   JL_GC_PUSH4(&ret, &new_levels, &ans, &na_vec);
-  ret = jl_alloc_array_1d(jl_apply_array_type(jl_string_type, 1), LENGTH(Var));
+  ret = jl_alloc_array_1d(jl_apply_array_type(jl_string_type, 1), len);
   new_levels = jl_alloc_array_1d(jl_apply_array_type(jl_string_type,1), nlevels);
 
   // Collect levels
   jl_value_t **retData1 = jl_array_data(new_levels);
-  for (size_t i = 0; i < nlevels; i++)
-     retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
+  for (size_t i = 0; i < nlevels; i++) {
+    retData1[i] = jl_cstr_to_string(translateCharUTF8(STRING_ELT(levels, i)));
+    jl_gc_wb(retData1, retData1[i]);
+  }
 
   // Collect string vector
   na_vec = jl_alloc_array_1d( jl_apply_array_type(jl_bool_type,1), LENGTH(Var));
@@ -202,9 +205,11 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
       if (INTEGER(Var)[i] == NA_INTEGER) {
 	jl_arrayset(ret, retData1[0], i);  // Will get wiped out by NA
 	na_data[i] = 1;
+	jl_gc_wb(ret,retData1[0]);
       } else {
 	jl_arrayset(ret, retData1[level_index - 1], i);
 	na_data[i] = 0;
+	jl_gc_wb(ret,retData1[level_index - 1]);
       }
     }
 
@@ -261,10 +266,10 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
 //Convert R Type To Julia,which not contain NA
 SEXP R_Julia(SEXP Var, SEXP VarName)
 {
-  jl_value_t *ans;
+  jl_array_t *ans;
   JL_GC_PUSH1(&ans);
   ans = R_Julia_MD(Var);
-  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
+  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), (jl_value_t *)ans);
   JL_GC_POP();
   return R_NilValue;
 }

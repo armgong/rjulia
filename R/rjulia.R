@@ -47,8 +47,9 @@ r2j <- r_julia <- function(x,y)
   .julia_init_if_necessary()
 
   if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
-    na = is.na(x)
-    if (any(na)) {
+
+    if (anyNA(x)) {
+      na = is.na(x)
       invisible(.Call("R_Julia_NA", x, na, y, PACKAGE="rjulia"))
     } else {
       invisible(.Call("R_Julia", x, y, PACKAGE="rjulia"))
