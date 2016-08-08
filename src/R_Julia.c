@@ -239,32 +239,38 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
 
   jl_array_t *col_names = NULL;
   jl_array_t *col_list = NULL;
-  JL_GC_PUSH2(&col_list, &col_names);
+  jl_value_t *ans = NULL;
+  JL_GC_PUSH3(&col_list, &col_names, &ans);
+  printf("In R_Julia_MD_NA_DataFrame.\n");
   col_list = jl_alloc_array_1d(jl_array_any_type, len);  // Vector{Any} to hold df columns
-  jl_value_t **col_list_data = jl_array_data(col_list);
+  //  jl_value_t **col_list_data = jl_array_data(col_list);
   col_names = jl_alloc_array_1d(jl_array_symbol_type, len); // Vector{Symbol} to hold df names
-  jl_value_t **col_names_data = jl_array_data(col_names);
-  
+  //  jl_value_t **col_names_data = jl_array_data(col_names);
+  printf("Made output vectors.\n");
   // Does putting these pointers in this Vector{Any} require a GC write barrier?
-  for (int i = 0; i < len; i++) {
-    jl_arrayset(col_names, (jl_value_t *)jl_symbol( CHAR(STRING_ELT(names,i)) ), i);
-    jl_gc_wb(col_names, col_names_data[i]);
-    SEXP data_elt = VECTOR_ELT(Var,i);
-    if (isFactor(data_elt)) {
-      jl_arrayset(col_list, R_Julia_MD_NA_Factor(data_elt), i);
-    } else  {
-      jl_arrayset(col_list, R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i)), i);
-    }
-    jl_gc_wb(col_list, col_list_data[i]);
-  }
-  jl_function_t *func = jl_get_function(jl_main_module, "DataFrame");
-  jl_value_t *ret = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
-      
-  if (rjulia_exception_occurred())
-    ret =  (jl_value_t *) jl_nothing;
-  
-  JL_GC_POP();  
-  return ret;
+//  for (int i = 0; i < len; i++) {
+//    jl_arrayset(col_names, (jl_value_t *)jl_symbol( CHAR(STRING_ELT(names,i)) ), i);
+//    printf("Set one colname.\n");
+//    jl_gc_wb(col_names, col_names_data[i]);
+//    SEXP data_elt = VECTOR_ELT(Var,i);
+//    if (isFactor(data_elt)) {
+//      jl_arrayset(col_list, R_Julia_MD_NA_Factor(data_elt), i);
+//    } else  {
+//      jl_arrayset(col_list, R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i)), i);
+//    }
+//    printf("Set one column.\n");
+//    jl_gc_wb(col_list, col_list_data[i]);
+//  }
+  printf("Done filling vectors.\n");
+  jl_function_t *func = jl_get_function(jl_main_module, "DataArray");
+  printf("Done getting function.\n");
+  ans = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
+  printf("Done calling function.\n");
+  //  if (rjulia_exception_occurred())
+  //    ans =  (jl_value_t *) jl_nothing;
+  printf("About to return.\n");
+  JL_GC_POP();
+  return ans;
 }
 
 //Convert R Type To Julia,which not contain NA

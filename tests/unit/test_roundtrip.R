@@ -56,16 +56,16 @@ test_roundtrip <- function() {
                message("list: ", k)
                r2j(v, k)
                checkIdentical( v, j2r(k) )
-#               message("data.frame w.o. factors: ", k)
-#               names(v) = letters[length(v)]
-#               newv = as.data.frame(v, stringsasFactors=FALSE)
-#               r2j(newv, k)
-#               checkIdentical( newv, j2r(k) )
-#              message("data.frame w. factors: ", k)
-#               names(v) = letters[length(k)]
-#               newv = as.data.frame(v, stringsasFactors=TRUE)
-#               r2j(newv, k)
-#               checkIdentical( newv, j2r(k) )
+               message("data.frame w.o. factors: ", k)
+               names(v) = letters[length(v)]
+               newv = as.data.frame(v, stringsasFactors=FALSE)
+               r2j(newv, k)
+               checkIdentical( newv, j2r(k) )
+              message("data.frame w. factors: ", k)
+               names(v) = letters[length(k)]
+               newv = as.data.frame(v, stringsasFactors=TRUE)
+               r2j(newv, k)
+               checkIdentical( newv, j2r(k) )
            })
 
 }

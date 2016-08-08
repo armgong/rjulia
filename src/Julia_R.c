@@ -132,7 +132,7 @@ SEXP juliaArrayToSEXP(jl_value_t *Var) {
 
 //function for control convert rules of Uint32, Uint64,Int64 to R
 //if it is ture, will convert to double, otherwise double or integer depend on value
-static bool biginttodouble=false;
+static bool biginttodouble=true;
 SEXP Julia_BigintToDouble(SEXP Var)
 {
  biginttodouble = LOGICAL(Var)[0];
@@ -277,10 +277,12 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   else if (jl_int64_type==vartype)
   {
     int64_t *p = (int64_t *) jl_array_data(Var);
-    if (biginttodouble)
-     {jlfloat_to_r;}
-    else
-     { jlbigint_to_r }
+    if (biginttodouble) {
+      jlfloat_to_r;
+    }
+    else {
+      jlbigint_to_r;
+       }
   }
   // more integer type
   else if (jl_int8_type==vartype)
@@ -394,10 +396,12 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   else if (jl_int64_type==vartype)
   {
     int64_t *p = (int64_t *) jl_array_data(retData);
-    if (biginttodouble)
-     {jlfloat_to_r_na;}
-    else
-     { jlbigint_to_r_na }
+    if (biginttodouble) {
+      jlfloat_to_r_na;
+    }
+    else {
+      jlbigint_to_r_na;
+    }
   }
   //more integer type
   else if (jl_int8_type==vartype)
@@ -528,13 +532,16 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
       if (jl_unbox_bool(jl_eval_string(evalcmd)))
 	{
 	  snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
-	  if (jl_unbox_bool(jl_eval_string(evalcmd)))
+	  if (jl_unbox_bool(jl_eval_string(evalcmd))) {
 	    SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
-	  else
+	  }
+	  else {
 	    SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
+	  }
 	}
-      else
+      else {
 	SET_VECTOR_ELT(ans, i, Julia_R_MD(eachcolvector));
+      }
     }
   //set names attribute
   snprintf(evalcmd, evalsize, "names(%s)", dfname);
