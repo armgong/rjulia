@@ -598,8 +598,12 @@ SEXP Julia_R(jl_value_t *Var)
     }
     if (jl_is_NAtype(Var))
 	PROTECT(ans = Julia_R_Scalar_NA(Var));
-    else if (jl_is_DataFrame(Var))
-	PROTECT(ans = Julia_R_MD_NA_DataFrame(Var));
+    else if (jl_is_DataFrame(Var)) {
+      printf("Gonna fetch dataframe\n");
+      PROTECT(ans = Julia_R_MD_NA_DataFrame(Var));
+      printf("Did fetch dataframe\n");
+	
+    }
     else if (jl_is_DataArray(Var))
 	PROTECT(ans = Julia_R_MD_NA(Var));
     else if (jl_is_PooledDataArray(Var))
