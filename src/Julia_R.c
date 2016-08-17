@@ -527,18 +527,17 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   for (i = 0; i < collen; i++)
     {
       snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
-      eachcolvector = jl_eval_string(evalcmd);	
+      eachcolvector = jl_eval_string(evalcmd);
       snprintf(evalcmd, evalsize, "isa(%s[%d],DataArray)", dfname, i + 1);
-      if (jl_unbox_bool(jl_eval_string(evalcmd)))
-	{
-	  snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
-	  if (jl_unbox_bool(jl_eval_string(evalcmd))) {
-	    SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
-	  }
-	  else {
-	    SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
-	  }
-	}
+      bool isa_da = jl_unbox_bool(jl_eval_string(evalcmd));
+      snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
+      bool isa_pda = jl_unbox_bool(jl_eval_string(evalcmd));
+      if (isa_pda) {
+	SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
+      }
+      else if (isa_da) {
+	SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
+      }
       else {
 	SET_VECTOR_ELT(ans, i, Julia_R_MD(eachcolvector));
       }
