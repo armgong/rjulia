@@ -229,50 +229,49 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
 }
 
 //convert R DataFrame to Julia DataFrame in DataFrames package
-static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na)
+static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na, const char *VarName)
 {
-  printf("Starting.\n");
-  jl_array_t *col_names = NULL;
-  jl_array_t *col_list = NULL;
-  jl_value_t *ans = NULL;
-  JL_GC_PUSH3(&col_list, &col_names, &ans);
-
-  size_t len = LENGTH(Var);
   SEXP names = getAttrib(Var, R_NamesSymbol);
-  jl_function_t *func = jl_get_function(jl_main_module, "DataFrame");
-  if (len == 0) {
-    ans = jl_call0(func);
-  } else if (TYPEOF(Var) != VECSXP || names == R_NilValue) {
-    ans = (jl_value_t *) jl_nothing;
-  } else {
-    col_list = jl_alloc_array_1d(jl_array_any_type, len);  // Vector{Any} to hold df columns
-    //jl_value_t **col_list_data = jl_array_data(col_list);
-    col_names = jl_alloc_array_1d(jl_array_symbol_type, len); // Vector{Symbol} to hold df names
-    //    jl_value_t **col_names_data = jl_array_data(col_names);
+  size_t len = LENGTH(Var);
+  if (TYPEOF(Var) != VECSXP || len == 0 || names == R_NilValue)
+    return (jl_value_t *) jl_nothing;
+  char evalcmd[evalsize];
+  char eltcmd[eltsize];
+  const char *onename;
 
-    for (int i = 0; i < len; i++) {
-      jl_arrayset(col_names, (jl_value_t *)jl_symbol( CHAR(STRING_ELT(names,i)) ), i);
-//      //      jl_gc_wb(col_names, col_names_data[i]);
-      SEXP data_elt = VECTOR_ELT(Var,i);
-      if (isFactor(data_elt)) {
-	jl_arrayset(col_list, R_Julia_MD_NA_Factor(data_elt), i);
-      } else  {
-	jl_arrayset(col_list, R_Julia_MD_NA(data_elt, VECTOR_ELT(na,i)), i);
+  SEXP elt;
+  jl_value_t *temp;
+  for (size_t i = 0; i < len; i++)
+    {
+      elt = VECTOR_ELT(Var, i);
+      snprintf(eltcmd, eltsize, "%sdfelt%lu", VarName, i + 1);
+      //vector is factor or not
+      if (getAttrib(elt, R_LevelsSymbol) != R_NilValue)
+	temp = R_Julia_MD_NA_Factor(elt);
+      else
+	temp = R_Julia_MD_NA(elt, VECTOR_ELT(na,i));
+      jl_set_global(jl_main_module, jl_symbol(eltcmd), (jl_value_t *)temp);
+      onename = CHAR(STRING_ELT(names, i));
+      if (i == 0) {
+	snprintf(evalcmd, evalsize, "%s=DataFrame(%s = %s)", VarName, onename, eltcmd);
+      } else {
+	snprintf(evalcmd, evalsize, "%s[Symbol(\"%s\")] = %s", VarName, onename, eltcmd);
       }
-      //jl_gc_wb(col_list, col_list_data[i]);
-    }
+      jl_eval_string(evalcmd);
 
-    //ans = jl_eval_string("DataFrame( Any[ 1:4, 5:8 ], [:a,:b] )");
-    //ans = jl_eval_string("DataFrame( [Int32,Int32], [:a,:b], 5 )");
+      //clear
+      snprintf(eltcmd, eltsize, "%sdfelt%lu=0;", VarName, i + 1);
+      jl_eval_string(eltcmd);
 
-    ans = jl_call2(func, (jl_value_t *)col_list, (jl_value_t *)col_names);
-    //ans = jl_call1(func, (jl_value_t *)col_list );
-    if (rjulia_exception_occurred()) {
-      ans =  (jl_value_t *) jl_nothing;
+      if (jl_exception_occurred())
+	{
+	  jl_show(jl_stderr_obj(), jl_exception_occurred());
+	  Rprintf("\n");
+	  jl_exception_clear();
+	  return (jl_value_t *) jl_nothing;
+	}
     }
-  }
-  JL_GC_POP();
-  return ans;
+  return (jl_value_t *) jl_nothing;
 }
 
 //Convert R Type To Julia,which not contain NA
@@ -311,10 +310,6 @@ SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarName)
 SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP na, SEXP VarName)
 {
   LoadDF();
-  jl_value_t *ans;
-  JL_GC_PUSH1(&ans);
-  ans = R_Julia_MD_NA_DataFrame(Var, na);
-  jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
-  JL_GC_POP();
+  R_Julia_MD_NA_DataFrame(Var, na, CHAR(STRING_ELT(VarName, 0)));
   return R_NilValue;
 }

@@ -3,7 +3,7 @@
 
 library(RUnit)
 library(rjulia)
-julia_init(disablegc=FALSE)
+julia_init(disablegc=TRUE)
 
 ## logical, numeric, and character with "e" fails
 ## logical or character with "f" fails. Logical or character have loop rather than memcpy in R_Julia_MD.
@@ -58,14 +58,14 @@ test_roundtrip <- function() {
                checkIdentical( v, j2r(k) )
                message("data.frame w.o. factors: ", k)
                names(v) = letters[1:length(v)]
-               newv = as.data.frame(v, stringsasFactors=FALSE)
+               newv = as.data.frame(v, stringsAsFactors=FALSE)
                r2j(newv, k)
                checkIdentical( newv, j2r(k) )
-              message("data.frame w. factors: ", k)
-               names(v) = letters[1:length(k)]
-               newv = as.data.frame(v, stringsasFactors=TRUE)
-               r2j(newv, k)
-               checkIdentical( newv, j2r(k) )
+#               message("data.frame w. factors: ", k)
+#               names(v) = letters[1:length(k)]
+#               newv = as.data.frame(v, stringsAsFactors=TRUE)
+#               r2j(newv, k)
+#               checkIdentical( newv, j2r(k) )
            })
 
 }
