@@ -61,11 +61,11 @@ test_roundtrip <- function() {
                newv = as.data.frame(v, stringsAsFactors=FALSE)
                r2j(newv, k)
                checkIdentical( newv, j2r(k) )
-#               message("data.frame w. factors: ", k)
-#               names(v) = letters[1:length(k)]
-#               newv = as.data.frame(v, stringsAsFactors=TRUE)
-#               r2j(newv, k)
-#               checkIdentical( newv, j2r(k) )
+               message("data.frame w. factors: ", k)
+               names(v) = letters[1:length(k)]
+               newv = as.data.frame(v, stringsAsFactors=TRUE)
+               r2j(newv, k)
+               checkIdentical( newv, j2r(k) )
            })
 
 }
