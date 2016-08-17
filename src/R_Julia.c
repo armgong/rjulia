@@ -246,10 +246,11 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na, const char *VarNam
       elt = VECTOR_ELT(Var, i);
       snprintf(eltcmd, eltsize, "%sdfelt%lu", VarName, i + 1);
       //vector is factor or not
-      if (getAttrib(elt, R_LevelsSymbol) != R_NilValue)
+      if (getAttrib(elt, R_LevelsSymbol) != R_NilValue) {
 	temp = R_Julia_MD_NA_Factor(elt);
-      else
+      } else {
 	temp = R_Julia_MD_NA(elt, VECTOR_ELT(na,i));
+      }
       jl_set_global(jl_main_module, jl_symbol(eltcmd), (jl_value_t *)temp);
       onename = CHAR(STRING_ELT(names, i));
       if (i == 0) {
