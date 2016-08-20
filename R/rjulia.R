@@ -10,16 +10,20 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
   .Call("initJulia", juliabindir, disablegc, PACKAGE = "rjulia")
 
   ## If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
-  julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
-  julia_void_eval('@windows_only ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]))')
+  julia_void_eval('@static if is_windows()  push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor))) end')
+  julia_void_eval('@static if is_windows()  ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"])) end')
+
+  jloaddf()
+
+  return(invisible(TRUE))
 }
 
 isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")
 
-.julia_init_if_necessary <- function() {
+.julia_init_if_necessary <- function(disablegc=FALSE) {
   if (!isJuliaOk()) {
     message("Julia not yet running. Calling julia_init() ...")
-    julia_init()
+    julia_init(disablegc)
     if (!isJuliaOk())
       stop("Julia *still* not running. Giving up.")
   }
@@ -42,20 +46,25 @@ r2j <- r_julia <- function(x,y)
 {
   .julia_init_if_necessary()
 
-  proc <- if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
+  if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
+
     if (anyNA(x)) {
-      "R_Julia_NA"
+      na = is.na(x)
+      invisible(.Call("R_Julia_NA", x, na, y, PACKAGE="rjulia"))
     } else {
-      "R_Julia"
+      invisible(.Call("R_Julia", x, y, PACKAGE="rjulia"))
     }
   } else if (is.data.frame(x)) {
-    "R_Julia_NA_DataFrame"
+    na = lapply(x, is.na)
+    if (is.null(names(x))) {
+      names(x) = as.character(seq_len(length(x)))
+    }
+    invisible(.Call("R_Julia_NA_DataFrame", x, na, y, PACKAGE="rjulia"))
   } else if (is.factor(x)) {
-    "R_Julia_NA_Factor"
+    invisible(.Call("R_Julia_NA_Factor", x, y, PACKAGE="rjulia"))
   } else {
     warning("rjulia supports only vector, matrix, array, list(withoug NAs), factor and data frames (with simple string, int, float, logical) classes")
   }
-  invisible(.Call(proc, x,y, PACKAGE="rjulia"))
 }
 
 jdfinited <- julia_DataArrayFrameInited <- function()

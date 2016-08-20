@@ -132,7 +132,7 @@ SEXP juliaArrayToSEXP(jl_value_t *Var) {
 
 //function for control convert rules of Uint32, Uint64,Int64 to R
 //if it is ture, will convert to double, otherwise double or integer depend on value
-static bool biginttodouble=false;
+static bool biginttodouble=true;
 SEXP Julia_BigintToDouble(SEXP Var)
 {
  biginttodouble = LOGICAL(Var)[0];
@@ -277,10 +277,12 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   else if (jl_int64_type==vartype)
   {
     int64_t *p = (int64_t *) jl_array_data(Var);
-    if (biginttodouble)
-     {jlfloat_to_r;}
-    else
-     { jlbigint_to_r }
+    if (biginttodouble) {
+      jlfloat_to_r;
+    }
+    else {
+      jlbigint_to_r;
+       }
   }
   // more integer type
   else if (jl_int8_type==vartype)
@@ -333,8 +335,9 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   // convert string array to STRSXP, but not sure it is correct ?
   else if (jl_string_type==vartype)
   {
+    jl_value_t **retData = jl_array_data(Var);
     for (size_t i = 0; i < len; i++)
-      SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(Var, i)), CE_UTF8));
+      SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(retData[i]), CE_UTF8));
   }
   else if (jl_any_type==vartype) {
     jl_value_t **p = (jl_value_t **) jl_array_data(Var);
@@ -357,13 +360,13 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   SEXP ans = R_NilValue;
   int nprot = 0;
   char *strData = "Varname0tmp.data";
-  char *strNA = "bitunpack(Varname0tmp.na)";
+  char *strNA = "Array(Varname0tmp.na)";
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-  jl_value_t *retData = jl_eval_string(strData);
-  jl_value_t *retNA = jl_eval_string(strNA);
-  JL_GC_PUSH2(&retData,&retNA);
+  jl_value_t *retData = jl_eval_string(strData);  // FIXME, needs cast?
+  jl_value_t *retNA = jl_eval_string(strNA);  // FIXME, needs cast?
+  JL_GC_PUSH2(&retData,&retNA);  // FIXME, set to null, push, then get?
 
-  int len = jl_array_len(retData);
+  size_t len = jl_array_len(retData);
   if (len == 0)
   {
     JL_GC_POP();
@@ -393,10 +396,12 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   else if (jl_int64_type==vartype)
   {
     int64_t *p = (int64_t *) jl_array_data(retData);
-    if (biginttodouble)
-     {jlfloat_to_r_na;}
-    else
-     { jlbigint_to_r_na }
+    if (biginttodouble) {
+      jlfloat_to_r_na;
+    }
+    else {
+      jlbigint_to_r_na;
+    }
   }
   //more integer type
   else if (jl_int8_type==vartype)
@@ -449,11 +454,14 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   //convert string array to STRSXP
   else if (jl_string_type==vartype)
   {
+    jl_value_t **p = jl_array_data(retData);
     for (size_t i = 0; i < len; i++)
-      if (pNA[i])
+      if (pNA[i]) {
         SET_STRING_ELT(ans, i, NA_STRING);
-      else
-        SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(retData, i)), CE_UTF8));
+      }
+      else {
+	SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(p[i]), CE_UTF8));
+      }
   }
   JL_GC_POP();
   jl_eval_string("Varname0tmp=0;");
@@ -461,84 +469,39 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   return ans;
 }
 
-//convert julia PooledDataArray's refs to R factor's integer value
-//this function is for factor convert it maybe not safe
-//because PooledDataArray.refs is Uint32 or bigger
-//but in pratice it should be ok
-static SEXP Julia_R_MD_INT(jl_value_t *Var)
-{
-  SEXP ans = R_NilValue;
-
-  int len = jl_array_len(Var);
-  if (len == 0)
-  {
-   return ans;
-  }
-
-  jl_datatype_t *vartype=jl_array_eltype(Var);
-  if (jl_int32_type==vartype)
-  {
-    int32_t *p = (int32_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_int64_type==vartype)
-  {
-    int64_t *p = (int64_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_int8_type==vartype)
-  {
-    int8_t *p = (int8_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_int16_type==vartype)
-  {
-    int16_t *p = (int16_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint8_type==vartype)
-  {
-    uint8_t *p = (uint8_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint16_type==vartype)
-  {
-    uint16_t *p = (uint16_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint32_type==vartype)
-  {
-    uint32_t *p = (uint32_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  else if (jl_uint64_type==vartype)
-  {
-    uint64_t *p = (uint64_t *) jl_array_data(Var);
-    jlint_to_r_md;
-  }
-  UNPROTECT(1);
-  return ans;
-}
-
 //convert julia PooledDataArray to R factor
+// Assumes incoming PooledDataArray is one dimensional for now although R and julia
+// can both do multidimensional factors
 static SEXP Julia_R_MD_NA_Factor(jl_value_t *Var)
 {
-  char *strData = "Varname0tmp.refs";
-  char *strlevels = "Varname0tmp.pool";
+  SEXP ans;
+  jl_value_t *retData;
+  jl_value_t *retLevels;
+  JL_GC_PUSH2(&retData,&retLevels);
+  
+  // Convert to Int32 vector in julia, let it catch overflows
   jl_set_global(jl_main_module, jl_symbol("Varname0tmp"), (jl_value_t *)Var);
-  jl_value_t *retData = jl_eval_string(strData);
-  jl_value_t *retlevels = jl_eval_string(strlevels);
-  JL_GC_PUSH2(&retData,&retlevels);
-  //first get refs data,dims=n
-  //caution this convert to int32 SEXP,it should be ok in reality,
-  //but if have a lot factor may be cause int32 overrun.
-  SEXP ans = PROTECT(Julia_R_MD_INT(retData));
-  //second setAttrib R levels and class
-  SEXP levels = PROTECT(Julia_R_MD(retlevels));
-  JL_GC_POP();
+  char *strData = "convert(Array{Int32,1},Varname0tmp.refs)";
+  retData = jl_eval_string(strData);
   jl_eval_string("Varname0tmp=0");
+
+  // Copy Int32 vector into R, mapping 0 to NA_INTEGER
+  int len = jl_array_len(retData);
+  PROTECT(ans = allocVector(INTSXP, len));
+  int *res = INTEGER(ans);
+  int32_t *p = (int32_t *) jl_array_data(retData);
+
+  for (size_t i = 0; i < len; i++)
+    res[i] = p[i] == 0 ? NA_INTEGER : p[i];
+      
+  // Get and set R levels and class attributes
+  jl_function_t *func = jl_get_function(jl_main_module, "levels");
+  retLevels = jl_call1(func,Var);
+  SEXP levels = PROTECT(Julia_R_MD(retLevels));
   setAttrib(ans, R_LevelsSymbol, levels);
   setAttrib(ans, R_ClassSymbol, mkString("factor"));
+
+  JL_GC_POP();
   UNPROTECT(2);
   return ans;
 }
@@ -564,18 +527,20 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   for (i = 0; i < collen; i++)
     {
       snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
-      eachcolvector = jl_eval_string(evalcmd);	
+      eachcolvector = jl_eval_string(evalcmd);
       snprintf(evalcmd, evalsize, "isa(%s[%d],DataArray)", dfname, i + 1);
-      if (jl_unbox_bool(jl_eval_string(evalcmd)))
-	{
-	  snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
-	  if (jl_unbox_bool(jl_eval_string(evalcmd)))
-	    SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
-	  else
-	    SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
-	}
-      else
+      bool isa_da = jl_unbox_bool(jl_eval_string(evalcmd));
+      snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
+      bool isa_pda = jl_unbox_bool(jl_eval_string(evalcmd));
+      if (isa_pda) {
+	SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
+      }
+      else if (isa_da) {
+	SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
+      }
+      else {
 	SET_VECTOR_ELT(ans, i, Julia_R_MD(eachcolvector));
+      }
     }
   //set names attribute
   snprintf(evalcmd, evalsize, "names(%s)", dfname);
@@ -617,7 +582,6 @@ SEXP Julia_R(jl_value_t *Var)
 
   // Array To Vector
   SEXP ans = R_NilValue;
-  JL_GC_PUSH1(&Var);
 
   if (jl_is_array(Var))
   {
@@ -633,8 +597,9 @@ SEXP Julia_R(jl_value_t *Var)
     }
     if (jl_is_NAtype(Var))
 	PROTECT(ans = Julia_R_Scalar_NA(Var));
-    else if (jl_is_DataFrame(Var))
-	PROTECT(ans = Julia_R_MD_NA_DataFrame(Var));
+    else if (jl_is_DataFrame(Var)) {
+      PROTECT(ans = Julia_R_MD_NA_DataFrame(Var));
+    }
     else if (jl_is_DataArray(Var))
 	PROTECT(ans = Julia_R_MD_NA(Var));
     else if (jl_is_PooledDataArray(Var))
@@ -654,7 +619,6 @@ SEXP Julia_R(jl_value_t *Var)
   }
   else
       PROTECT(ans = Julia_R_Scalar(Var));
-  JL_GC_POP();
   UNPROTECT(1);
   return ans;
 }
