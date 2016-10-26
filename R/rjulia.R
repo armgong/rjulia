@@ -20,10 +20,10 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 
 isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")
 
-.julia_init_if_necessary <- function(disablegc=FALSE) {
+.julia_init_if_necessary <- function() {
   if (!isJuliaOk()) {
     message("Julia not yet running. Calling julia_init() ...")
-    julia_init(disablegc)
+    julia_init()
     if (!isJuliaOk())
       stop("Julia *still* not running. Giving up.")
   }
