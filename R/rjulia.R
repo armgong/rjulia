@@ -15,7 +15,7 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 
   jloaddf()
 
-  if (julia_eval('VERSION < v"0.5.0"')
+  if (julia_eval('VERSION < v"0.5.0"'))
       stop("Julia version must be 0.5 or higher.")
   
   return(invisible(TRUE))
