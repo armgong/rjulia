@@ -130,7 +130,7 @@ static jl_array_t *R_Julia_MD(SEXP Var)
       jl_value_t **retData = jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++) {
 	retData[i] = (jl_value_t *)jl_cstr_to_string(translateCharUTF8(STRING_ELT(Var, i)));
-	jl_gc_wb(ret, retData[i]);
+	jl_gc_wb(ret, retData[i]);  // I'm not sure this is right
       }
       break;
     }
@@ -278,9 +278,8 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na, const char *VarNam
 //Convert R Type To Julia,which not contain NA
 SEXP R_Julia(SEXP Var, SEXP VarName)
 {
-  jl_array_t *ans;
+  jl_array_t *ans = R_Julia_MD(Var);
   JL_GC_PUSH1(&ans);
-  ans = R_Julia_MD(Var);
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), (jl_value_t *)ans);
   JL_GC_POP();
   return R_NilValue;
@@ -289,9 +288,8 @@ SEXP R_Julia(SEXP Var, SEXP VarName)
 //Convert R Type To Julia,which contain NA
 SEXP R_Julia_NA(SEXP Var, SEXP na, SEXP VarName)
 {
-  jl_value_t *ans;
+  jl_value_t *ans = R_Julia_MD_NA(Var, na);
   JL_GC_PUSH1(&ans);
-  ans = R_Julia_MD_NA(Var, na);
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
   JL_GC_POP();
   return R_NilValue;
@@ -300,9 +298,8 @@ SEXP R_Julia_NA(SEXP Var, SEXP na, SEXP VarName)
 SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarName)
 {
   LoadDF();
-  jl_value_t *ans;
+  jl_value_t *ans = R_Julia_MD_NA_Factor(Var);
   JL_GC_PUSH1(&ans);
-  ans = R_Julia_MD_NA_Factor(Var);
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
   JL_GC_POP();
   return R_NilValue;
