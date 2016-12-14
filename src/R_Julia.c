@@ -81,20 +81,16 @@ static jl_datatype_t* ElementType(SEXP Var) {
 // Alternate array creator starting from R SEXP
 static jl_array_t* NewArray(SEXP Var) {
   jl_datatype_t *eltype = ElementType(Var);
-  jl_array_t *ret = NULL;
-  JL_GC_PUSH1(&ret);
   if (isMatrix(Var)) {
     jl_value_t* array_type = jl_apply_array_type(eltype, 2);
-    ret = jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
+    return jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
   } else if (isArray(Var)) {
     jl_value_t *dims = RDims_JuliaTuple(Var);
-    ret = CreateArray(eltype, jl_nfields(dims), dims);
+    return CreateArray(eltype, jl_nfields(dims), dims);
   } else { // isVector and isVectorAtomic do not mean what one would expect
      jl_value_t* array_type = jl_apply_array_type(eltype, 1);
-     ret = jl_alloc_array_1d(array_type, LENGTH(Var));
+     return jl_alloc_array_1d(array_type, LENGTH(Var));
   }
-  JL_GC_POP();
-  return(ret);
 }
 
 //convert R object to julia object
