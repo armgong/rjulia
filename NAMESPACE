@@ -1,4 +1,4 @@
-export(julia_init, isJuliaOk,
+export(julia_init,
        ## short, long :
        j2r, julia_eval,
        jDo, julia_void_eval,
