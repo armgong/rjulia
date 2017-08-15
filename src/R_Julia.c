@@ -172,7 +172,7 @@ static jl_value_t *TransArrayToDataArray(jl_array_t *mArray, jl_array_t *mboolAr
   jl_eval_string("TransVarName=0;TransVarNamebool=0;");
   if (jl_exception_occurred())
   {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
     return (jl_value_t *) jl_nothing;
@@ -319,7 +319,7 @@ static jl_value_t *TransArrayToPoolDataArray(jl_array_t *mArray, jl_array_t *mpo
   jl_eval_string("varpools=0;varrefs=0;");
   if (jl_exception_occurred())
   {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
     return (jl_value_t *) jl_nothing;
@@ -412,7 +412,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 
     if (jl_exception_occurred())
     {
-      jl_show(jl_stderr_obj(), jl_exception_occurred());
+      jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
       Rprintf("\n");
       jl_exception_clear();
       return (jl_value_t *) jl_nothing;

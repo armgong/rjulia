@@ -57,7 +57,7 @@ SEXP jl_void_eval(SEXP cmd)
   jl_eval_string((char *)s);
   if (jl_exception_occurred())
   {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
   }
@@ -71,7 +71,7 @@ SEXP jl_eval(SEXP cmd)
   jl_value_t *ret = jl_eval_string((char *)s);
   if (jl_exception_occurred())
   {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
     return R_NilValue;
