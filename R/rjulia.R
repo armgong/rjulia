@@ -5,8 +5,8 @@ julia_init <- function(disablegc = FALSE)
   .Call("initJulia", disablegc, PACKAGE = "rjulia")
 
   ## If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
-  julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
-  julia_void_eval('@windows_only ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]))')
+  julia_void_eval('if is_windows() push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor))) end')
+  julia_void_eval('if is_windows() ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"])) end')
 }
 
 isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")
