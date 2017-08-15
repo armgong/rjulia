@@ -229,8 +229,8 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
       else
 	  return ScalarInteger((int32_t)jl_unbox_uint64(Var));
   }
-  if (jl_is_float64(Var)) return ScalarReal(jl_unbox_float64(Var));
-  if (jl_is_float32(Var)) return ScalarReal(jl_unbox_float32(Var));
+  if (jl_typeis(Var,jl_float64_type)) return ScalarReal(jl_unbox_float64(Var));
+  if (jl_typeis(Var,jl_float32_type)) return ScalarReal(jl_unbox_float32(Var));
   if (jl_is_bool   (Var)) return ScalarLogical(jl_unbox_bool(Var));
   if (jl_is_int8   (Var)) return ScalarInteger(jl_unbox_int8  (Var));
   if (jl_is_uint8  (Var)) return ScalarInteger(jl_unbox_uint8 (Var));
