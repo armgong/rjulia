@@ -3,7 +3,14 @@
 
 library(RUnit)
 library(rjulia)
+<<<<<<< Updated upstream
 rjulia:::.julia_init_if_necessary()
+=======
+julia_init()
+
+## logical, numeric, and character with "e" fails
+## logical or character with "f" fails. Logical or character have loop rather than memcpy in R_Julia_MD.
+>>>>>>> Stashed changes
 
 ## Send data of each atomic type to julia and back again
 ##  With and without NAs

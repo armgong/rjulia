@@ -1,13 +1,8 @@
 
 ## Initialise Julia
-julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
+julia_init <- function(disablegc = FALSE)
 {
-  ## Check Julia exists on the system. If it doesn't, stop immediately.
-  juliabindir <- if (nzchar(juliahome)) juliahome else {
-    gsub("\"", "", system('julia -E JULIA_HOME', intern=TRUE))
-  }
-  ## Otherwise, initialise Julia using the provided home directory.
-  .Call("initJulia", juliabindir, disablegc, PACKAGE = "rjulia")
+  .Call("initJulia", disablegc, PACKAGE = "rjulia")
 
   ## If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
   julia_void_eval('@windows_only push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
