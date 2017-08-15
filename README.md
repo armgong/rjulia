@@ -8,17 +8,17 @@ It currently supports use on Linux and Windows (both R and RGUI), but build on W
 Installing
 -------------
 
-1. Install julia v0.4 and R version >=3.1.0.
+1. Install julia v0.5 and R version >=3.1.0.
  
 2. Add `<juliainstalldir>/bin` to your system PATH variable if needed.
 
-3. Install the rjulia package.  If you're using the v0.3 branch of julia, use the "0.3" branch of rjulia.
+3. Install the rjulia package.  If you're using the v0.4 branch of julia, use the "julia0.4" branch of rjulia.
 
     You can install rjulia on Linux using the devtools package:
 
     ```r
     install.packages("devtools") #if not already installed
-    devtools::install_github("armgong/rjulia", ref="master")# or ref="0.3" if using Julia v0.3
+    devtools::install_github("armgong/rjulia", ref="julia0.5")# or ref="julia0.4" if using Julia v0.5
     ```
     You can install rjulia on Windows using the Rtools and devtools package :
 

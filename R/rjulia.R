@@ -1,4 +1,3 @@
-
 ## Initialise Julia
 julia_init <- function(disablegc = FALSE)
 {
@@ -9,16 +8,62 @@ julia_init <- function(disablegc = FALSE)
   julia_void_eval('if is_windows() ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"])) end')
 }
 
-isJuliaOk <- function() .Call("Julia_is_running", PACKAGE="rjulia")
 
 .julia_init_if_necessary <- function() {
-  if (!isJuliaOk()) {
+  if (!.isJuliaOk) {
     message("Julia not yet running. Calling julia_init() ...")
     julia_init()
-    if (!isJuliaOk())
+    if (!.isJuliaOk)
       stop("Julia *still* not running. Giving up.")
+    else
+      message("julia_init complete successfully")
   }
 }
+
+jDo<-julia_void_eval<-julia_eval<-function(cmdstr) {
+  .julia_init_if_necessary()
+                                        #first clear julia exception
+  ccall("jl_eval_string",'ccall(:jl_exception_clear,Void,());')
+                                        #second eval julia expression
+  ccall("jl_eval_string",cmdstr)
+                                        #then,try catch and show julia execption
+  ccall("jl_eval_string",
+        'if ccall(:jl_exception_occurred,Ptr{Void},())!=C_NULL
+            rjuliaexception=ccall(:jl_exception_occurred,Any,());
+            showerror(STDERR,rjuliaexception);
+            println("");
+            ccall(:jl_exception_clear,Void,());
+       end')
+}
+
+Init<-julia_init <- function(juliahome="")
+       {
+           ##force change HOME env variable in R, R change HOME to c:\user\username\Documents
+           ##but on window 7+ this should be c:\user\username, and it not change it, julia could not
+           ##find its package and compiled package, so let us change it
+           if (Sys.info()[['sysname']]=="Windows")
+           {
+               Sys.setenv(HOME=paste0(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH")))
+           }
+
+           juliabindir <- if (nchar(juliahome) > 0) juliahome else {
+                                                                      gsub("\"", "",
+                                                                      system('julia -E JULIA_HOME',
+                                                                             intern=TRUE))
+                                                              }
+           ccall("jl_init",juliabindir)
+           .isJuliaOk<<-T
+           ## If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
+             ##jDo('@windows_only
+           ##push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
+           ##jDo('@windows_only ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]))')
+           ## Loading julia packages
+           jDo("using DataFrames")
+           jDo("using RCall")
+       }
+
+
+########## End: from rjulia2
 
 j2r <- julia_eval <- function(expression)
 {
@@ -27,30 +72,29 @@ j2r <- julia_eval <- function(expression)
   .Call("jl_eval", expression, PACKAGE="rjulia")
 }
 
-jDo <- julia_void_eval <- function(expression)
-{
-  .julia_init_if_necessary()
-  invisible(.Call("jl_void_eval",expression, PACKAGE="rjulia"))
-}
-
 r2j <- r_julia <- function(x,y)
 {
   .julia_init_if_necessary()
 
-  proc <- if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
+  if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
+
     if (anyNA(x)) {
-      "R_Julia_NA"
+      na = is.na(x)
+      invisible(.Call("R_Julia_NA", x, na, y, PACKAGE="rjulia"))
     } else {
-      "R_Julia"
+      invisible(.Call("R_Julia", x, y, PACKAGE="rjulia"))
     }
   } else if (is.data.frame(x)) {
-    "R_Julia_NA_DataFrame"
+    na = lapply(x, is.na)
+    if (is.null(names(x))) {
+      names(x) = as.character(seq_len(length(x)))
+    }
+    invisible(.Call("R_Julia_NA_DataFrame", x, na, y, PACKAGE="rjulia"))
   } else if (is.factor(x)) {
-    "R_Julia_NA_Factor"
+    invisible(.Call("R_Julia_NA_Factor", x, y, PACKAGE="rjulia"))
   } else {
     warning("rjulia supports only vector, matrix, array, list(withoug NAs), factor and data frames (with simple string, int, float, logical) classes")
   }
-  invisible(.Call(proc, x,y, PACKAGE="rjulia"))
 }
 
 jdfinited <- julia_DataArrayFrameInited <- function()

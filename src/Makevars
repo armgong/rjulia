@@ -2,27 +2,6 @@
 #  CRAN checks want non-GNU Makefiles
 #  but MM cannot see a direct way -- we would need  Makevars.in
 
-#julia -E find include file
-myjuliahome="abspath(JULIA_HOME)"
-## Fails: it is not expanded at all when passed to gcc !
-# juliabinpath=`julia -E $(myjuliahome)`
-# juliabinpath ::= $(juliabinpath)
-juliabinpath=$(shell julia -E $(myjuliahome))
-juliabinpath:=$(strip $(juliabinpath))
-
-#dev julia
-PKG_CPPFLAGS= -I$(juliabinpath)/../../src
-PKG_CPPFLAGS+= -I$(juliabinpath)/../../src/support -DJULIA_ENABLE_THREADING=0
-
-#release julia
-PKG_CPPFLAGS+= -I$(juliabinpath)/../include
-PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia -DJULIA_ENABLE_THREADING=0
-
-#use julia -E find libjulia.so path
-Libjulia="abspath(dirname(Libdl.dlpath(\"libjulia\")))"
-libjuliapath=$(shell julia -E $(Libjulia))
-libjuliapath:=$(strip $(libjuliapath))
-# libjuliapath = `julia -E $(Libjulia)`
-# libjuliapath ::= $(libjuliapath)
-#
-PKG_LIBS=-L$(libjuliapath) -ljulia
+JL_SHARE = $(shell julia -e 'print(joinpath(JULIA_HOME,Base.DATAROOTDIR,"julia"))')
+PKG_CFLAGS   += $(shell $(JL_SHARE)/julia-config.jl --cflags)
+PKG_LIBS     += $(shell $(JL_SHARE)/julia-config.jl --ldlibs --ldflags)
