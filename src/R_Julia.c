@@ -103,10 +103,6 @@ static jl_array_t* NewArray(SEXP Var) {
 //VarName in converted Julia object's name
 static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
 {
-
-   if ((LENGTH(Var))==0)
-     return (jl_value_t *) jl_nothing;
-
    jl_array_t *ret = NewArray(Var);
    JL_GC_PUSH1(&ret);
    switch (TYPEOF(Var))
@@ -146,11 +142,6 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
       {
 	retData[i] = R_Julia_MD(VECTOR_ELT(Var,i),"foo");
       }
-      break;
-    }
-    default:
-    {
-      ret=(jl_value_t *)jl_nothing;
       break;
     }
    }
