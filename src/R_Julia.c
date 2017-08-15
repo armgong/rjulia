@@ -108,7 +108,7 @@ static jl_value_t *R_Julia_MD(SEXP Var, const char *VarName)
      return (jl_value_t *) jl_nothing;
 
    jl_array_t *ret = NewArray(Var);
-   JL_GC_PUSH(&ret);
+   JL_GC_PUSH1(&ret);
    switch (TYPEOF(Var))
    {
     case LGLSXP:
@@ -425,7 +425,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, const char *VarName)
 SEXP R_Julia(SEXP Var, SEXP VarName)
 {
   jl_value_t *ret = R_Julia_MD(Var, CHAR(STRING_ELT(VarName, 0)));
-  JL_GC_PUSH(&ret);
+  JL_GC_PUSH1(&ret);
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ret);
   JL_GC_POP();
   return R_NilValue;
