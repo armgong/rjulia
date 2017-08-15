@@ -22,7 +22,7 @@ SEXP juliaArrayToSEXP(jl_value_t *Var) {
   SEXPTYPE type;
   SEXP ans = R_NilValue;
   jl_datatype_t *vartype = jl_array_eltype(Var);
-  if (vartype == jl_utf8_string_type || vartype == jl_ascii_string_type)
+  if (vartype == jl_string_type)
     type = STRSXP;
   else if (vartype == jl_bool_type)
     type = LGLSXP;
@@ -236,14 +236,12 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
   if (jl_is_uint8  (Var)) return ScalarInteger(jl_unbox_uint8 (Var));
   if (jl_is_int16  (Var)) return ScalarInteger(jl_unbox_int16 (Var));
   if (jl_is_uint16 (Var)) return ScalarInteger(jl_unbox_uint16(Var));
-  if (jl_is_utf8_string(Var)) { // TODO ? : use ScalarString(.) as well
+  if (jl_is_string (Var)) { // TODO ? : use ScalarString(.) as well
     SEXP ans = PROTECT(allocVector(STRSXP, 1));
     SET_STRING_ELT(ans, 0, mkCharCE(jl_string_data(Var), CE_UTF8));
     UNPROTECT(1);
     return ans;
   }
-  if (jl_is_ascii_string(Var))
-      return ScalarString(mkChar(jl_string_data(Var)));
   // else
   return R_NilValue;
 }
@@ -258,7 +256,7 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     return ans;
 
   PROTECT(ans = juliaArrayToSEXP(Var)); nprot++;
-  
+
   jl_datatype_t *vartype=jl_array_eltype(Var);
 
   if (jl_bool_type==vartype)
@@ -331,16 +329,12 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     jlfloat_to_r;
   }
   // convert string array to STRSXP, but not sure it is correct ?
-  else if (jl_utf8_string_type==vartype)
+  else if (jl_string_type==vartype)
   {
     for (size_t i = 0; i < len; i++)
       SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(Var, i)), CE_UTF8));
   }
-  else if (jl_ascii_string_type==vartype)
-  {
-    for (size_t i = 0; i < len; i++)
-      SET_STRING_ELT(ans, i, mkChar(jl_string_data(jl_cellref(Var, i))));
-  } else if (jl_any_type==vartype) {
+  else if (jl_any_type==vartype) {
     jl_value_t **p = (jl_value_t **) jl_array_data(Var);
     for (size_t i = 0; i < len; i++)
       SET_VECTOR_ELT(ans, i, Julia_R_MD(p[i]));
@@ -375,7 +369,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   }
 
   PROTECT(ans = juliaArrayToSEXP(retData)); nprot++;
-  
+
   jl_datatype_t *vartype = jl_array_eltype(retData);
 
   //bool array
@@ -451,21 +445,13 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
     jlfloat_to_r_na;
   }
   //convert string array to STRSXP
-  else if (jl_utf8_string_type==vartype)
+  else if (jl_string_type==vartype)
   {
     for (size_t i = 0; i < len; i++)
       if (pNA[i])
         SET_STRING_ELT(ans, i, NA_STRING);
       else
         SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(jl_cellref(retData, i)), CE_UTF8));
-  }
-  else if (jl_ascii_string_type==vartype)
-  {
-    for (size_t i = 0; i < len; i++)
-      if (pNA[i])
-        SET_STRING_ELT(ans, i, NA_STRING);
-      else
-        SET_STRING_ELT(ans, i, mkChar(jl_string_data(jl_cellref(retData, i))));
   }
   JL_GC_POP();
   jl_eval_string("Varname0tmp=0;");
@@ -576,7 +562,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   for (i = 0; i < collen; i++)
   {
     snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
-    eachcolvector = jl_eval_string(evalcmd);	
+    eachcolvector = jl_eval_string(evalcmd);
     snprintf(evalcmd, evalsize, "isa(%s[%d],DataArray)", dfname, i + 1);
 	if (jl_unbox_bool(jl_eval_string(evalcmd)))
 	 {
