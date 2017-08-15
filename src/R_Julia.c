@@ -49,7 +49,7 @@ static jl_value_t *RDims_JuliaTuple(SEXP Var)
 //create an Array in julia
 static jl_array_t* CreateArray(jl_datatype_t *type, size_t ndim, jl_value_t *dims)
 {
-  return jl_new_array(jl_apply_array_type(type, ndim), dims);;
+  return jl_new_array(jl_apply_array_type((jl_value_t*)type, ndim), dims);;
 }
 
 // Pick type for array element
@@ -86,13 +86,13 @@ static jl_array_t* NewArray(SEXP Var) {
   jl_datatype_t *eltype = ElementType(Var);
   jl_array_t *ret = NULL;
   if (isMatrix(Var)) {
-    jl_value_t* array_type = jl_apply_array_type(eltype, 2);
+    jl_value_t* array_type = jl_apply_array_type((jl_value_t*)eltype, 2);
     ret = jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
   } else if (isArray(Var)) {
     jl_value_t *dims = RDims_JuliaTuple(Var);
     ret = CreateArray(eltype, jl_nfields(dims), dims);
   } else { // isVector and isVectorAtomic do not mean what one would expect
-     jl_value_t* array_type = jl_apply_array_type(eltype, 1);
+     jl_value_t* array_type = jl_apply_array_type((jl_value_t*)eltype, 1);
      ret = jl_alloc_array_1d(array_type, LENGTH(Var));
   }
   return(ret);
@@ -196,7 +196,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, const char *VarName)
   JL_GC_PUSH3(&ret, &ret1, &ans);
   ret = NewArray(Var);
   int rank = jl_array_ndims(ret);
-  jl_value_t* array_type = jl_apply_array_type(jl_bool_type, rank);
+  jl_value_t* array_type = jl_apply_array_type((jl_value_t*)jl_bool_type, rank);
   if (rank == 1) {
     ret1 = jl_alloc_array_1d(array_type, LENGTH(Var));
   } else if (rank == 2) {
@@ -341,7 +341,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
   jl_array_t *ret=NULL;
   jl_array_t *ret1=NULL;
 
-  ret1 = jl_alloc_array_1d(jl_apply_array_type(jl_string_type,1), LENGTH(levels));
+  ret1 = jl_alloc_array_1d(jl_apply_array_type((jl_value_t*)jl_string_type,1), LENGTH(levels));
 
   jl_value_t **retData1 = jl_array_data(ret1);
   JL_GC_PUSH3(&ret, &ret1, &ans);
@@ -353,7 +353,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var, const char *VarName)
    {
     case INTSXP:
     {
-      ret = jl_alloc_array_1d(jl_apply_array_type(jl_uint32_type, 1), LENGTH(Var));
+      ret = jl_alloc_array_1d(jl_apply_array_type((jl_value_t*)jl_uint32_type, 1), LENGTH(Var));
       int *retData = (int *)jl_array_data(ret);
       for (size_t i = 0; i < jl_array_len(ret); i++)
       {
