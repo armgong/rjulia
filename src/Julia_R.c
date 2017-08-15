@@ -587,7 +587,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
     for (i = 0; i < jl_array_len(ret); i++)
     {
       if (jl_is_symbol(jl_arrayref((jl_array_t *)ret, i)))
-        SET_STRING_ELT(names, i, mkChar(((jl_sym_t *)jl_arrayref((jl_array_t *)ret, i))->name));
+        SET_STRING_ELT(names, i, mkChar( jl_symbol_name( (jl_sym_t *)jl_arrayref( (jl_array_t *)ret, i) ) ) );
     }
     setAttrib(ans, R_NamesSymbol, names);
     UNPROTECT(1); // names
