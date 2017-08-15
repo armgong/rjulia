@@ -50,7 +50,7 @@ SEXP initJulia(SEXP DisableGC)
   return R_NilValue;
 }
 
-//eval julia srcipt, but not return val
+//eval julia script, but do not return val
 SEXP jl_void_eval(SEXP cmd)
 {
   const char *s = CHAR(asChar(cmd));

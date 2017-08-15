@@ -10,14 +10,13 @@ myjuliahome="abspath(JULIA_HOME)"
 juliabinpath=$(shell julia -E $(myjuliahome))
 juliabinpath:=$(strip $(juliabinpath))
 
-
 #dev julia
 PKG_CPPFLAGS= -I$(juliabinpath)/../../src
-PKG_CPPFLAGS+= -I$(juliabinpath)/../../src/support
+PKG_CPPFLAGS+= -I$(juliabinpath)/../../src/support -DJULIA_ENABLE_THREADING=0
+
 #release julia
 PKG_CPPFLAGS+= -I$(juliabinpath)/../include
-PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia
-
+PKG_CPPFLAGS+= -I$(juliabinpath)/../include/julia -DJULIA_ENABLE_THREADING=0
 
 #use julia -E find libjulia.so path
 Libjulia="abspath(dirname(Libdl.dlpath(\"libjulia\")))"
@@ -27,4 +26,3 @@ libjuliapath:=$(strip $(libjuliapath))
 # libjuliapath ::= $(libjuliapath)
 #
 PKG_LIBS=-L$(libjuliapath) -ljulia
-
