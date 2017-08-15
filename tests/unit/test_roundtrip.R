@@ -3,6 +3,10 @@
 
 library(RUnit)
 library(rjulia)
+julia_init()
+
+## logical, numeric, and character with "e" fails
+## logical or character with "f" fails. Logical or character have loop rather than memcpy in R_Julia_MD.
 julia_init(disablegc=FALSE)
 
 ## logical, numeric, and character with "e" fails

@@ -1,0 +1,8 @@
+Usage:
+    rzil [-h] command package_name
+
+        command can be new, rename, docs, vignette, test, mincheck, check, build, install, clean, tidy or publish
+
+    perldoc rzil
+
+First positional argument is expected to be a package in this directory.

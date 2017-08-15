@@ -1,9 +1,9 @@
 Package: rjulia
 Type: Package
 Title: Integrating R and Julia -- Calling Julia from R
-Version: 0.9-4
-Date: 2015-08-01
-Author: Yu Gong [aut, cre], Oliver Keys [ctb], Martin Maechler [ctb]
+Version: 0.10-0
+Date: 2017-08-15
+Author: Yu Gong [aut, cre], Oliver Keys [ctb], Peter Haverty [ctb], Martin Maechler [ctb]
 Maintainer: Yu Gong <armgong@yahoo.com>
 Description: An interface between R and Julia.  It allows to run a script
  in julia from R, i.e., call Julia on R objects and provides object type

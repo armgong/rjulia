@@ -236,14 +236,7 @@ static SEXP Julia_R_Scalar(jl_value_t *Var)
   if (jl_is_uint8  (Var)) return ScalarInteger(jl_unbox_uint8 (Var));
   if (jl_is_int16  (Var)) return ScalarInteger(jl_unbox_int16 (Var));
   if (jl_is_uint16 (Var)) return ScalarInteger(jl_unbox_uint16(Var));
-  if (jl_is_string(Var)) { // TODO ? : use ScalarString(.) as well
-    SEXP ans = PROTECT(allocVector(STRSXP, 1));
-    SET_STRING_ELT(ans, 0, mkCharCE(jl_string_data(Var), CE_UTF8));
-    UNPROTECT(1);
-    return ans;
-  }
-  if (jl_is_string(Var))
-      return ScalarString(mkChar(jl_string_data(Var)));
+  if (jl_is_string (Var)) return ScalarString(mkChar(jl_string_data(Var)));
   // else
   return R_NilValue;
 }
@@ -258,7 +251,7 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     return ans;
 
   PROTECT(ans = juliaArrayToSEXP(Var)); nprot++;
-  
+
   jl_datatype_t *vartype=jl_array_eltype(Var);
 
   if (jl_bool_type==vartype)
@@ -321,7 +314,6 @@ static SEXP Julia_R_MD(jl_value_t *Var)
     else
      { jlbigint_to_r }
   }
-  //double
   else if (jl_float64_type==vartype)
   {
     double *p = (double *) jl_array_data(Var);
@@ -335,9 +327,9 @@ static SEXP Julia_R_MD(jl_value_t *Var)
   // convert string array to STRSXP, but not sure it is correct ?
   else if (jl_string_type==vartype)
   {
-    jl_value_t **retData = jl_array_data(Var);
+    jl_value_t **p = (jl_value_t **) jl_array_data(Var);
     for (size_t i = 0; i < len; i++)
-      SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(retData[i]), CE_UTF8));
+      SET_STRING_ELT(ans, i, mkCharCE(jl_string_data(p[i]), CE_UTF8));
   }
   else if (jl_any_type==vartype) {
     jl_value_t **p = (jl_value_t **) jl_array_data(Var);
@@ -374,7 +366,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   }
 
   PROTECT(ans = juliaArrayToSEXP(retData)); nprot++;
-  
+
   jl_datatype_t *vartype = jl_array_eltype(retData);
 
   //bool array
@@ -454,7 +446,7 @@ static SEXP Julia_R_MD_NA(jl_value_t *Var)
   //convert string array to STRSXP
   else if (jl_string_type==vartype)
   {
-    jl_value_t **p = jl_array_data(retData);
+    jl_value_t **p = (jl_value_t **) jl_array_data(retData);
     for (size_t i = 0; i < len; i++)
       if (pNA[i]) {
         SET_STRING_ELT(ans, i, NA_STRING);
@@ -525,23 +517,23 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
   //Create SEXP for Each Column and assign
   PROTECT(ans = allocVector(VECSXP, collen));
   for (i = 0; i < collen; i++)
-    {
-      snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
-      eachcolvector = jl_eval_string(evalcmd);
-      snprintf(evalcmd, evalsize, "isa(%s[%d],DataArray)", dfname, i + 1);
-      bool isa_da = jl_unbox_bool(jl_eval_string(evalcmd));
-      snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
-      bool isa_pda = jl_unbox_bool(jl_eval_string(evalcmd));
-      if (isa_pda) {
-	SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
-      }
-      else if (isa_da) {
-	SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
-      }
-      else {
-	SET_VECTOR_ELT(ans, i, Julia_R_MD(eachcolvector));
-      }
-    }
+  {
+    snprintf(evalcmd, evalsize, "%s[%d]", dfname, i + 1);
+    eachcolvector = jl_eval_string(evalcmd);
+    snprintf(evalcmd, evalsize, "isa(%s[%d],DataArray)", dfname, i + 1);
+	if (jl_unbox_bool(jl_eval_string(evalcmd)))
+	 {
+	  snprintf(evalcmd, evalsize, "isa(%s[%d],PooledDataArray)", dfname, i + 1);
+      if (jl_unbox_bool(jl_eval_string(evalcmd)))
+       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA_Factor(eachcolvector));
+      else
+       SET_VECTOR_ELT(ans, i, Julia_R_MD_NA(eachcolvector));
+	 }
+   else
+	{
+	  SET_VECTOR_ELT(ans, i, Julia_R_MD(eachcolvector));
+	}
+  }
   //set names attribute
   snprintf(evalcmd, evalsize, "names(%s)", dfname);
   ret = jl_eval_string(evalcmd);
@@ -551,7 +543,7 @@ static SEXP Julia_R_MD_NA_DataFrame(jl_value_t *Var)
     for (i = 0; i < jl_array_len(ret); i++)
     {
       if (jl_is_symbol(jl_arrayref((jl_array_t *)ret, i)))
-	SET_STRING_ELT(names, i, mkChar( jl_symbol_name( (jl_sym_t *)jl_arrayref((jl_array_t *)ret, i))) );
+        SET_STRING_ELT(names, i, mkChar( jl_symbol_name( (jl_sym_t *)jl_arrayref( (jl_array_t *)ret, i) ) ) );
     }
     setAttrib(ans, R_NamesSymbol, names);
     UNPROTECT(1); // names
