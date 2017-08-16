@@ -17,7 +17,7 @@ SEXP Julia_LoadDataArrayFrame()
   jl_eval_string("using DataArrays,DataFrames");
   if (jl_exception_occurred())
   {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
   }

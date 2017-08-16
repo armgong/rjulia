@@ -18,7 +18,7 @@ Copyright (C) 2014, 2015 by Yu Gong
 // Handle and report exception
 static int rjulia_exception_occurred() {
   if (jl_exception_occurred()) {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
     return(1);
@@ -47,7 +47,7 @@ static jl_value_t *RDims_JuliaTuple(SEXP Var)
 //create an Array in julia
 static jl_array_t* CreateArray(jl_datatype_t *type, size_t ndim, jl_value_t *dims)
 {
-  return jl_new_array(jl_apply_array_type(type, ndim), dims);;
+  return jl_new_array(jl_apply_array_type((jl_value_t*)type, ndim), dims);;
 }
 
 // Pick type for array element
@@ -77,18 +77,18 @@ static jl_datatype_t* ElementType(SEXP Var) {
    }
   return(eltype);
 }
-  
+
 // Alternate array creator starting from R SEXP
 static jl_array_t* NewArray(SEXP Var) {
   jl_datatype_t *eltype = ElementType(Var);
   if (isMatrix(Var)) {
-    jl_value_t* array_type = jl_apply_array_type(eltype, 2);
+    jl_value_t* array_type = jl_apply_array_type((jl_value_t*)eltype, 2);
     return jl_alloc_array_2d(array_type, nrows(Var), ncols(Var));
   } else if (isArray(Var)) {
     jl_value_t *dims = RDims_JuliaTuple(Var);
     return CreateArray(eltype, jl_nfields(dims), dims);
   } else { // isVector and isVectorAtomic do not mean what one would expect
-     jl_value_t* array_type = jl_apply_array_type(eltype, 1);
+     jl_value_t* array_type = jl_apply_array_type((jl_value_t*)eltype, 1);
      return jl_alloc_array_1d(array_type, LENGTH(Var));
   }
 }
@@ -180,8 +180,8 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
   jl_array_t *new_levels=NULL;
   jl_array_t *na_vec=NULL;
   JL_GC_PUSH4(&ret, &new_levels, &ans, &na_vec);
-  ret = jl_alloc_array_1d(jl_apply_array_type(jl_string_type, 1), len);
-  new_levels = jl_alloc_array_1d(jl_apply_array_type(jl_string_type,1), nlevels);
+  ret = jl_alloc_array_1d(jl_apply_array_type((jl_value_t*)jl_string_type, 1), len);
+  new_levels = jl_alloc_array_1d(jl_apply_array_type((jl_value_t*)jl_string_type,1), nlevels);
 
   // Collect levels
   jl_value_t **retData1 = jl_array_data(new_levels);
@@ -191,7 +191,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
   }
 
   // Collect string vector
-  na_vec = jl_alloc_array_1d( jl_apply_array_type(jl_bool_type,1), LENGTH(Var));
+  na_vec = jl_alloc_array_1d( jl_apply_array_type((jl_value_t*)jl_bool_type,1), LENGTH(Var));
   char *na_data = (char *)jl_array_data(na_vec);
   int level_index;
 
@@ -215,7 +215,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
 
   // Make PooledDataArray using DataArray and levels
   func = jl_get_function(jl_main_module, "PooledDataArray");
-  ans = jl_call2(func, (jl_value_t *)ans, (jl_value_t *)new_levels);  
+  ans = jl_call2(func, (jl_value_t *)ans, (jl_value_t *)new_levels);
 
   if (rjulia_exception_occurred())
     ans =  (jl_value_t *) jl_nothing;
@@ -262,7 +262,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na, const char *VarNam
 
       if (jl_exception_occurred())
 	{
-	  jl_show(jl_stderr_obj(), jl_exception_occurred());
+	  jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
 	  Rprintf("\n");
 	  jl_exception_clear();
 	  return (jl_value_t *) jl_nothing;
