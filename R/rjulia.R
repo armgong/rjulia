@@ -1,7 +1,5 @@
 ## Initialise Julia
-julia_init <- function(disablegc = FALSE)
-{
-
+julia_init <- function(disablegc = FALSE) {
   ## Otherwise, initialise Julia using the provided home directory.
   .Call("initJulia", disablegc, PACKAGE = "rjulia")
 
@@ -17,38 +15,21 @@ julia_init <- function(disablegc = FALSE)
   return(invisible(TRUE))
 }
 
-######### From: rjulia2
-
-cstrnull <- function(orgstr)
-{
+cstrnull <- function(orgstr) {
   return (c(charToRaw(orgstr),as.raw(0)))
 }
 
-ccall <- function(fname,cmdstr)
-{
+ccall <- function(fname,cmdstr) {
   functionsym<-getNativeSymbolInfo(fname)
   invisible(.C(functionsym,cstrnull(cmdstr)))
 }
 
-
-.julia_init_if_necessary <- function() {
-  if (!.isJuliaOk) {
-    message("Julia not yet running. Calling julia_init() ...")
-    julia_init()
-    if (!.isJuliaOk)
-      stop("Julia *still* not running. Giving up.")
-    else
-      message("julia_init complete successfully")
-  }
-}
-
 jDo <- julia_void_eval <- julia_eval <- function(cmdstr) {
-  .julia_init_if_necessary()
-                                        #first clear julia exception
+  #first clear julia exception
   ccall("jl_eval_string",'ccall(:jl_exception_clear,Void,());')
-                                        #second eval julia expression
+  #second eval julia expression
   ccall("jl_eval_string",cmdstr)
-                                        #then,try catch and show julia execption
+  #then,try catch and show julia execption
   ccall("jl_eval_string",
         'if ccall(:jl_exception_occurred,Ptr{Void},())!=C_NULL
             rjuliaexception=ccall(:jl_exception_occurred,Any,());
@@ -58,46 +39,12 @@ jDo <- julia_void_eval <- julia_eval <- function(cmdstr) {
        end')
 }
 
-Init <- julia_init <- function(juliahome="")
-       {
-           ##force change HOME env variable in R, R change HOME to c:\user\username\Documents
-           ##but on window 7+ this should be c:\user\username, and it not change it, julia could not
-           ##find its package and compiled package, so let us change it
-           if (Sys.info()[['sysname']]=="Windows")
-           {
-               Sys.setenv(HOME=paste0(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH")))
-           }
-
-           juliabindir <- if (nchar(juliahome) > 0) juliahome else {
-                                                                      gsub("\"", "",
-                                                                      system('julia -E JULIA_HOME',
-                                                                             intern=TRUE))
-                                                              }
-           ccall("jl_init",juliabindir)
-           .isJuliaOk<<-T
-           ## If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
-             ##jDo('@windows_only
-           ##push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor)))')
-           ##jDo('@windows_only ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]))')
-           ## Loading julia packages
-           jDo("using DataFrames")
-           jDo("using RCall")
-       }
-
-
-########## End: from rjulia2
-
-j2r <- julia_eval <- function(expression)
-{
-  .julia_init_if_necessary()
+j2r <- julia_eval <- function(expression) {
   ## Evaluate the expression and return the results of that evaluation.
   .Call("jl_eval", expression, PACKAGE="rjulia")
 }
 
-r2j <- r_julia <- function(x,y)
-{
-  .julia_init_if_necessary()
-
+r2j <- r_julia <- function(x,y) {
   if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
 
     if (anyNA(x)) {
@@ -119,15 +66,11 @@ r2j <- r_julia <- function(x,y)
   }
 }
 
-jdfinited <- julia_DataArrayFrameInited <- function()
-{
+jdfinited <- julia_DataArrayFrameInited <- function() {
   .Call("Julia_DataArrayFrameInited", PACKAGE="rjulia")
 }
 
-jloaddf <- julia_LoadDataArrayFrame <- function()
-{
-  .julia_init_if_necessary()
-
+jloaddf <- julia_LoadDataArrayFrame <- function() {
   invisible(.Call("Julia_LoadDataArrayFrame", PACKAGE="rjulia"))
   if (!julia_DataArrayFrameInited()) warning(
  "DataArray and DataFrame Julia packages have not been loaded.
@@ -135,8 +78,7 @@ jloaddf <- julia_LoadDataArrayFrame <- function()
 }
 
 
-julia_BigintToDouble <- function(mode = FALSE)
-{
+julia_BigintToDouble <- function(mode = FALSE) {
   invisible(.Call("Julia_BigintToDouble", mode, PACKAGE="rjulia"))
 }
 
