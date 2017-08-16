@@ -18,7 +18,7 @@ Copyright (C) 2014, 2015 by Yu Gong
 // Handle and report exception
 static int rjulia_exception_occurred() {
   if (jl_exception_occurred()) {
-    jl_show(jl_stderr_obj(), jl_exception_occurred());
+    jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
     Rprintf("\n");
     jl_exception_clear();
     return(1);
@@ -77,7 +77,7 @@ static jl_datatype_t* ElementType(SEXP Var) {
    }
   return(eltype);
 }
-  
+
 // Alternate array creator starting from R SEXP
 static jl_array_t* NewArray(SEXP Var) {
   jl_datatype_t *eltype = ElementType(Var);
@@ -215,7 +215,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
 
   // Make PooledDataArray using DataArray and levels
   func = jl_get_function(jl_main_module, "PooledDataArray");
-  ans = jl_call2(func, (jl_value_t *)ans, (jl_value_t *)new_levels);  
+  ans = jl_call2(func, (jl_value_t *)ans, (jl_value_t *)new_levels);
 
   if (rjulia_exception_occurred())
     ans =  (jl_value_t *) jl_nothing;
@@ -262,7 +262,7 @@ static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na, const char *VarNam
 
       if (jl_exception_occurred())
 	{
-	  jl_show(jl_stderr_obj(), jl_exception_occurred());
+	  jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
 	  Rprintf("\n");
 	  jl_exception_clear();
 	  return (jl_value_t *) jl_nothing;

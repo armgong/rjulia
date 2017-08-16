@@ -1,12 +1,9 @@
 ## Initialise Julia
-julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
+julia_init <- function(disablegc = FALSE)
 {
-  ## Check Julia exists on the system. If it doesn't, stop immediately.
-  juliabindir <- if (nzchar(juliahome)) juliahome else {
-    gsub("\"", "", system('julia -E JULIA_HOME', intern=TRUE))
-  }
+
   ## Otherwise, initialise Julia using the provided home directory.
-  .Call("initJulia", juliabindir, disablegc, PACKAGE = "rjulia")
+  .Call("initJulia", disablegc, PACKAGE = "rjulia")
 
   ## If on Windows, run a specific push to compensate for R not handling pkg.dir() correctly.
   julia_void_eval('@static if is_windows()  push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor))) end')
@@ -14,20 +11,20 @@ julia_init <- function(juliahome="", disablegc = FALSE, parallel = TRUE)
 
   jloaddf()
 
-  if (julia_eval('VERSION < v"0.5.0"'))
-      stop("Julia version must be 0.5 or higher.")
-  
+  if (julia_eval('VERSION < v"0.6.0"'))
+      stop("Julia version must be 0.6 or higher.")
+
   return(invisible(TRUE))
 }
 
 ######### From: rjulia2
 
-cstrnull<-function(orgstr)
+cstrnull <- function(orgstr)
 {
   return (c(charToRaw(orgstr),as.raw(0)))
 }
 
-ccall<-function(fname,cmdstr)
+ccall <- function(fname,cmdstr)
 {
   functionsym<-getNativeSymbolInfo(fname)
   invisible(.C(functionsym,cstrnull(cmdstr)))
@@ -45,7 +42,7 @@ ccall<-function(fname,cmdstr)
   }
 }
 
-jDo<-julia_void_eval<-julia_eval<-function(cmdstr) {
+jDo <- julia_void_eval <- julia_eval <- function(cmdstr) {
   .julia_init_if_necessary()
                                         #first clear julia exception
   ccall("jl_eval_string",'ccall(:jl_exception_clear,Void,());')
@@ -61,7 +58,7 @@ jDo<-julia_void_eval<-julia_eval<-function(cmdstr) {
        end')
 }
 
-Init<-julia_init <- function(juliahome="")
+Init <- julia_init <- function(juliahome="")
        {
            ##force change HOME env variable in R, R change HOME to c:\user\username\Documents
            ##but on window 7+ this should be c:\user\username, and it not change it, julia could not
