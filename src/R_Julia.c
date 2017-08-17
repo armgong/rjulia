@@ -151,6 +151,7 @@ static jl_array_t *R_Julia_MD(SEXP Var)
 //convert R object contain NA value to Julia DataArrays
 static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 {
+  LoadDF();
   jl_function_t *func = jl_get_function(jl_main_module, "DataArray");
   jl_array_t *ret1 = NULL;
   jl_array_t *ret2 = NULL;
@@ -168,6 +169,7 @@ static jl_value_t *R_Julia_MD_NA(SEXP Var, SEXP na)
 //convert R factor to Julia PooledDataArray
 static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
 {
+  LoadDF();
   SEXP levels = getAttrib(Var, R_LevelsSymbol);
   size_t nlevels = LENGTH(levels);
   size_t len = LENGTH(Var);
@@ -227,6 +229,7 @@ static jl_value_t *R_Julia_MD_NA_Factor(SEXP Var)
 //convert R DataFrame to Julia DataFrame in DataFrames package
 static jl_value_t *R_Julia_MD_NA_DataFrame(SEXP Var, SEXP na, const char *VarName)
 {
+  LoadDF();
   SEXP names = getAttrib(Var, R_NamesSymbol);
   size_t len = LENGTH(Var);
   if (TYPEOF(Var) != VECSXP || len == 0 || names == R_NilValue)
@@ -293,7 +296,6 @@ SEXP R_Julia_NA(SEXP Var, SEXP na, SEXP VarName)
 //Convert R factor To Julia, which contain NA
 SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarName)
 {
-  LoadDF();
   jl_value_t *ans = R_Julia_MD_NA_Factor(Var);
   JL_GC_PUSH1(&ans);
   jl_set_global(jl_main_module, jl_symbol(CHAR(STRING_ELT(VarName, 0))), ans);
@@ -303,7 +305,6 @@ SEXP R_Julia_NA_Factor(SEXP Var, SEXP VarName)
 //Convert R data frame To Julia
 SEXP R_Julia_NA_DataFrame(SEXP Var, SEXP na, SEXP VarName)
 {
-  LoadDF();
   R_Julia_MD_NA_DataFrame(Var, na, CHAR(STRING_ELT(VarName, 0)));
   return R_NilValue;
 }

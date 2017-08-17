@@ -33,14 +33,12 @@ SEXP Julia_DataArrayFrameInited()
 }
 
 //real function for load julia DataArrays and DataFrames packages
-bool LoadDF()
-{
+bool LoadDF() {
   if (DataArrayFrameInited)
     return true;
 
   Julia_LoadDataArrayFrame();
-  if (!DataArrayFrameInited)
-  {
+  if (!DataArrayFrameInited) {
     error("DataArrays and DataFrames can't be loaded correctly into Julia, please check this");
     return false;
   }
