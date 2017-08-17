@@ -10,6 +10,9 @@ julia_init <- function(disablegc = FALSE) {
   if (julia_eval('VERSION < v"0.6.0"'))
       stop("Julia version must be 0.6 or higher.")
 
+  if (julia_eval('VERSION < v"0.6.0"'))
+      stop("Julia version must be 0.6 or higher.")
+
   return(invisible(TRUE))
 }
 
