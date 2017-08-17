@@ -1,25 +1,9 @@
 library(rjulia)
 
-julia_init()
-## ## init embedding julia,paraments are julia_home and disable_gc
-## if(.Platform$OS.type == "unix") julia_init("/usr/bin",F,T) else
-## {
-##   if (.Platform$r_arch=="x64")
-##   {julia_init("c:/julia/64/bin",F,T)}
-##   else
-##   {julia_init("c:/julia/32/bin",F,T)}
-## }
+jloaddf()
 
-## load Julia DataFrames and DataArrays -- with care
-T <- tryCatch(julia_void_eval("using DataArrays,DataFrames"),
-                          error = function(e) e)
-## MM [2015-02-04, lynne]:
-## LoadError("/u/maechler/.julia/v0.3/DataArrays/src/DataArrays.jl",59,LoadError("/u/maechler/.julia/v0.3/DataArrays/src/abstractdataarray.jl",5,UndefVarError(:StoredArray)))
-okDF <- !inherits(T, "error")
+f <- function(n) {
 
-
-f <- function(n)
-{
     stopifnot(n >= 1)
     for (i in 1:n) {
         ## pass R double vector to Julia
@@ -61,7 +45,7 @@ f <- function(n)
         ## pass string vector to julia,need to verify
         x <- c("tttt","xxxx")
         r2j(x,"sss")
-        yy <- j2r("sss")
+        pyy <- j2r("sss")
         cat("string vector :",yy,"\n")
         yy <- j2r("sss[1]")
         cat("string :",yy,"\n")
@@ -76,8 +60,7 @@ f <- function(n)
     }
 }
 f(1)
-f(10)
-xdd <- f(10000)
+f(100)
 
 f2 <- function(n)
 {
@@ -300,7 +283,7 @@ for (i in 1:1)
 
 ## warning don't add too much procs in test
 ## otherwise it will crash on low end machine
-## warning due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when calling julia parallel functions on Julia 0.3.x. 
+## warning due to https://github.com/JuliaLang/julia/issues/10085, the rjulia master branch may crash when calling julia parallel functions on Julia 0.3.x.
 
 julia_void_eval("addprocs(1)")
 
@@ -311,4 +294,3 @@ cat(paste("process ",2," get value:\n",sep = ""))
 print(y)
 
 julia_void_eval("rmprocs(workers())")
-

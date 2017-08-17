@@ -1,4 +1,19 @@
-## Initialise Julia
+#' @name rjulia package
+#' @title Integrating R and Julia -- Calling Julia from R
+#' @description
+#' Provides a mechanism to send data to create a running julia proess,
+#' send and receive data to/from that process and run arbitrary code in
+#' the process.
+#' @docType package
+#' @useDynLib rjulia
+NULL
+
+#' Initialise Julia
+#'
+#' Initialise Julia
+#' @param disablegc single logical, turn of garbage collection?
+#' @return TRUE, invisibly
+#' @export julia_init
 julia_init <- function(disablegc = FALSE) {
   ## Otherwise, initialise Julia using the provided home directory.
   .Call("initJulia", disablegc, PACKAGE = "rjulia")
@@ -22,7 +37,13 @@ ccall <- function(fname,cmdstr) {
   invisible(.C(functionsym,cstrnull(cmdstr)))
 }
 
-jDo <- julia_void_eval <- julia_eval <- function(cmdstr) {
+#' Execute julia code
+#'
+#' Execute julia code
+#' @param cmdstr single character
+#' @return nothing
+#' @export jDo julia_void_eval
+jDo <- julia_void_eval <- function(cmdstr) {
   #first clear julia exception
   ccall("jl_eval_string",'ccall(:jl_exception_clear,Void,());')
   #second eval julia expression
@@ -37,11 +58,24 @@ jDo <- julia_void_eval <- julia_eval <- function(cmdstr) {
        end')
 }
 
+#' Evaluate julia code and return result to R
+#'
+#' Evaluate julia code and return result to R
+#' @param expression single character
+#' @return single character
+#' @export j2r julia_eval
 j2r <- julia_eval <- function(expression) {
-  ## Evaluate the expression and return the results of that evaluation.
   .Call("jl_eval", expression, PACKAGE="rjulia")
 }
 
+#' Send data to juila
+#'
+#' R data types will be translated to the appropriate julia types. For now,
+#' names will be lost.
+#' @param x R variable: vector, array, factor, list, data.frame
+#' @param y single character, symbol to use in julia
+#' @return nothing
+#' @export r2j r_julia
 r2j <- r_julia <- function(x,y) {
   if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
 
@@ -64,10 +98,22 @@ r2j <- r_julia <- function(x,y) {
   }
 }
 
+#' Check if DataFrames and DataArrays packages have been loaded in julia
+#'
+#' These packages are loaded any time r2j is used to pass data.frames or
+#' any objects containing NAs.
+#' @return single logical
+#' @export jdfinited julia_DataArrayFrameInited
 jdfinited <- julia_DataArrayFrameInited <- function() {
   .Call("Julia_DataArrayFrameInited", PACKAGE="rjulia")
 }
 
+#' Load the DataFrames and DataArrays packages in juila
+#'
+#' These packages are loaded any time r2j is used to pass data.frames or
+#' any objects containing NAs, but you can load them early if you want.
+#' @return single logical for success or failure
+#' @export jloaddf julia_LoadDataArrayFrame
 jloaddf <- julia_LoadDataArrayFrame <- function() {
   invisible(.Call("Julia_LoadDataArrayFrame", PACKAGE="rjulia"))
   if (!julia_DataArrayFrameInited()) warning(
@@ -75,13 +121,12 @@ jloaddf <- julia_LoadDataArrayFrame <- function() {
   Please install or check installation directory.")
 }
 
-
+#' Set option for converting julia BigInt values to doubles
+#'
+#' Set option for converting julia BigInt values to doubles
+#' @param mode single logical
+#' @return NULL
+#' @export julia_BigintToDouble
 julia_BigintToDouble <- function(mode = FALSE) {
   invisible(.Call("Julia_BigintToDouble", mode, PACKAGE="rjulia"))
 }
-
-###  MM: (ess-set-style 'DEFAULT)  ==> only indent by 2
-## Local Variables:
-## eval: (ess-set-style 'DEFAULT 'quiet)
-## delete-old-versions: never
-## End:

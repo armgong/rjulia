@@ -13,3 +13,4 @@ SystemRequirements: Julia (including C headers [pkgs julia-dev (deb) / julia-dev
 License: GPL-2
 Suggests:
   RUnit
+RoxygenNote: 6.0.1
