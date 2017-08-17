@@ -13,3 +13,10 @@ single logical
 These packages are loaded any time r2j is used to pass data.frames or
 any objects containing NAs.
 }
+\seealso{
+Other rjulia: \code{\link{j2r}}, \code{\link{jDo}},
+  \code{\link{jloaddf}},
+  \code{\link{julia_BigintToDouble}},
+  \code{\link{julia_init}}, \code{\link{r2j}},
+  \code{\link{rjulia package}}
+}

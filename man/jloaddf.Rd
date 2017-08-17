@@ -13,3 +13,10 @@ single logical for success or failure
 These packages are loaded any time r2j is used to pass data.frames or
 any objects containing NAs, but you can load them early if you want.
 }
+\seealso{
+Other rjulia: \code{\link{j2r}}, \code{\link{jDo}},
+  \code{\link{jdfinited}},
+  \code{\link{julia_BigintToDouble}},
+  \code{\link{julia_init}}, \code{\link{r2j}},
+  \code{\link{rjulia package}}
+}

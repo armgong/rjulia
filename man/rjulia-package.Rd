@@ -6,7 +6,18 @@
 \alias{rjulia package-package}
 \title{Integrating R and Julia -- Calling Julia from R}
 \description{
-Provides a mechanism to send data to create a running julia proess,
-send and receive data to/from that process and run arbitrary code in
-the process.
+RJulia (R package name \pkg{rjulia}) provides an interface between \R
+and Julia by converting \R and Julia objects mutually,  and running
+Julia scripts from \R.
+
+\R is a sophisticated feature-rich statistical software but a bit
+slow,  julia is new advanced computing language which is fast and
+LLVM-based JIT. So, combining \R and julia will allow us to do better
+statistical computing.
+}
+\seealso{
+Other rjulia: \code{\link{j2r}}, \code{\link{jDo}},
+  \code{\link{jdfinited}}, \code{\link{jloaddf}},
+  \code{\link{julia_BigintToDouble}},
+  \code{\link{julia_init}}, \code{\link{r2j}}
 }

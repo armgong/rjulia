@@ -15,3 +15,10 @@ nothing
 \description{
 Execute julia code
 }
+\seealso{
+Other rjulia: \code{\link{j2r}}, \code{\link{jdfinited}},
+  \code{\link{jloaddf}},
+  \code{\link{julia_BigintToDouble}},
+  \code{\link{julia_init}}, \code{\link{r2j}},
+  \code{\link{rjulia package}}
+}

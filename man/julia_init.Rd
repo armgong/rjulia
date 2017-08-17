@@ -2,7 +2,7 @@
 % Please edit documentation in R/rjulia.R
 \name{julia_init}
 \alias{julia_init}
-\title{Initialise Julia}
+\title{Start Julia from R,  properly initializing the  R--Julia Interface}
 \usage{
 julia_init(disablegc = FALSE)
 }
@@ -13,5 +13,11 @@ julia_init(disablegc = FALSE)
 TRUE, invisibly
 }
 \description{
-Initialise Julia
+Start Julia from R,  properly initializing the  R--Julia Interface
+}
+\seealso{
+Other rjulia: \code{\link{j2r}}, \code{\link{jDo}},
+  \code{\link{jdfinited}}, \code{\link{jloaddf}},
+  \code{\link{julia_BigintToDouble}}, \code{\link{r2j}},
+  \code{\link{rjulia package}}
 }

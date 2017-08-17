@@ -2,7 +2,7 @@
 % Please edit documentation in R/rjulia.R
 \name{j2r}
 \alias{j2r}
-\title{Evaluate julia code and return result to R}
+\title{Evaluate Julia Code or Get a Julia Variable}
 \usage{
 j2r(expression)
 }
@@ -13,5 +13,20 @@ j2r(expression)
 single character
 }
 \description{
-Evaluate julia code and return result to R
+Evaluate Julia code from \R, or simply get a Julia variable into \R. Whereas
+\code{j2r()} is currently \emph{identical} to \code{j2r()},
+\code{jDo()} will evaluate code in the running julia
+process \emph{without} returning a value.
+}
+\examples{
+j2r("cos(pi * (1:7))")
+j2r("map(x -> x^2,  (7, 17, 47))") # tuple in Julia ==>  list (with no names!) in R
+j2r("rand(2, 3)")# or rather use R's RNG
+}
+\seealso{
+Other rjulia: \code{\link{jDo}}, \code{\link{jdfinited}},
+  \code{\link{jloaddf}},
+  \code{\link{julia_BigintToDouble}},
+  \code{\link{julia_init}}, \code{\link{r2j}},
+  \code{\link{rjulia package}}
 }
