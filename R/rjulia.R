@@ -7,7 +7,8 @@ julia_init <- function(disablegc = FALSE) {
   julia_void_eval('@static if is_windows()  push!(LOAD_PATH,joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"]),".julia",string("v",VERSION.major,".",VERSION.minor))) end')
   julia_void_eval('@static if is_windows()  ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"])) end')
 
-  jloaddf()
+  if (julia_eval('VERSION < v"0.6.0"'))
+      stop("Julia version must be 0.6 or higher.")
 
   if (julia_eval('VERSION < v"0.6.0"'))
       stop("Julia version must be 0.6 or higher.")
