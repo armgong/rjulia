@@ -26,12 +26,11 @@ j2r("Rpi - pi") # typically 0
 
 ## integer vector:
 r2j(1:10,  "i10")
-j2r("i10") ; stopifnot(identical(1:10,  j2r("i10")))
+j2r("i10")
 
 ## matrix,  passed to Julia and got back
 m <- matrix(exp(-5:6),  3, 4)
 r2j(m,  "m")
-stopifnot(identical(m,  j2r("m")))
 }
 \seealso{
 Other rjulia: \code{\link{j2r}}, \code{\link{jDo}},

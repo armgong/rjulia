@@ -1,8 +1,8 @@
 Package: rjulia
 Type: Package
 Title: Integrating R and Julia -- Calling Julia from R
-Version: 0.10-1
-Date: 2017-08-16
+Version: 0.10.2
+Date: 2017-10-10
 Author: Yu Gong [aut, cre], Peter M. Haverty [ctb], Oliver Keys [ctb], Martin Maechler [ctb]
 Maintainer: Yu Gong <armgong@yahoo.com>
 Description: An interface between R and Julia.  It allows to run a script
@@ -14,3 +14,4 @@ License: GPL-2
 Suggests:
   RUnit
 RoxygenNote: 6.0.1
+ByteCompile: TRUE

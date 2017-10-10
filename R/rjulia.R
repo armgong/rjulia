@@ -78,7 +78,7 @@ jDo <- function(cmdstr) {
 #' j2r("cos(pi * (1:7))")
 #' j2r("map(x -> x^2,  (7, 17, 47))") # tuple in Julia ==>  list (with no names!) in R
 #' j2r("rand(2, 3)")# or rather use R's RNG
-#' @export j2r
+#' @export
 #' @family rjulia
 j2r <- function(expression) {
   .Call("jl_eval", expression, PACKAGE="rjulia")
@@ -99,17 +99,15 @@ j2r <- function(expression) {
 #'
 #' ## integer vector:
 #' r2j(1:10,  "i10")
-#' j2r("i10") ; stopifnot(identical(1:10,  j2r("i10")))
+#' j2r("i10")
 #'
 #' ## matrix,  passed to Julia and got back
 #' m <- matrix(exp(-5:6),  3, 4)
 #' r2j(m,  "m")
-#' stopifnot(identical(m,  j2r("m")))
-#' @export r2j
+#' @export
 #' @family rjulia
 r2j <- function(x,y) {
   if (is.vector(x) || is.array(x)) {  # Covers list and matrix too
-
     if (anyNA(x)) {
       na = is.na(x)
       invisible(.Call("R_Julia_NA", x, na, y, PACKAGE="rjulia"))
@@ -172,22 +170,14 @@ jloaddf  <- function() {
 #' @examples
 #' julia_BigintToDouble(TRUE)
 #' y <- j2r("jvar=convert(Uint64,  12)")
-#' julia_void_eval("println(typeof(jvar))") # UInt64
+#' jDo("println(typeof(jvar))") # UInt64
 #' str(y) # num 12 -- double ("TRUE" above)
 #'
 #' julia_BigintToDouble(FALSE)
 #' y <- j2r("jvar=convert(Uint64,  31)")
-#' julia_void_eval("println(typeof(jvar))") # UInt64
+#' jDo("println(typeof(jvar))") # UInt64
 #' str(y) # int 31 -- integer,  not double  ("FALSE" above)
-#'
-#' ## Show maximal values of the 64-bit integer types:
-#' y[1] <- j2r("jvar= convert(Uint64,  typemax(Uint64))")
-#' y[2] <- j2r("jv2 = convert(Int64,   typemax( Int64))")
-#' julia_void_eval("println(typeof(jvar), ' ',  typeof(jv2))")
-#' str(y) # num 1.84e+19 9.22e+18
-#' ## they are 2^64 and 2^63  respectively:
-#' stopifnot(log2(y) == 64:63)
-#' @export julia_BigintToDouble
+#' @export
 #' @family rjulia
 julia_BigintToDouble <- function(mode = FALSE) {
   invisible(.Call("Julia_BigintToDouble", mode, PACKAGE="rjulia"))
