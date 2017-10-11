@@ -30,18 +30,9 @@ julia_init <- function(disablegc = FALSE) {
   jDo('@static if is_windows()  ENV["HOME"]=joinpath(string(ENV["HOMEDRIVE"],ENV["HOMEPATH"])) end')
 
   if (j2r('VERSION < v"0.6.0"'))
-      stop("Julia version must be 0.6 or higher.")
+      stop("Julia version must be 0.6.0 or higher.")
 
   return(invisible(TRUE))
-}
-
-cstrnull <- function(orgstr) {
-  return (c(charToRaw(orgstr),as.raw(0)))
-}
-
-ccall <- function(fname,cmdstr) {
-  functionsym<-getNativeSymbolInfo(fname)
-  invisible(.C(functionsym,cstrnull(cmdstr)))
 }
 
 #' Execute julia code
@@ -52,18 +43,7 @@ ccall <- function(fname,cmdstr) {
 #' @export jDo
 #' @family rjulia
 jDo <- function(cmdstr) {
-  #first clear julia exception
-  ccall("jl_eval_string",'ccall(:jl_exception_clear,Void,());')
-  #second eval julia expression
-  ccall("jl_eval_string",cmdstr)
-  #then,try catch and show julia execption
-  ccall("jl_eval_string",
-        'if ccall(:jl_exception_occurred,Ptr{Void},())!=C_NULL
-            rjuliaexception=ccall(:jl_exception_occurred,Any,());
-            showerror(STDERR,rjuliaexception);
-            println("");
-            ccall(:jl_exception_clear,Void,());
-       end')
+    .Call("jl_void_eval", cmdstr)
 }
 
 #' Evaluate Julia Code or Get a Julia Variable
@@ -182,3 +162,7 @@ jloaddf  <- function() {
 julia_BigintToDouble <- function(mode = FALSE) {
   invisible(.Call("Julia_BigintToDouble", mode, PACKAGE="rjulia"))
 }
+
+# This discussion
+# https://groups.google.com/forum/#!topic/julia-users/-_nGAynvYI8
+# Might be relevant

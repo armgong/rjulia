@@ -1,7 +1,7 @@
 Package: rjulia
 Type: Package
 Title: Integrating R and Julia -- Calling Julia from R
-Version: 0.10.2
+Version: 0.10.3
 Date: 2017-10-10
 Author: Yu Gong [aut, cre], Peter M. Haverty [ctb], Oliver Keys [ctb], Martin Maechler [ctb]
 Maintainer: Yu Gong <armgong@yahoo.com>
