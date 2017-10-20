@@ -43,6 +43,15 @@ julia_init <- function(disablegc = FALSE) {
 #' @export jDo
 #' @family rjulia
 jDo <- function(cmdstr) {
+    # If cmdstr load a julia package, use a hack to
+    #   load package in new julia process to force precompile
+    # julia 0.6.0 has a bug that prevents precompiling via embedding API
+    # Thanks to JuliaCall for this solution
+    if (grepl("using\\s+[a-zA-Z0-9]+", cmdstr)) {
+        using_cmd = gsub("^.*(using\\s+[a-zA-Z0-9]+).*$", "'\\1'",cmdstr)
+        message(sprintf("Doing %s in a separate thread to force precompilation ...", using_cmd))
+        system2("julia", args = c("-e",using_cmd))
+    }
     .Call("jl_void_eval", cmdstr)
 }
 

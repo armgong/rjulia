@@ -29,7 +29,7 @@ SEXP Julia_is_running()
   return ans;
 }
 
-//function about  init embeded Julia instance
+//function about init embeded Julia instance
 //julia_home shoud be the directy of julia execute file
 //DisableGC  determine whether the Julia garbage collector is to be enabled or not
 SEXP initJulia(SEXP DisableGC)
@@ -52,16 +52,13 @@ SEXP initJulia(SEXP DisableGC)
   return R_NilValue;
 }
 
-//eval julia srcipt, but not return val
 SEXP jl_void_eval(SEXP cmd)
 {
   const char *s = CHAR(asChar(cmd));
   jl_eval_string((char *)s);
-  if (jl_exception_occurred())
-  {
+  if (jl_exception_occurred()) {
     jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
-    Rprintf("\n");
-    jl_exception_clear();
+    jl_printf(jl_stderr_stream(), "\n");
   }
   return R_NilValue;
 }
@@ -74,8 +71,7 @@ SEXP jl_eval(SEXP cmd)
   if (jl_exception_occurred())
   {
     jl_call2(jl_get_function(jl_base_module, "show"), jl_stderr_obj(), jl_exception_occurred());
-    Rprintf("\n");
-    jl_exception_clear();
+    jl_printf(jl_stderr_stream(), "\n");
     return R_NilValue;
   }
   return Julia_R(ret);
